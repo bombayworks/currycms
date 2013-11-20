@@ -34,7 +34,7 @@ installation from `/admin.php`.
 Curry CMS uses PHPUnit for unit testing. In order to run the tests, you need to:
 
 * Download composer development dependencies `php composer.phar install --dev`.
-* Configure database settings in `test/fixtures/propel.xml`.
+* Configure database settings in `test/fixtures/propel/propel.xml`.
 * Build propel files for fixtures `./vendor/bin/propel-gen test/fixtures/propel/ main`.
 * Clear database `./vendor/bin/propel-gen test/fixtures/propel/ insert-sql`.
 * Run tests: `./vendor/bin/phpunit`.

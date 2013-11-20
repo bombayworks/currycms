@@ -23,6 +23,7 @@ repository. You can use composer to create a new project using this repository.
 
 * [Install composer](http://getcomposer.org)
 * Create project skeleton and install dependencies `php composer.phar create-project --stability=dev bombayworks/currycms-project-base <directory>`
+* Create curry symlink `ln -s vendor/bombayworks/currycms curry`
 
 Once everything has been installed, you need to make the `www` folder accessible from your
 web server and configure URL rewriting, after that you should be able to access the project

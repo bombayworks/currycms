@@ -1,0 +1,19 @@
+const CONTENT_VISIBILITY_NEVER = 0;
+const CONTENT_VISIBILITY_ALWAYS = 1;
+const CONTENT_VISIBILITY_PAGE = 2;
+const CONTENT_VISIBILITY_SUBPAGES = 3;
+const CONTENT_VISIBILITY_HAS_LOCAL_CONTENT = 4;
+const CONTENT_VISIBILITY_IS_ENABLED = 5;
+const CONTENT_VISIBILITY_HAS_CONTENT = 6;
+const CONTENT_VISIBILITY_HAS_INHERITED_CONTENT = 7;
+
+public static $contentVisiblityOptions = array(
+	self::CONTENT_VISIBILITY_NEVER => 'Never',
+	self::CONTENT_VISIBILITY_ALWAYS => 'Always',
+	self::CONTENT_VISIBILITY_PAGE => 'Page only',
+	self::CONTENT_VISIBILITY_SUBPAGES => 'Subpages only',
+	self::CONTENT_VISIBILITY_HAS_CONTENT => 'Pages with content',
+	self::CONTENT_VISIBILITY_HAS_LOCAL_CONTENT => 'Pages with local content',
+	self::CONTENT_VISIBILITY_HAS_INHERITED_CONTENT => 'Pages with inherited content',
+	self::CONTENT_VISIBILITY_IS_ENABLED => 'Pages where module is shown',
+);

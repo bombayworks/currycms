@@ -1,0 +1,171 @@
+.finder {
+	position: relative; /* position overlay relative to this */
+}
+
+.finder .wrapper {
+	background-color: #fafafa;
+	border-radius: 5px;
+	overflow-x: auto;
+	white-space: nowrap;
+	margin-bottom: 4px;
+	height: 100%;
+}
+	.finder .wrapper ul {
+		display: inline-block;
+		vertical-align: middle;
+		height: 400px;
+		width: 33.333%;
+		margin: 0;
+		overflow-y: scroll;
+		overflow-x: hidden;
+	}
+	.finder .wrapper ul:last-child {
+		margin-right: -1px;
+	}
+	.finder .wrapper ul:first-of-type:nth-last-of-type(1) { /* one item */
+		width: 100%;
+	}
+	.finder .wrapper ul:first-of-type:nth-last-of-type(2), /* two items */
+	.finder .wrapper ul:first-of-type:nth-last-of-type(2) ~ ul {
+		width: 50%;
+	}
+	.finder ul.folder li {
+		list-style-type: none;
+		white-space: nowrap;
+		background-repeat: no-repeat;
+		background-position: 1px center;
+		margin: 1px 0px;
+	}
+	.finder ul.folder li.selected {
+		background-color: #8cbf26;
+	}
+	.finder ul.folder li.highlighted {
+		background-color: #e5f1ce;
+	}
+	.finder ul.folder li a {
+		display: inline-block;
+		padding-left: 20px;
+	}
+	.finder ul.folder li.selected a {
+		color: white;
+	}
+	.finder .drop-target {
+		background-color: rgba(255,113,0,0.1) !important;
+	}
+	
+.finder ul.fileinfo {
+	overflow: auto;
+}
+	.finder ul.fileinfo li {
+		list-style-type: none;
+		padding: 0 5px;
+		text-align: center;
+	}
+	.finder ul.fileinfo .fullscreen-preview {
+		display: block;
+	}
+	.finder ul.fileinfo .preview {
+		display: block;
+		margin: 10px auto;
+		max-width: 90%;
+		max-height: 240px;
+		box-shadow: 2px 2px 2px rgba(0,0,0,0.2);
+	}
+	.finder ul.fileinfo .fullscreen-preview.active {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		z-index: 1003;
+		background: #888;
+	}
+	.finder ul.fileinfo .fullscreen-preview.active:before {
+		content: "";
+		display: inline-block;
+		vertical-align: middle;
+		height: 100%;
+	}
+	.finder ul.fileinfo .fullscreen-preview.active .preview {
+		display: inline-block;
+		vertical-align: middle;
+		margin: 0;
+		max-height: 98%;
+		max-width: 98%;
+	}
+	.finder ul.fileinfo h2 {
+		font-size: 12px;
+		font-weight: bold;
+		font-style: italic;
+		white-space: normal;
+		word-wrap: break-word;
+	}
+
+.finder .btn-toolbar {
+	padding: 10px;
+	text-align: right;
+	margin: 0;
+	border-top: 1px solid #ddd;
+	line-height: 26px;
+}
+	.finder .btn-group:first-child {
+		float: left;
+	}
+	.finder .btn-group:last-child {
+		float: right;
+	}
+	.finder select {
+		margin: 0 10px;
+	}
+	.finder .btn-toolbar a {
+		display: inline-block;
+		background-color: white;
+		border-radius: 5px;
+		padding: 0 5px;
+		margin: 0 4px;
+		border: 1px solid #ddd;
+	}
+	.finder .btn-toolbar input {
+		filter: alpha(opacity=0);
+		opacity:0;
+		position: absolute;
+		top:0;
+		left:0;
+		right:0;
+		bottom:0;
+		margin-left: -150px;
+		cursor: pointer;
+	}
+
+.finder .buttons {
+	width: 30%;
+	float: right;
+	text-align: right;
+	margin: 5px;
+}
+	.finder .buttons li {
+		list-style-type: none;
+		display: inline;
+	}
+
+.overlay {
+	display: none;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width:100%;
+	height:100%;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+	.overlay p {
+		position: absolute;
+		top: 50%;
+		text-align: center;
+		margin-top: 20px;
+		width: 100%;
+	}
+	.finder.loading .overlay {
+		display: block;
+		background-image: url('../../../images/ajax-loader.gif');
+	}

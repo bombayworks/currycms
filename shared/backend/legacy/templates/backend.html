@@ -1,0 +1,44 @@
+  {% block breadcrumbs %}
+  {% if breadcrumbs %}
+  <ul class="trace">
+    {% for breadcrumb in breadcrumbs|reverse %}
+    <li><a href="{{breadcrumb.Url}}"><span>{{breadcrumb.Name}}</span></a></li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {% endblock %}
+  
+  <div id="separator"></div>
+  
+  {% block main %}
+  <div id="content">
+   
+    <div class="title"><h1>{{module.Name}}</h1></div>
+    
+    <ul class="top-menu">
+      {% for item in menuItems %}
+      <li id="top-menu-{{item.Name|rewrite}}" class="{{item.Active?'active':''}}"><a title="{{item.Message}}" href="{{item.Url}}" {{item.Attributes|attr|raw}}><span>{{item.Name}} {{item.Notifications}}</span></a></li>
+      {% endfor %}
+    </ul>
+    
+    {% if menuContent %}
+    <div id="menu">
+      {{menuContent|raw}}
+    </div>
+    {% endif %}
+    
+    <div id="main">
+      {% if commands %}
+      <ul id="commands">
+        {% for item in commands %}
+        <li><a href="{{item.Url}}" {{item.Attributes|attr|raw}}><span class="{{item.Icon}}"></span> {{item.Name}}</a></li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      
+      {{mainContent|raw}}
+      
+    </div>
+    
+  </div>
+  {% endblock %}

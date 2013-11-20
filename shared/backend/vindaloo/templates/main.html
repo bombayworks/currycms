@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset={{Encoding}}" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>{% block title %}{{module.Name}} | {{ProjectName}} | Curry CMS{% endblock %}</title>
+  <link rel="shortcut icon" href="shared/backend/vindaloo/favicon.ico" />
+  <link href="shared/backend/vindaloo/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"/>
+  <link href="shared/backend/common/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+  <link href="shared/backend/vindaloo/css/backend.css" rel="stylesheet" type="text/css" />
+  <link href="shared/backend/vindaloo/css/forms.css" rel="stylesheet" type="text/css" />
+  <link href="shared/backend/vindaloo/css/finder.css" rel="stylesheet" type="text/css" />
+
+  {% if Logotype %}
+  <style type="text/css">
+  .header-main h1 { background-image: url("{{Logotype}}"); }
+  </style>
+  {% endif %}
+
+{{HtmlHead|raw}}
+
+</head>
+<body class="module-{{module.Module|rewrite}} {{BodyClass}}">
+{% block body %}
+  <div class="container">
+
+    {% block header %}
+    <header class="header-main">
+      <h1><a href="http://currycms.com">Curry CMS</a></h1>
+      {% block navigation %}
+        <nav>
+          <ul>
+
+          {% set defaultModules = {Content: 'Curry_Backend_Page', Appearance: 'Curry_Backend_Template', Accounts: 'Curry_Backend_Users', System: 'Curry_Backend_System'} %}
+          {% for moduleGroup in moduleGroups %}
+          {% for module in moduleGroup.modules %}
+
+          {% if loop.first %}
+            {% set defaultModule = module %}
+            {% if defaultModules[moduleGroup.Name] in moduleGroup.modules|keys %}
+              {% set defaultModule = moduleGroup.modules[defaultModules[moduleGroup.Name]] %}
+            {% endif %}
+            <li class="group group-{{moduleGroup.Name|rewrite}}{{moduleGroup.Active?' current':''}}">
+              <a href="{{defaultModule.Url}}">{{ moduleGroup.Name }}</a>
+              <ul>
+          {% endif %}
+
+                <li class="{{module.Active ? 'current' : ''}}">
+                  <a title="{{module.Message}}" href="{{module.Url}}">{{module.Name}}
+                    {% if module.Notifications %}<span class="badge">{{module.Notifications}}</span>{% endif %}
+                  </a>
+                </li>
+
+          {% if loop.last %}
+              </ul>
+            </li>
+          {% endif %}
+
+          {% endfor %}
+          {% endfor %}
+
+          </ul>
+        </nav>
+      {% endblock %}
+      <div class="logged-in">{{user.Name}}<br/><a href="?logout=1">Logout</a><br/><small>v {{Version}}</small></div>
+    </header>
+    {% endblock %}
+
+    {% block content %}
+    <div class="content">
+      {{ content|raw }}
+    </div>
+    {% endblock %}
+
+  </div>
+{% endblock %}
+
+<!--[if lt IE 9]>
+<style type="text/css">
+  .container {
+    display: none;
+  }
+</style>
+<div>
+  <h2>Sorry but your browser is not supported.</h2>
+  <p>Please upgrade to a modern browser.</p>
+  <p>Recommended: Chrome 24+, Firefox 17+, IE 10+, Safari 6+.</p>
+</div>
+<![endif]-->
+
+</body>
+</html>

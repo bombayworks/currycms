@@ -1,0 +1,6 @@
+.project
+nbproject
+vendor/*
+doc/
+test/fixtures/propel/build
+composer.phar

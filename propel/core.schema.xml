@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="utf-8"?>
+<database package="core" name="curry" defaultIdMethod="native">
+
+    <!-- backend user -->
+    <table name="user">
+        <column name="user_id" type="INTEGER" required="true" autoIncrement="true" primaryKey="true"/>
+        <column name="name" type="VARCHAR" size="255" required="true" primaryString="true"/>
+        <column name="password" type="VARCHAR" size="255" required="true"/>
+        <column name="user_role_id" type="INTEGER" required="true"/>
+        <foreign-key foreignTable="user_role">
+            <reference local="user_role_id" foreign="user_role_id"/>
+        </foreign-key>
+        <unique>
+            <unique-column name="name"/>
+        </unique>
+        <behavior name="inject_file">
+            <parameter name="object" value="inject/core/User.php"/>
+        </behavior>
+    </table>
+
+    <table name="user_role">
+        <column name="user_role_id" type="INTEGER" required="true" autoIncrement="true" primaryKey="true"/>
+        <column name="name" type="VARCHAR" size="255" required="true" primaryString="true"/>
+    </table>
+
+    <table name="user_role_access">
+        <column name="user_role_access_id" type="INTEGER" required="true" autoIncrement="true" primaryKey="true"/>
+        <column name="user_role_id" type="INTEGER" required="true"/>
+        <column name="module" type="VARCHAR" size="255" required="true" primaryString="true"/>
+        <foreign-key foreignTable="user_role" onDelete="cascade">
+            <reference local="user_role_id" foreign="user_role_id"/>
+        </foreign-key>
+        <unique>
+            <unique-column name="user_role_id"/>
+            <unique-column name="module"/>
+        </unique>
+    </table>
+
+    <table name="user_language" isCrossRef="true">
+        <column name="user_id" type="INTEGER" required="true" primaryKey="true"/>
+        <column name="langcode" type="VARCHAR" size="8" required="true" primaryKey="true" />
+        <foreign-key foreignTable="user" onDelete="cascade">
+            <reference local="user_id" foreign="user_id"/>
+        </foreign-key>
+        <foreign-key foreignTable="language" onDelete="cascade">
+            <reference local="langcode" foreign="langcode"/>
+        </foreign-key>
+    </table>
+
+    <table name="filebrowser_access">
+        <column name="filebrowser_access_id" type="INTEGER" required="true" autoIncrement="true" primaryKey="true"/>
+        <column name="user_id" type="INTEGER"/>
+        <column name="user_role_id" type="INTEGER"/>
+        <column name="name" type="VARCHAR" size="255" required="true" primaryString="true"/>
+        <column name="path" type="VARCHAR" size="255" required="true"/>
+        <column name="write" type="BOOLEAN" required="true" default="false"/>
+        <foreign-key foreignTable="user" onDelete="cascade">
+            <reference local="user_id" foreign="user_id"/>
+        </foreign-key>
+        <foreign-key foreignTable="user_role" onDelete="cascade">
+            <reference local="user_role_id" foreign="user_role_id"/>
+        </foreign-key>
+    </table>
+
+    <table name="page">
+        <column name="page_id" type="INTEGER" required="true" autoIncrement="true" primaryKey="true"/>
+        <column name="uid" type="VARCHAR" size="16" required="true"/>
+        <column name="name" type="VARCHAR" size="255" required="true" primaryString="true"/>
+        <column name="url" type="VARCHAR" size="255" required="true"/>
+        <column name="visible" type="BOOLEAN" required="true" default="false"/>
+        <column name="enabled" type="BOOLEAN" required="true" default="false"/>
+        <column name="include_in_index" type="BOOLEAN" required="true" default="true"/>
+        <column name="active_page_revision_id" type="INTEGER"/>
+        <column name="working_page_revision_id" type="INTEGER"/>
+        <column name="redirect_method" type="ENUM" valueSet="clone, permanent, temporary"/>
+        <column name="redirect_page_id" type="INTEGER"/>
+        <column name="redirect_url" type="VARCHAR" size="255"/>
+        <column name="model_route" type="VARCHAR" size="255"/>
+        <!-- 0: do not cache, negative: infinity, positive: number of seconds -->
+        <column name="cache_lifetime" type="INTEGER" required="true" default="0"/>
+        <column name="image" size="255" type="VARCHAR" default=""/>
+        <column name="langcode" type="VARCHAR" size="8"/>
+        <column name="generator" type="VARCHAR" size="255"/>
+        <column name="encoding" type="VARCHAR" size="64"/>
+        <foreign-key foreignTable="page_revision" onDelete="setnull" phpName="ActivePageRevision">
+            <reference local="active_page_revision_id" foreign="page_revision_id"/>
+        </foreign-key>
+        <foreign-key foreignTable="page_revision" onDelete="setnull" phpName="WorkingPageRevision">
+            <reference local="working_page_revision_id" foreign="page_revision_id"/>
+        </foreign-key>
+        <foreign-key foreignTable="page" onDelete="setnull" onUpdate="cascade" phpName="RedirectPage">
+            <reference local="redirect_page_id" foreign="page_id"/>
+        </foreign-key>
+        <foreign-key foreignTable="language" onDelete="setnull" onUpdate="cascade">
+            <reference local="langcode" foreign="langcode"/>
+        </foreign-key>
+        <unique>
+            <unique-column name="uid"/>
+        </unique>
+        <behavior name="timestampable"/>
+        <behavior name="nested_set"/>
+        <behavior name="inject_file">
+            <parameter name="object" value="inject/core/Page.php"/>
+            <parameter name="peer" value="inject/core/PagePeer.php"/>
+            <parameter name="query" value="inject/core/PageQuery.php"/>
+        </behavior>
+    </table>
+
+    <!-- page revisions -->
+    <table name="page_revision">
+        <column name="page_revision_id" type="INTEGER" required="true" autoIncrement="true" primaryKey="true"/>
+        <column name="page_id" type="INTEGER" required="true"/>
+        <column name="template" type="VARCHAR" size="255"/>
+        <column name="base_page_id" type="INTEGER"/>
+        <column name="description" type="VARCHAR" size="255" required="true" default=""/>
+        <column name="publish_date" type="TIMESTAMP"/>
+        <column name="published_date" type="TIMESTAMP"/>
+        <foreign-key foreignTable="page" onDelete="cascade" onUpdate="cascade" phpName="Page" refPhpName="PageRevision">
+            <reference local="page_id" foreign="page_id"/>
+        </foreign-key>
+        <foreign-key foreignTable="page" onDelete="setnull" onUpdate="cascade" phpName="BasePage"
+                     refPhpName="BasePageRevision">
+            <reference local="base_page_id" foreign="page_id"/>
+        </foreign-key>
+        <behavior name="timestampable"/>
+        <behavior name="inject_file">
+            <parameter name="object" value="inject/core/PageRevision.php"/>
+        </behavior>
+    </table>
+
+    <table name="page_access">
+        <column name="page_access_id" type="INTEGER" required="true" autoIncrement="true" primaryKey="true"/>
+        <column name="user_id" type="INTEGER"/>
+        <column name="user_role_id" type="INTEGER"/>
+        <column name="page_id" type="INTEGER" required="true"/>
+        <column name="perm_subpages" type="BOOLEAN" required="true"/>
+        <column name="perm_visible" type="BOOLEAN"/>
+        <column name="perm_create_page" type="BOOLEAN"/>
+        <column name="perm_create_module" type="BOOLEAN"/>
+        <column name="perm_publish" type="BOOLEAN"/>
+        <column name="perm_properties" type="BOOLEAN"/>
+        <column name="perm_content" type="BOOLEAN"/>
+        <column name="perm_meta" type="BOOLEAN"/>
+        <column name="perm_modules" type="BOOLEAN"/>
+        <column name="perm_revisions" type="BOOLEAN"/>
+        <column name="perm_permissions" type="BOOLEAN"/>
+        <foreign-key foreignTable="user" onDelete="cascade">
+            <reference local="user_id" foreign="user_id"/>
+        </foreign-key>
+        <foreign-key foreignTable="user_role" onDelete="cascade">
+            <reference local="user_role_id" foreign="user_role_id"/>
+        </foreign-key>
+        <foreign-key foreignTable="page" onDelete="cascade">
+            <reference local="page_id" foreign="page_id"/>
+        </foreign-key>
+        <behavior name="inject_file">
+            <parameter name="object" value="inject/core/PageAccess.php"/>
+            <parameter name="query" value="inject/core/PageAccessQuery.php"/>
+        </behavior>
+    </table>
+
+    <table name="metadata">
+        <column name="name" type="VARCHAR" size="32" required="true" primaryKey="true"/>
+        <column name="type" type="VARCHAR" size="32" required="true"/>
+        <column name="display_name" type="VARCHAR" size="64" required="true"/>
+        <column name="default_value" type="VARCHAR" size="255" required="true" default=""/>
+        <behavior name="sortable"/>
+    </table>
+
+    <table name="page_metadata">
+        <column name="page_revision_id" type="INTEGER" required="true" primaryKey="true"/>
+        <column name="name" type="VARCHAR" size="32" required="true" primaryKey="true"/>
+        <column name="value" type="LONGVARCHAR" required="true"/>
+        <foreign-key foreignTable="page_revision" onDelete="cascade" onUpdate="cascade" phpName="PageRevision">
+            <reference local="page_revision_id" foreign="page_revision_id"/>
+        </foreign-key>
+        <foreign-key foreignTable="metadata" onDelete="cascade" onUpdate="cascade" phpName="Metadata">
+            <reference local="name" foreign="name"/>
+        </foreign-key>
+    </table>
+
+    <!-- predefined modules -->
+    <table name="module">
+        <column name="module_id" type="INTEGER" required="true" autoIncrement="true" primaryKey="true"/>
+        <column name="title" type="VARCHAR" size="255" required="true" primaryString="true"/>
+        <column name="name" type="VARCHAR" size="255" required="true"/>
+        <column name="module_class" type="VARCHAR" size="255" required="true"/>
+        <column name="content_visibility" type="INTEGER" required="true" default="1"/>
+        <column name="search_visibility" type="BOOLEAN" required="true" default="true"/>
+        <column name="targets_exclude" type="BOOLEAN" required="true" default="true"/>
+        <column name="targets" type="ARRAY" required="true" />
+        <column name="template" type="VARCHAR" size="255"/>
+    </table>
+
+    <!-- attaches a module to a page -->
+    <table name="page_module">
+        <column name="page_module_id" type="INTEGER" required="true" autoIncrement="true" primaryKey="true"/>
+        <column name="uid" type="VARCHAR" size="16" required="true"/>
+        <column name="page_id" type="INTEGER" required="true"/>
+        <!-- the following attributes cannot be "overridden" -->
+        <column name="name" type="VARCHAR" size="255" required="true" primaryString="true"/>
+        <column name="target" type="VARCHAR" size="255" required="true"/>
+        <column name="module_class" type="VARCHAR" size="255" required="true"/>
+        <column name="content_visibility" type="INTEGER" required="true" default="1"/>
+        <column name="search_visibility" type="BOOLEAN" required="true" default="true"/>
+        <foreign-key foreignTable="page" onDelete="cascade" onUpdate="cascade">
+            <reference local="page_id" foreign="page_id"/>
+        </foreign-key>
+        <unique>
+            <unique-column name="uid"/>
+        </unique>
+        <behavior name="timestampable"/>
+        <behavior name="inject_file">
+            <parameter name="object" value="inject/core/PageModule.php"/>
+            <parameter name="peer" value="inject/core/PageModulePeer.php"/>
+        </behavior>
+    </table>
+
+    <!-- attaches a module to a page_revision -->
+    <table name="revision_module" isCrossRef="true">
+        <column name="page_module_id" type="INTEGER" required="true" primaryKey="true"/>
+        <column name="page_revision_id" type="INTEGER" required="true" primaryKey="true"/>
+        <foreign-key foreignTable="page_module" onDelete="cascade" onUpdate="cascade">
+            <reference local="page_module_id" foreign="page_module_id"/>
+        </foreign-key>
+        <foreign-key foreignTable="page_revision" onDelete="cascade" onUpdate="cascade">
+            <reference local="page_revision_id" foreign="page_revision_id"/>
+        </foreign-key>
+        <behavior name="inject_file">
+            <parameter name="object" value="inject/core/RevisionModule.php"/>
+        </behavior>
+    </table>
+
+    <table name="module_sortorder">
+        <column name="page_module_id" type="INTEGER" required="true" primaryKey="true"/>
+        <column name="page_revision_id" type="INTEGER" required="true" primaryKey="true"/>
+        <foreign-key foreignTable="page_module" onDelete="cascade" onUpdate="cascade">
+            <reference local="page_module_id" foreign="page_module_id"/>
+        </foreign-key>
+        <foreign-key foreignTable="page_revision" onDelete="cascade" onUpdate="cascade">
+            <reference local="page_revision_id" foreign="page_revision_id"/>
+        </foreign-key>
+        <behavior name="sortable">
+            <parameter name="use_scope" value="true"/>
+            <parameter name="scope_column" value="page_revision_id"/>
+        </behavior>
+    </table>
+
+    <!-- attaches inherited module data to a page_module -->
+    <table name="module_data">
+        <column name="module_data_id" type="INTEGER" required="true" autoIncrement="true" primaryKey="true"/>
+        <column name="page_module_id" type="INTEGER" required="true"/>
+        <column name="page_revision_id" type="INTEGER" required="true"/>
+        <column name="langcode" type="VARCHAR" size="8" required="true" default=""/>
+        <column name="template" type="VARCHAR" size="255"/>
+        <column name="enabled" type="BOOLEAN"/>
+        <column name="data" type="LONGVARCHAR"/>
+        <foreign-key foreignTable="page_module" onDelete="cascade" onUpdate="cascade">
+            <reference local="page_module_id" foreign="page_module_id"/>
+        </foreign-key>
+        <foreign-key foreignTable="page_revision" onDelete="cascade" onUpdate="cascade">
+            <reference local="page_revision_id" foreign="page_revision_id"/>
+        </foreign-key>
+        <!--
+        <foreign-key foreignTable="language" onDelete="cascade" onUpdate="cascade">
+          <reference local="langcode" foreign="langcode" />
+        </foreign-key>
+        -->
+        <unique>
+            <unique-column name="page_module_id"/>
+            <unique-column name="page_revision_id"/>
+            <unique-column name="langcode"/>
+        </unique>
+        <behavior name="timestampable"/>
+        <behavior name="inject_file">
+            <parameter name="object" value="inject/core/ModuleData.php"/>
+        </behavior>
+    </table>
+
+    <table name="language">
+        <column name="langcode" type="VARCHAR" size="8" required="true" primaryKey="true"/>
+        <column name="name" type="VARCHAR" size="255" required="true" primaryString="true"/>
+    </table>
+
+    <table name="language_string">
+        <column name="id" type="VARCHAR" size="255" required="true" primaryKey="true" primaryString="true"/>
+        <column name="element_type" type="VARCHAR" size="255"/>
+        <column name="last_used" type="timestamp" required="false"/>
+    </table>
+
+    <table name="language_string_translation">
+        <column name="langcode" type="VARCHAR" size="8" required="true" primaryKey="true"/>
+        <column name="string_id" type="VARCHAR" size="255" required="true" primaryKey="true"/>
+        <column name="translation" type="LONGVARCHAR" required="true"/>
+        <foreign-key foreignTable="language" onDelete="cascade" onUpdate="cascade">
+            <reference local="langcode" foreign="langcode"/>
+        </foreign-key>
+        <foreign-key foreignTable="language_string" onDelete="cascade" onUpdate="cascade">
+            <reference local="string_id" foreign="id"/>
+        </foreign-key>
+    </table>
+
+    <table name="repository">
+        <column name="repository_id" type="INTEGER" required="true" autoIncrement="true" primaryKey="true"/>
+        <column name="url" type="VARCHAR" size="255" required="true" primaryString="true"/>
+    </table>
+
+    <table name="package">
+        <column name="name" type="VARCHAR" size="255" required="true" primaryKey="true" primaryString="true"/>
+        <column name="version" type="VARCHAR" size="255" required="true"/>
+    </table>
+
+    <table name="package_file">
+        <column name="package_file_id" type="INTEGER" required="true" autoIncrement="true" primaryKey="true"/>
+        <column name="package_name" size="255" type="VARCHAR" required="true"/>
+        <column name="filename" type="VARCHAR" size="255" required="true" primaryString="true"/>
+        <!-- sha1 hash of file -->
+        <column name="checksum" type="VARCHAR" size="40" required="true"/>
+        <foreign-key foreignTable="package" onDelete="cascade">
+            <reference local="package_name" foreign="name"/>
+        </foreign-key>
+        <behavior name="inject_file">
+            <parameter name="object" value="inject/core/PackageFile.php"/>
+        </behavior>
+    </table>
+
+</database>

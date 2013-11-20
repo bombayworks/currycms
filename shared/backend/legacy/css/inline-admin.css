@@ -1,0 +1,221 @@
+/* generic */
+body {
+	padding-top:40px!important; /* make sure there is space for our panel */
+}
+
+#curry-admin, #curry-admin-panel {
+	font: 12px/1.5em "Lucida Grande",Lucida Sans,Arial,sans-serif;
+	color: black;
+}
+#curry-admin ul,
+#curry-admin-panel ul {
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+}
+.module-holder ul li,
+#curry-admin-panel ul li {
+	margin-bottom:5px;
+}
+#curry-admin h2,
+#curry-admin-panel h2 {
+	color: black;
+	font: bold 14px/1.5em "Lucida Grande",Lucida Sans,Arial,sans-serif;
+	margin: 0 0 15px 0;
+}
+#curry-admin a,
+#curry-admin-panel a {
+	color: #888;
+	text-decoration: none;
+}
+#curry-admin a:hover,
+#curry-admin-panel a:hover {
+	color: black;
+}
+
+/* overlay */
+#curry-admin-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0,0,0,0.25);
+	z-index:99998;
+}
+#curry-admin-overlay iframe {
+	background-color: black;
+	border: 1px solid #888;
+	position: absolute;
+	width: 1000px;
+	height: 90%;
+	top: 5%;
+	left: 50%;
+	margin-left: -500px;
+	z-index:99999;
+}
+
+/* Panel */
+#curry-admin-panel {
+	position: fixed;
+	left: 0px;
+	right: 0px;
+	top: 0px;
+	width: 100%;
+	height:39px;
+	
+	background-color: #fefefe;
+	border-bottom: 1px solid #D9D9D9;
+
+	-webkit-box-shadow: 0px 3px 5px rgba(50, 50, 50, 0.35);
+	-moz-box-shadow:    0px 3px 5px rgba(50, 50, 50, 0.35);
+	box-shadow:         0px 3px 5px rgba(50, 50, 50, 0.35);
+	z-index:99997;
+
+	overflow: hidden;
+}
+
+#curry-admin-panel {}
+
+	#curry-admin-panel ul li {
+		float:left;
+		margin-right:20px;
+	}
+
+
+
+	/*
+	 * in iframe style
+	 */
+	 
+
+		.curry-admin-frame #curry-admin-panel h2 {
+			display:none;
+		}
+
+		.curry-admin-frame #curry-admin-panel ul {
+			margin:10px 0px 0px 30px;
+		}
+
+			.curry-admin-frame #curry-admin-panel ul li {
+				font-size:13px;
+			}
+
+				.curry-admin-frame #curry-admin-panel ul li a{
+					color:#000;
+				}
+
+		.curry-admin-frame #curry-admin-panel .curry-admin-logout,
+		.curry-admin-frame #curry-admin-panel .curry-admin-backend {
+			display:none;
+		}
+
+	/*
+	 * Stand alone version
+	 */
+	 .curry-admin-standalone #curry-admin-panel {
+	 	color: black;
+		border-top: 3px solid #FF7200;
+		background: #353535 url('../images/logo.png') no-repeat 25px center;
+		height: 32px;
+		padding: 5px;
+		border-bottom: 1px solid #000;
+	 }
+	 	.curry-admin-standalone #curry-admin-panel h2 {
+			display:none;
+		}
+
+		.curry-admin-standalone #curry-admin-panel .curry-admin-logout,
+		.curry-admin-standalone #curry-admin-panel .curry-admin-backend {
+				position:absolute;
+				right:30px;
+		}
+			.curry-admin-standalone #curry-admin-panel .curry-admin-backend {
+				right:100px;
+			}
+
+		.curry-admin-standalone #curry-admin-panel ul {
+			margin:0px 0px 0px 150px;
+		}
+
+			.curry-admin-standalone #curry-admin-panel ul li {
+				
+				font-family:"Lucida Grande",Lucida Sans,Arial,sans-serif;
+				font-size:14px;
+				margin-right:0px;
+			}
+
+				.curry-admin-standalone #curry-admin-panel ul li a{
+					color: #CBCBCB;
+					display: inline-block;
+					line-height: 23px;
+					height: 23px;
+					margin: 2px 0 0 0;
+					padding: 2px 10px;
+					text-decoration: none;
+					border: 1px solid transparent;
+				}
+
+
+/* Overlay for modules */
+#curry-admin {
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 9998;
+}
+#curry-admin .module-holder {
+	pointer-events: none;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+}
+#curry-admin .module-holder:hover,
+body.show-all-modules #curry-admin .module-holder {
+	border: 1px dashed #FF7200;
+	background: rgba(255, 114, 0, 0.1);
+	
+}
+#curry-admin .module-holder.edit {
+	border: 1px dashed #FF7200;
+	background: rgba(255, 114, 0, 0.1);
+}
+#curry-admin .module-holder .module-control {
+	position: absolute;
+	display: block;
+	width: 16px;
+	height: 16px;
+	top: 5px;
+	right: 5px;	
+	background: url(../../../images/icons/wrench.png) no-repeat;
+	pointer-events: auto;
+	cursor: pointer;
+}
+#curry-admin .module-holder:not(.edit) .module-control > * {
+	display: none;
+}
+#curry-admin .module-holder.edit .module-control {
+	font-family:"Lucida Grande",Lucida Sans,Arial,sans-serif;
+	background: none;
+	width: auto;
+	height: auto;
+	color: black;
+	background-color: white;
+	-webkit-box-shadow: 1px 1px 4px rgba(0,0,0,.4);
+	-moz-box-shadow:    1px 1px 4px rgba(0,0,0,.4);
+	box-shadow:         1px 1px 4px rgba(0,0,0,.4);
+}
+	#curry-admin .module-holder.edit .module-control ul {
+		padding:0px 10px 10px 10px;
+	}
+
+	#curry-admin .module-holder.edit .module-control h2 {
+		color: #fff;
+		border-top: 1px solid #000;
+		border-bottom: 1px solid #000;
+		background: #353535;
+		display:block;
+		padding:5px 10px;
+	}
+		#curry-admin .module-holder.edit .module-control h2 .close {
+		}

@@ -1,0 +1,33 @@
+{
+  "name": "bombayworks/currycms",
+  "description": "Curry CMS is a web based Content Management System for PHP5.",
+  "keywords": ["cms", "publishing"],
+  "homepage": "http://www.currycms.com/",
+  "license": "GPL-3.0+",
+  "authors": [{
+    "name": "Jesper Ek",
+    "email": "jesper.ek@bombayworks.se"
+  }],
+  "autoload": {
+    "psr-0": {
+      "Curry": "include/"
+    }
+  },
+  "include-path": ["include/"],
+  "require": {
+    "php": ">=5.3.7",
+    "propel/propel1": "1.6.*",
+    "bombayworks/zendframework1": "1.12.*",
+    "twig/twig": "1.12.*",
+    "ircmaxell/password-compat": "1.0.*",
+    "oyatel/minify": "dev-master"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "3.7.*"
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "1.0-dev"
+    }
+  }
+}

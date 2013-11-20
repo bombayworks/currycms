@@ -1,0 +1,287 @@
+@import url(../../common/font-awesome/css/font-awesome.min.css);
+/* generic */
+body {
+	padding-top:40px!important; /* make sure there is space for our panel */
+}
+
+#curry-admin, #curry-admin-panel, #curry-admin-overlay {
+	font: 12px/1.5em sans-serif;
+	color: black;
+}
+#curry-admin ul,
+#curry-admin-panel ul {
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+}
+.module-holder ul li,
+#curry-admin-panel ul li {
+	margin-bottom:5px;
+}
+#curry-admin h2,
+#curry-admin-panel h2 {
+	color: black;
+	font: bold 14px/1.5em sans-serif;
+	margin: 0 0 15px 0;
+}
+#curry-admin a,
+#curry-admin-panel a {
+	color: #888;
+	text-decoration: none;
+}
+#curry-admin a:hover,
+#curry-admin-panel a:hover {
+	color: black;
+}
+
+/* overlay */
+#curry-admin-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(0,0,0,0.5);
+	background: radial-gradient(ellipse at center, rgba(0,0,0,0.4) 0%,rgba(0,0,0,0.8) 100%);
+	z-index:99998;
+}
+#curry-admin-overlay iframe {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	height: calc(100% - 46px);
+	top: 46px;
+	left: 0;
+	box-shadow: 0 0 20px rgba(0,0,0,0.3);
+}
+
+#curry-admin-iframe-close {
+	color: black;
+	background-color: white;
+	position: absolute;
+	width: 30px;
+	line-height: 30px;
+	text-align: center;
+	top: 66px;
+	right: 30px;
+	font-size: 24px;
+	box-shadow: 0 0 20px rgba(0,0,0,0.3);
+	text-decoration: none;
+}
+#curry-admin-iframe-close:hover {
+	color: white;
+	background-color: black;
+}
+
+/* Panel */
+#curry-admin-panel {
+	position: fixed;
+	left: 0px;
+	right: 0px;
+	top: 0px;
+	width: 100%;
+	height:39px;
+	
+	background-color: #fefefe;
+	border-bottom: 1px solid #D9D9D9;
+
+	-webkit-box-shadow: 0px 3px 5px rgba(50, 50, 50, 0.35);
+	-moz-box-shadow:    0px 3px 5px rgba(50, 50, 50, 0.35);
+	box-shadow:         0px 3px 5px rgba(50, 50, 50, 0.35);
+	z-index:99997;
+
+	overflow: hidden;
+}
+
+#curry-admin-panel {}
+
+	#curry-admin-panel ul li {
+		float:left;
+		margin-right:20px;
+	}
+
+
+
+	/*
+	 * in iframe style
+	 */
+	 
+
+		.curry-admin-frame #curry-admin-panel h2 {
+			display:none;
+		}
+
+		.curry-admin-frame #curry-admin-panel ul {
+			margin:10px 0px 0px 30px;
+		}
+
+			.curry-admin-frame #curry-admin-panel ul li {
+				font-size:13px;
+			}
+
+				.curry-admin-frame #curry-admin-panel ul li a{
+					color:#000;
+				}
+
+		.curry-admin-frame #curry-admin-panel .curry-admin-logout,
+		.curry-admin-frame #curry-admin-panel .curry-admin-backend {
+			display:none;
+		}
+
+	/*
+	 * Stand alone version
+	 */
+	.curry-admin-standalone #curry-admin-panel {
+	 	color: black;
+		border-top: 3px solid #FF7200;
+		background-color: #353535;
+		height: 32px;
+		padding: 5px;
+		border-bottom: 1px solid #000;
+	}
+		@media (min-width: 1080px) {
+			.curry-admin-standalone #curry-admin-panel {
+				background: #353535 url('../images/currycms.png') no-repeat 10px 35%;
+				background-size: auto 150%;
+			}
+		}
+	 	.curry-admin-standalone #curry-admin-panel h2 {
+			display:none;
+		}
+
+		.curry-admin-standalone #curry-admin-panel ul li:nth-last-child(-n+2) {
+			float: none;
+			display: inline-block;
+		}
+
+		.curry-admin-standalone #curry-admin-panel ul {
+			width: 960px;
+			margin:0px auto;
+			text-align: right;
+		}
+
+			.curry-admin-standalone #curry-admin-panel ul li {
+				font-family: sans-serif;
+				font-size:14px;
+				margin-right:0px;
+			}
+
+				.curry-admin-standalone #curry-admin-panel ul li a{
+					color: #CBCBCB;
+					display: inline-block;
+					line-height: 23px;
+					height: 23px;
+					margin: 2px 0 0 0;
+					padding: 2px 10px;
+					text-decoration: none;
+					border: 1px solid transparent;
+				}
+
+/* Overlay for modules */
+#curry-admin {
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 9998;
+}
+/* block holder */
+#curry-admin .block-holder {
+	pointer-events: none;
+}
+#curry-admin .block-holder:hover,
+body.show-all-modules #curry-admin .block-holder {
+	background-color: rgba(255,0,0,0.1);
+}
+#curry-admin .block-holder .block-control {
+	position: relative;
+	top: -13px;
+	left: 10px;
+	display: inline-block;
+	pointer-events: auto;
+	-webkit-box-shadow: 1px 1px 4px rgba(0,0,0,.4);
+	-moz-box-shadow:    1px 1px 4px rgba(0,0,0,.4);
+	box-shadow:         1px 1px 4px rgba(0,0,0,.4);
+}
+#curry-admin .block-holder .block-control h2 {
+	font-size: 12px;
+	margin: 0;
+	line-height: 26px;
+	padding: 0 8px;
+	background-color: rgba(0,0,0,0.7);
+	color: white;
+}
+#curry-admin .block-holder .block-control ul {
+	font-size: 11px;
+	background-color: white;
+	padding: 0 5px;
+	height: 0;
+	overflow: hidden;
+}
+#curry-admin .block-holder .block-control:hover ul,
+body.show-all-modules #curry-admin .block-holder .block-control ul {
+	padding: 3px 5px;
+	height: auto;
+}
+/* module holder */
+#curry-admin .module-holder {
+	color: #666;
+	pointer-events: none;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+}
+#curry-admin .module-holder:hover,
+#curry-admin .module-holder.module-move,
+#curry-admin .module-holder.edit,
+body.show-all-modules #curry-admin .module-holder {
+	color: #333;
+	outline: 1px solid #FF7200;
+	background: rgba(255, 114, 0, 0.1);
+}
+#curry-admin .module-move-target {
+	background-color: rgba(255,0,0,0.5);
+}
+#curry-admin .module-holder .module-control {
+	position: absolute;
+	display: block;
+	width: 16px;
+	height: 16px;
+	top: 5px;
+	right: 5px;	
+	pointer-events: auto;
+	cursor: pointer;
+}
+#curry-admin .module-holder:not(.edit) .module-control:after {
+	content: "\f013";
+	font-size: 18px;
+	font-family: FontAwesome;
+	font-weight: normal;
+	font-style: normal;
+	-webkit-font-smoothing: antialiased;
+}
+#curry-admin .module-holder:not(.edit) .module-control > * {
+	display: none;
+}
+#curry-admin .module-holder.edit .module-control {
+	font-family: sans-serif;
+	background: none;
+	width: auto;
+	height: auto;
+	color: black;
+	background-color: white;
+	-webkit-box-shadow: 1px 1px 4px rgba(0,0,0,.4);
+	-moz-box-shadow:    1px 1px 4px rgba(0,0,0,.4);
+	box-shadow:         1px 1px 4px rgba(0,0,0,.4);
+}
+	#curry-admin .module-holder.edit .module-control ul {
+		padding:0px 10px 10px 10px;
+	}
+
+	#curry-admin .module-holder.edit .module-control h2 {
+		color: #fff;
+		background: #353535;
+		display:block;
+		padding:5px 10px;
+	}
+		#curry-admin .module-holder.edit .module-control h2 .close {
+		}

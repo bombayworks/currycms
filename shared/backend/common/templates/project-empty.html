@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+  {% block head %}
+  <meta http-equiv="Content-Type" content="{{curry.ContentType}}; charset={{curry.Encoding}}" />
+  <meta name="keywords" content="{{curry.page.meta.inherited.Keywords}}" />
+  <meta name="description" content="{{curry.page.meta.inherited.Description}}" />
+  <title>{% block title curry.page.meta.Title|default(curry.page.Name~" - "~curry.ProjectName) %}</title>
+  <base href="{{curry.BaseUrl}}">
+  {{curry.HtmlHead|raw}}
+  {% endblock %}
+</head>
+
+<body id="{{curry.page.BodyId}}">
+{% block body %}
+  <h1>{{curry.ProjectName}}</h1>
+  {% placeholder 'content' %}
+{% endblock %}
+</body>
+</html>

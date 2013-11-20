@@ -1,0 +1,42 @@
+<header class="content-header">
+  <h1>{{module.Name}}</h1>
+  {% if menuItems %}
+  <nav class="content-menu">
+    <ul class="nav nav-tabs">
+      {% for item in menuItems %}
+      <li id="content-menu-{{item.Name|rewrite}}" class="{{item.Active?'active':''}}"><a title="{{item.Message}}" href="{{item.Url}}" {{item.Attributes|attr|raw}}>{{item.Name}} {{item.Notifications}}</a></li>
+      {% endfor %}
+    </ul>
+  </nav>
+  {% endif %}
+</header>
+{% if menuContent %}
+<aside class="content-sidebar">
+  {{menuContent|raw}}
+</aside>
+{% endif %}
+<section class="content-main">
+  {% if breadcrumbs and breadcrumbs|length > 1 %}
+  <ul class="breadcrumb">
+    {% for breadcrumb in breadcrumbs %}
+    {% if not loop.last %}
+    <li><a href="{{breadcrumb.Url}}">{{breadcrumb.Name}}</a> <span class="divider">/</span></li>
+    {% else %}
+    <li class="active">{{breadcrumb.Name}}</li>
+    {% endif %}
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {% if commands %}
+  <div class="content-commands">
+    {% if commands %}
+    <div class="btn-group">
+      {% for item in commands %}
+      <a href="{{item.Url}}" {{item.Attributes|attr|raw}}><span class="{{item.Icon}}"></span> {{item.Name}}</a>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+  {{mainContent|raw}}
+</section>

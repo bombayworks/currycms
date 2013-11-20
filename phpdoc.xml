@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Configuration for phpDocumentor2 -->
+<phpdoc>
+  <title>Curry CMS</title>
+  <parser>
+    <target>doc</target>
+  </parser>
+  <transformer>
+    <target>doc</target>
+  </transformer>
+  <files>
+    <directory>include</directory>
+  </files>
+</phpdoc>

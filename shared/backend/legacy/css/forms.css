@@ -1,0 +1,389 @@
+/* FORMS */
+form {
+	margin-bottom: .5em;
+}
+.zend_form {
+	background-color: #f6f6f6;
+	padding: 10px;
+	border-radius: 2px;
+	margin: 0;
+}
+.zend_form:after { /* clearfix */
+	content:"";
+	display:block;
+	clear:both;
+}
+.zend_form label {
+	color: #666;
+	font-style: italic;
+}
+/* hide hidden fields */
+.zend_form .element-type-hidden,
+.zend_form .element-type-hidden + dd {
+	display: none;
+}
+/* right align submit buttons */
+.zend_form .element-type-submit {
+	display: none;
+}
+.zend_form .element-type-submit + dd {
+	width: 100%;
+	text-align: right;
+}
+
+/* subforms have 100% width and label hidden */
+.zend_form .element-type-subform,
+.zend_form .element-type-multiform,
+.zend_form .element-type-displaygroup {
+	display: none;
+}
+.zend_form .element-type-subform + dd,
+.zend_form .element-type-multiform + dd,
+.zend_form .element-type-displaygroup + dd {
+	width: 100%;
+}
+/* elements with 100% width */
+.zend_form .element-type-codemirror label,
+.zend_form .element-type-codemirror + dd,
+.zend_form .element-type-tinymce label,
+.zend_form .element-type-tinymce + dd {
+	width: 100%;
+}
+/* link */
+.zend_form .element-type-link + dd input[type="text"] {
+	width: 75%;
+}
+.zend_form .element-type-link + dd select {
+	width: 25%;
+}
+/* datetime */
+.zend_form .element-type-datetime + dd input.date {
+	width: 60%;
+}
+.zend_form .element-type-datetime + dd input.time {
+	width: 40%;
+}
+/* hash/csrf */
+.zend_form .element-type-hash:not(.element-has-errors),
+.zend_form .element-type-hash:not(.element-has-errors) + dd {
+	display: none;
+}
+/* sortable */
+.zend_form .ui-sortable {
+	margin: 0;
+}
+.zend_form .ui-sortable > li {
+	list-style-type: none;
+}
+.zend_form dt {
+	font-weight: normal;
+	clear: both;
+	float: left;
+	width: 30%;
+	line-height: 2em;
+	margin-bottom: 5px;
+}
+.zend_form dd {
+	position: relative; /* position p.description relative to this object */
+	float: left;
+	width: 70%;
+	margin-bottom: 5px;
+	margin-left: 0;
+}
+.zend_form fieldset {
+	padding: 0 10px;
+	border-radius: 5px;
+	border: 1px solid transparent;
+	margin: 0px -10px 0 -10px;
+}
+.zend_form fieldset:not(:first-child) {
+	margin-top: 10px;
+}
+.zend_form fieldset:hover {
+	border: 1px solid #ccc;
+	background-color: #f2f2f2;
+}
+.zend_form fieldset legend {
+	font-size: 1.1em;
+}
+
+/* description */
+.zend_form dd p.description {
+	padding: 5px;
+	border-radius: 5px;
+	
+	font-size: 12px;
+	line-height: 1.2em;
+	
+	display: none;
+	margin-top: 6px;
+	position: absolute;
+	border: 1px solid #ffdd88;
+	background-color: #ffffdd;
+	padding: 4px;
+	min-width: 150px;
+	width: 90%;
+	top: 100%;
+	right: 0;
+	font-style: italic;
+	color: #555;
+	z-index: 1;
+}
+/* show description on hover */
+.zend_form dt:hover + dd > p.description,
+.zend_form dd:hover > p.description {
+	display: block;
+}
+
+/* show errors */
+.zend_form .element-has-errors + dd {
+	border: 1px solid #ff0000;
+	background-color: #ffdddd;
+	margin-bottom: .5em;
+	padding: 4px;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+}
+.zend_form dd ul.errors {
+	color: #900;
+	margin: 0;
+}
+.zend_form dd ul.errors li {
+	list-style-type: none;
+}
+
+/* input fields */
+.zend_form dd input[type="text"],
+.zend_form dd input[type="password"],
+.zend_form dd textarea,
+.zend_form dd select {
+	font-size: 13px;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+	width: 100%;
+	border-radius: 5px;
+	background-color: #ffffff;
+	border: 1px solid #cacaca;
+	padding: 5px;
+}
+/* input fields: focus */
+.zend_form dd input[type="text"]:focus,
+.zend_form dd input[type="password"]:focus,
+.zend_form dd textarea:focus,
+.zend_form dd select:focus {
+	border: 1px solid #888;
+}
+/* input fields: disabled */
+.zend_form dd input[type="text"][disabled],
+.zend_form dd input[type="password"][disabled],
+.zend_form dd textarea[disabled],
+.zend_form dd select[disabled] {
+	background-color: #fcfcfc;
+	color: #aaa;
+}
+/* buttons*/
+.zend_form .element-type-submit + dd button {
+	font-size: 16px;
+	padding: 6px;
+}
+
+/* filebrowser icons */
+.filebrowser ~ a {
+	display: inline-block;
+	position: relative;
+	margin-left: -16px;
+	vertical-align: middle;
+	overflow: hidden;
+}
+.filebrowser + a {
+	left: -4px;
+}
+.filebrowser + a + a {
+	left: -24px;
+}
+.filebrowser ~ a input {
+	opacity: 0;
+	position: absolute;
+	top:0;
+	left:0;
+	right:0;
+	bottom:0;
+	margin-left: -150px;
+}
+
+/* horizontal group (hide labels) */
+.zend_form fieldset.horizontal-group {
+	border: none;
+	background-color: transparent;
+	padding: 0;
+	margin: 0 0 -5px 0;
+}
+.zend_form fieldset.horizontal-group > legend {
+	color:#666666;
+	font-size: 1.0em;
+	float: left;
+	width: 30%;
+	line-height: 2em;
+}
+.zend_form fieldset.horizontal-group > dl {
+	float: right;
+	width: 70%;
+	margin: 0;
+}
+.zend_form fieldset.horizontal-group dt {
+	display: none;
+}
+.zend_form fieldset.horizontal-group dd {
+	float: none;
+	display: inline-block;
+	width: auto;
+	margin-right: 4px;
+}
+
+/* advanced fieldsets */
+.zend_form fieldset.advanced-hidden {
+	border: none;
+	margin-bottom: 0;
+}
+.zend_form .advanced-hidden > dl {
+	display: none;
+}
+.zend_form .advanced-hidden > ul {
+	display: none;
+}
+
+/* button styles */
+.zend_form button {
+	padding:6px 12px;
+	font-size:13px !important;
+	background: #ff7000;
+	color: #fff;
+	border-left: 1px solid #ff7200;
+	border-bottom: 1px solid #ff7200;
+	border-right: 1px solid #ff7200;
+	border-top: 1px solid #ffa64d;
+	
+	background: -moz-linear-gradient(
+	    top,
+	    rgb(255,127,0) 0%,
+	    rgb(255,99,0) 100%
+	);
+	background: -webkit-linear-gradient(
+		top,
+	    rgb(255,127,0) 0%,
+	    rgb(255,99,0) 100%
+	);
+	background: linear-gradient(
+	    top,
+	    rgb(255,127,0) 0%,
+	    rgb(255,99,0) 100%
+	);	
+	border-radius:2px;
+
+	-moz-box-shadow: 1px 1px #d15e01;
+	-webkit-box-shadow: 1px 1px #d15e01;
+	box-shadow: 1px 1px #d15e01;	
+}
+
+.zend_form button:hover {
+	background: -moz-linear-gradient(
+	    top,
+	    rgb(255,127,0) 0%,
+	    rgb(255,99,0) 40%
+	);
+	background: -webkit-linear-gradient(
+		top,
+	    rgb(255,127,0) 0%,
+	    rgb(255,99,0) 40%
+	);
+	background: linear-gradient(
+	    top,
+	    rgb(255,127,0) 0%,
+	    rgb(255,99,0) 40%
+	);	
+}
+
+.zend_form button:active {
+	-moz-box-shadow:none;
+	-webkit-box-shadow:none;
+	box-shadow:none;
+
+	-moz-box-shadow: inset 1px 1px #d15e01;
+	-webkit-box-shadow: inset 1px 1px #d15e01;
+	box-shadow: inset 1px 1px #d15e01;
+
+	margin:2px 1px 2px 1px;
+
+}
+
+	.zend_form div button {
+		padding:4px 10px;
+		font-size:12px;
+		color:#646464;
+		background: #e7e7e7;
+		border-left: 1px solid #d0d0d0;
+		border-bottom: 1px solid #d0d0d0;
+		border-right: 1px solid #e5e5e5;
+		border-top: 1px solid #e5e5e5;
+		
+		background: -moz-linear-gradient(
+		    top,
+		    rgb(231,231,231) 0%,
+		    rgb(211,211,211) 100%
+		);
+		background: -webkit-linear-gradient(
+			top,
+		    rgb(231,231,231) 0%,
+		    rgb(211,211,211) 100%
+		);
+		background: linear-gradient(
+		    top,
+		    rgb(231,231,231) 0%,
+		    rgb(211,211,211) 100%
+		);	
+		border-radius:2px;
+
+		-moz-box-shadow: 1px 1px #a0a0a0;
+		-webkit-box-shadow: 1px 1px #a0a0a0;
+		box-shadow: 1px 1px #a0a0a0;	
+	}
+
+	.zend_form div button:hover {
+		background: -moz-linear-gradient(
+		    top,
+		    rgb(231,231,231) 0%,
+		    rgb(211,211,211) 40%
+		);
+		background: -webkit-linear-gradient(
+			top,
+		    rgb(231,231,231) 0%,
+		    rgb(211,211,211) 40%
+		);
+		background: linear-gradient(
+		    top,
+		    rgb(231,231,231) 0%,
+		    rgb(211,211,211) 40%
+		);	
+	}
+
+	.zend_form div button:active {
+		-moz-box-shadow:none;
+		-webkit-box-shadow:none;
+		box-shadow:none;
+
+		-moz-box-shadow: inset 1px 1px #a0a0a0;
+		-webkit-box-shadow: inset 1px 1px #a0a0a0;
+		box-shadow: inset 1px 1px #a0a0a0;
+
+		margin:2px 3px 1px 1px;
+
+	}
+
+.zend_form div:disabled {
+	opacity:0.3;
+	-moz-box-shadow: none;
+	-webkit-box-shadow: none;
+	box-shadow: none;
+}

@@ -1,0 +1,103 @@
+/* Main Nav */
+#navigation {
+	font-size: 1.143em;
+	position: relative;
+	margin-left: 10px;
+}
+
+#navigation li { list-style-type: none; }
+#navigation > ul {list-style: none; margin: 0 auto auto 140px;}
+#navigation > ul > li {float: left; margin: 0; }
+
+#navigation li.group > a {
+	color: #cbcbcb;
+	display: inline-block;
+	line-height: 23px;
+	height: 23px;
+	margin: 2px 0 0 0;
+	padding: 2px 15px;
+	text-decoration: none;
+	border: 1px solid transparent;
+}
+#navigation li.group > a:hover {
+	color: #fff;
+}
+#navigation li.group.current > a {
+	color: #fff;
+	
+	border-left: 1px solid #ff7200;
+	border-bottom: 1px solid #ff7200;
+	border-right: 1px solid #ff7200;
+	border-top: 1px solid #ffa64d;
+	border-radius: 2px;
+	
+	background: #ff7000;
+	background: -webkit-linear-gradient(
+	    top,
+	    rgb(255,127,0) 0%,
+	    rgb(255,99,0) 100%
+	);
+	background: -moz-linear-gradient(
+	    top,
+	    rgb(255,127,0) 0%,
+	    rgb(255,99,0) 100%
+	);
+	background: linear-gradient(
+	    top,
+	    rgb(255,127,0) 0%,
+	    rgb(255,99,0) 100%
+	);
+}
+
+#navigation li.user,
+#navigation li.logout {
+	float: right;
+}
+#navigation li.user a::before {
+	content: "";
+	background: url(../images/cms-user.png) no-repeat left center;
+	padding-left: 20px;
+}
+
+#navigation li ul {
+	display: none;
+}
+#navigation li.current ul {
+	display: block;
+}
+
+#navigation ul ul {
+	list-style: none;
+	margin: 0 auto;
+	font-size: 1em;
+	line-height: 1.2em;
+	padding: 5px 0;
+	width: 100%;
+	position: absolute;
+	left: 0;
+	top: 31px;
+}
+#navigation ul ul li {
+	float: left;
+	margin-top: 6px;
+}
+#navigation ul ul li a {
+	display: block;
+	color: black;
+	text-decoration: none;
+	padding: 10px 15px;
+	white-space: nowrap;
+	border-right: 1px solid transparent;
+	border-top: 1px solid transparent;
+	border-left: 1px solid transparent;
+}
+#navigation ul ul li a:hover {
+	color: #ff7100;
+}
+#navigation ul ul li.current a {
+	background: white;
+	color: #ff7100;
+ 	border-right: 1px solid #d9d9d9;
+	border-top: 1px solid #d9d9d9;
+	border-left: 1px solid #d9d9d9;
+}

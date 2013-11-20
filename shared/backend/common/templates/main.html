@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset={{Encoding}}" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<title>{% block title %}{{module.Name}} | {{ProjectName}} | Curry CMS{% endblock %}</title>
+
+<link href="shared/backend/default/css/backend.css" rel="stylesheet" type="text/css" />
+
+<!--[if lt IE 8]>
+<style type="text/css">
+#container {
+	display: none;
+}
+#invalid-browser {
+	display: block;
+	margin: 1em;
+	padding: 1em;
+	background-color: white;
+}
+</style>
+<![endif]-->
+
+<style type="text/css">
+{% if Logotype %}
+#header { background-image: url("{{Logotype}}"); }
+{% endif %}
+</style>
+
+{{HtmlHead|raw}}
+
+</head>
+<body>
+{% block body %}
+
+  {% block header %}
+  <div id="header">
+    {% block navigation %}
+    <div id="navigation">
+      <ul>
+        {% for moduleGroup in moduleGroups %}
+          {% for module in moduleGroup.modules %}
+            {% if loop.first %}
+        <li class="group {{moduleGroup.Active ? 'current' : ''}}">
+          {% if moduleGroup.Name == 'Content' and 'Curry_Backend_Page' in moduleGroup.modules|keys %}
+          <a href="{{moduleGroup.modules['Curry_Backend_Page'].Url}}">{{moduleGroup.Name}}</a>
+          {% else %}
+          <a href="{{module.Url}}">{{moduleGroup.Name}}</a>
+          {% endif %}
+          <ul>
+            {% endif %}
+            <li class="{{module.Active ? 'current' : ''}}">
+              <a title="{{module.Message}}" href="{{module.Url}}">{{module.Name}}
+                {% if module.Notifications %}<span>({{module.Notifications}})</span>{% endif %}
+              </a>
+            </li>
+            {% if loop.last %}
+          </ul>
+            {% endif %}
+          {% endfor %}
+        </li>
+        {% endfor %}
+        {% if user %}
+        <li class="group logout">
+          <a href="?logout=1">Log out</a>
+        </li>
+        <li class="group user {{module.Name == 'Profile' ? 'current' : ''}}">
+          <a href="{{moduleGroups['Accounts'].modules['Curry_Backend_Profile'].Url}}">{{user.Name}}</a>
+        </li>
+        {% endif %}
+      </ul>
+    </div>
+    {% endblock %}
+  </div>
+  {% endblock %}
+  
+  {% block subheader %}
+  <div id="subheader">
+		{% if breadcrumbs %}
+		<ul class="trace">
+		  {% for breadcrumb in breadcrumbs %}
+		  <li><a href="{{breadcrumb.Url}}"><span>{{breadcrumb.Name}}</span></a></li>
+		  {% endfor %}
+		</ul>
+		{% endif %}
+  </div>
+  {% endblock %}
+
+  {% block container %}
+  <div id="container">
+
+    {% block content %}
+    {{ content|raw }}
+    {% endblock %}
+
+    {% block footer %}
+    <!-- <div id="footer">Copyright &copy; BombayWorks AB 2007-2010. <span id="version">Curry CMS {{Version}}</span></div> -->
+    {% endblock %}
+
+  </div>
+  {% endblock %}
+
+  <div id="invalid-browser">
+    <h2>Sorry but your browser is not supported.</h2>
+    <p>Please upgrade to a modern browser.</p>
+    <p>Minimum: IE8<br />
+      Recommended: Firefox 3.6, Chrome 4, Safari 5, Opera 10 or newer.</p>
+  </div>
+
+{% endblock %}
+</body>
+</html>

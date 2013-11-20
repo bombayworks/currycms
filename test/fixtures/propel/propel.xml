@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+	<propel>
+		<datasources default="curry">
+			<datasource id="curry">
+				<adapter>mysql</adapter>
+				<connection>
+					<dsn>mysql:host=localhost;dbname=curry_unittests</dsn>
+					<user>curry_unittests</user>
+					<password>dummy</password>
+					<settings>
+						<setting id="charset">utf8</setting>
+					</settings>
+				</connection>
+			</datasource>
+		</datasources>
+	</propel>
+</config>

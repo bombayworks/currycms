@@ -1,0 +1,32 @@
+{% extends "main.html" %}
+
+{% block title %}Login{{ parent() }}{% endblock %}
+
+{% block header %}{% endblock %}
+
+{% block content %}
+<form action="admin.php" method="post" class="form-horizontal">
+  <h1>CurryCMS Login</h1>
+  {% if LoginRedirect %}
+  <input type="hidden" name="login_redirect" value="{{LoginRedirect}}" />
+  {% endif %}
+  <div class="control-group">
+    <label class="control-label" for="login-username">Username</label>
+    <div class="controls">
+      <input type="text" name="login_username" id="login-username" autofocus="autofocus" placeholder="Username">
+    </div>
+  </div>
+  <div class="control-group">
+    <label class="control-label" for="login-password">Password</label>
+    <div class="controls">
+      <input type="password" name="login_password" id="login-password" placeholder="Password">
+    </div>
+  </div>
+  <div class="control-group">
+    <div class="controls">
+      <label class="checkbox"><input type="checkbox" name="login_remember" checked="checked"> Keep me logged in</label>
+      <button type="submit" class="btn btn-primary btn-large">Login <i class="icon-arrow-right icon-white"></i></button>
+    </div>
+  </div>
+</form>
+{% endblock %}

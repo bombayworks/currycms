@@ -408,7 +408,7 @@ class Curry_Backend_Database extends Curry_Backend
 						// attempt to find existing object using pk
 						if (count($pkData) === count($pks)) {
 							$obj = new $modelClass;
-							$obj->fromArray($pkData, BasePeer::TYPE_RAW_COLNAME);
+							$obj->fromArray($pkData, BasePeer::TYPE_FIELDNAME);
 							$obj = PropelQuery::from($modelClass)->findPk($obj->getPrimaryKey());
 						}
 						if(!$obj && $mode === self::IMPORT_UPDATE_OR_INSERT) {
@@ -434,7 +434,7 @@ class Curry_Backend_Database extends Curry_Backend
 								}
 							}
 						}
-						$obj->fromArray($data, BasePeer::TYPE_RAW_COLNAME);
+						$obj->fromArray($data, BasePeer::TYPE_FIELDNAME);
 						if($obj->isNew()) {
 							// allows insert of custom primary key
 							BasePeer::doInsert($obj->buildCriteria(), $con);

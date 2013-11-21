@@ -345,7 +345,7 @@ class Curry_Core {
 		$config = array(
 			'curry' => array(
 				'name' => "untitled",
-				'baseUrl' => '',
+				'baseUrl' => '/',
 				'adminEmail' => "info@example.com",
 				
 				'statistics' => false,

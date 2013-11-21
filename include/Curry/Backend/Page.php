@@ -455,7 +455,7 @@ class Curry_Backend_Page extends Curry_Backend
 			return;
 		
 		// Trace
-		$pages = array_reverse((array) $page->getPath());
+		$pages = array_reverse($page->getPath()->getArrayCopy());
 		foreach($pages as $p)
 			$this->addTrace($p->getName(), url('', array("module", "view" => $defaultView, "page_id"=>$p->getPageId())));
 		

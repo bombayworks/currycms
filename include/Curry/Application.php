@@ -111,7 +111,7 @@ class Curry_Application {
 	public function reverseRoute(&$path, &$query)
 	{
 		// remove matching base path
-		$baseUrl = Curry_URL::getBaseUrl();
+		$baseUrl = Curry_URL::getDefaultBaseUrl();
 		$basePath = $baseUrl['path'];
 		$basePathRemoved = false;
 		if (Curry_String::startsWith($path, $basePath) && $path !== '/') {
@@ -191,7 +191,7 @@ class Curry_Application {
 		$requestUri = explode('?', rawurldecode(Curry_URL::getRequestUri()), 2);
 
 		// remove matching base path
-		$baseUrl = Curry_URL::getBaseUrl();
+		$baseUrl = Curry_URL::getDefaultBaseUrl();
 		$basePath = $baseUrl['path'];
 		if ($basePath === $requestUri[0]) {
 			$requestUri[0] = '/';

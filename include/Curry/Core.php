@@ -805,7 +805,7 @@ class Curry_Core {
 			// Create form to recreate error
 			$method = strtoupper($_SERVER['REQUEST_METHOD']);
 			$hidden = Curry_Html::createHiddenFields($method == 'POST' ? $_POST : $_GET);
-			$action = substr(self::getBaseUrl(), 0, -1).$_SERVER['REQUEST_URI'];
+			$action = url(Curry_URL::getRequestUri())->getAbsolute();
 			$form = '<form action="'.$action.'" method="'.$method.'">'.$hidden.'<button type="submit">Execute</button></form>';
 
 			// Create mail

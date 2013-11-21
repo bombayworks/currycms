@@ -92,9 +92,9 @@ class Curry_Route_ModelRoute implements Curry_IRoute {
 	 * From an internal URL, create the public URL.
 	 *
 	 * @param string $path
-	 * @param array $env
+	 * @param array|string $query
 	 */
-	public static function reverse(&$path, array &$env)
+	public static function reverse(&$path, &$query)
 	{
 		$parts = explode("/", $path);
 		$url = "";
@@ -103,9 +103,13 @@ class Curry_Route_ModelRoute implements Curry_IRoute {
 			// find model for current url
 			$model = self::findPageModel($url ? $url : '/');
 			if($model) {
+				$env = array();
+				parse_str($query, $env);
 				$slug = self::reverseModelSlug($model, $env);
-				if($slug)
+				if($slug !== null) {
 					$newpath[] = $slug;
+					$query = http_build_query($env, null, '&');
+				}
 			}
 			// build next url
 			while(count($parts)) {

@@ -19,7 +19,7 @@
 /**
  * Class to create/build URLs.
  * 
- * scheme://username:password@domain:port/path?query_string#fragment
+ * scheme://username:password@host:port/path?query_string#fragment
  *
  * @package Curry
  */
@@ -104,16 +104,16 @@ class Curry_URL {
 	/**
 	 * Base URL info.
 	 *
-	 * @var array
+	 * @var null|array
 	 */
-	protected static $baseUrlInfo = array(
-		'scheme' => '',
-		'user' => '',
-		'pass' => '',
-		'host' => '',
-		'port' => '',
-		'path' => '',
-	);
+	protected $baseUrl = null;
+
+	/**
+	 * Default Base URL info.
+	 *
+	 * @var null|array
+	 */
+	protected static $defaultBaseUrl = null;
 
 	/**
 	 * Default secret used when creating and validating HMAC.
@@ -142,6 +142,8 @@ class Curry_URL {
 	}
 
 	/**
+	 * Set the default secret to use when creating secured URLs.
+	 *
 	 * @param string $defaultSecret
 	 */
 	public static function setDefaultSecret($defaultSecret)
@@ -150,6 +152,8 @@ class Curry_URL {
 	}
 
 	/**
+	 * Get the default secret, used when creating secured URLs.
+	 *
 	 * @return string
 	 */
 	public static function getDefaultSecret()
@@ -425,7 +429,7 @@ class Curry_URL {
 	 * External:
 	 * http://www.hello.com/test/
 	 * 
-	 * Internal (relative):
+	 * Internal (relative to base url):
 	 * test/hello/
 	 * 
 	 * Internal (absolute project path):
@@ -433,9 +437,6 @@ class Curry_URL {
 	 * 
 	 * It will also accept other parts of the url:
 	 * /test/?foo=1&bar=2#fragment
-	 * 
-	 * If you specify GET variables using a query string, this will
-	 * overwrite the current GET variables.
 	 *
 	 * @param string $url
 	 * @return Curry_URL
@@ -487,6 +488,46 @@ class Curry_URL {
 		return $urlinfo;
 	}
 
+	/**
+	 * Construct url-string from array as returned by parse().
+	 *
+	 * @param array $urlinfo
+	 * @return string
+	 */
+	public static function build(array $urlinfo) {
+		// scheme
+		$ret = $urlinfo['scheme'] ? $urlinfo['scheme'] . ':' : '';
+		if ($urlinfo['user'] || $urlinfo['pass'] || $urlinfo['host'] || $urlinfo['port']) {
+			$ret .= '//';
+			// credentials
+			if($urlinfo['user'] || $urlinfo['pass'])
+				$ret .= rawurlencode($urlinfo['user']) . ":" . rawurlencode($urlinfo['pass']) . '@';
+			// host
+			$ret .= $urlinfo['host'];
+			// port
+			if($urlinfo['port'])
+				$ret .= ":" . $urlinfo['port'];
+		}
+		if (isset($urlinfo['path']))
+			$ret .= self::encodeURI($urlinfo['path']);
+		if (isset($urlinfo['query']) && $urlinfo['query'] !== '')
+			$ret .= '?' . $urlinfo['query'];
+		if (isset($urlinfo['fragment']) && $urlinfo['fragment'] !== '')
+			$ret .= '#' . rawurlencode($urlinfo['fragment']);
+		return $ret;
+	}
+
+	/**
+	 * Encode an URI using percent-encoding in the same way rawurlencode() does, except
+	 * that the following characters are preserved:
+	 *
+	 * Reserved: ;,/?:@&=+$
+	 * Unescaped: !*'()
+	 * Score: #
+	 *
+	 * @param $url
+	 * @return string
+	 */
 	public static function encodeURI($url) {
 		return strtr(rawurlencode($url), array(
 			// Reserved
@@ -595,8 +636,7 @@ class Curry_URL {
 	 * @return string
 	 */
 	public function getUrl($separator = "&", $secure = false) {
-		$base = $this->isAbsolute() ? $this->getBase() : '';
-		return $base . $this->getRelative($separator, $secure);
+		return $this->getBase() . $this->getRelative($separator, $secure);
 	}
 	
 	/**
@@ -616,7 +656,7 @@ class Curry_URL {
 			if (is_array($query))
 				$query['hash'] = $hash;
 			else
-				$query .= (empty($query) ? '' : '&') . 'hash=' . $hash;
+				$query .= (empty($query) ? '' : $separator) . 'hash=' . $hash;
 		}
 		
 		if($path === "") {
@@ -633,25 +673,19 @@ class Curry_URL {
 			$path = ($lastSlash === false ? $scriptPath : substr($scriptPath, 0, $lastSlash)) . substr($path, 1);
 		} else {
 			// path relative to base
-			$path = self::$baseUrlInfo['path'] . $path;
+			$base = $this->getBaseUrl();
+			$path = $base['path'] . $path;
 		}
 		
 		if($this->reverseRoute && self::$reverseRouteCallback) {
-			if (is_string($query)) {
-				$vars = array();
-				parse_str($query, $vars);
-				call_user_func_array(self::$reverseRouteCallback, array(&$path, &$vars));
-				$query = http_build_query($vars, null, $separator);
-			} else {
-				call_user_func_array(self::$reverseRouteCallback, array(&$path, &$query));
-			}
+			call_user_func_array(self::$reverseRouteCallback, array(&$path, &$query));
 		}
-			
+
 		$ret = self::encodeURI($path);
 
 		if (is_array($query) && count($query))
 			$ret .= '?' . http_build_query($query, null, $separator);
-		else if (is_string($query) && $query)
+		else if (is_string($query) && $query !== '')
 			$ret .= '?' . $query;
 		
 		if($this->fragment)
@@ -688,27 +722,7 @@ class Curry_URL {
 	 * @return string
 	 */
 	public function getAbsolute($separator = "&", $secure = false) {
-		$url = $this->getUrl($separator, $secure);
-		
-		if($this->isAbsolute())
-			return $url;
-		else {
-			// scheme
-			$ret = (self::$baseUrlInfo['scheme'] ? self::$baseUrlInfo['scheme'] : "http") . "://";
-
-			// credentials
-			if(self::$baseUrlInfo['user'] || self::$baseUrlInfo['pass'])
-				$ret .= rawurlencode(self::$baseUrlInfo['user']) . ":" . rawurlencode(self::$baseUrlInfo['pass']) . '@';
-			
-			// host
-			$ret .= self::$baseUrlInfo['host'] ? self::$baseUrlInfo['host'] : $_SERVER['HTTP_HOST'];
-			
-			// port
-			if(self::$baseUrlInfo['port'])
-				$ret .= ":" . self::$baseUrlInfo['port'];
-
-			return $ret . $url;
-		}
+		return $this->getBase(true) . $this->getRelative($separator, $secure);
 	}
 	
 	/**
@@ -735,10 +749,10 @@ class Curry_URL {
 	 *
 	 * @param string|array $baseUrl
 	 */
-	public static function setBaseUrl($baseUrl) {
-		self::$baseUrlInfo = is_array($baseUrl) ? $baseUrl : self::parse($baseUrl);
+	public static function setDefaultBaseUrl($baseUrl) {
+		self::$defaultBaseUrl = is_array($baseUrl) ? $baseUrl : self::parse($baseUrl);
 		// Add default components
-		self::$baseUrlInfo += array(
+		self::$defaultBaseUrl += array(
 			'scheme' => '',
 			'user' => '',
 			'pass' => '',
@@ -751,39 +765,88 @@ class Curry_URL {
 	/**
 	 * Get base URL. This is returned in the same format as parse_url().
 	 *
-	 * @return array
+	 * @param bool $asString
+	 * @return array|string
 	 */
-	public static function getBaseUrl() {
-		return self::$baseUrlInfo;
+	public static function getDefaultBaseUrl($asString = false) {
+		if (self::$defaultBaseUrl === null) {
+			$secure = !empty($_SERVER['HTTPS'])
+				? strtolower($_SERVER['HTTPS']) != 'off'
+				: (isset($_SERVER['SERVER_PORT']) ? $_SERVER['SERVER_PORT'] == 443 : false);
+			$scheme = $secure ? 'https' : 'http';
+			$port = isset($_SERVER['SERVER_PORT']) ? $_SERVER['SERVER_PORT'] : '';
+			if(isset($_SERVER['HTTP_HOST'])) {
+				$host = explode(":", $_SERVER['HTTP_HOST'], 2);
+				$hostname = $host[0];
+				if (count($host) > 1) {
+					$port = $host[1];
+				}
+			} elseif(isset($_SERVER['SERVER_ADDR'])) {
+				$hostname = $_SERVER['SERVER_ADDR'];
+			} else {
+				$hostname = 'localhost';
+			}
+			$port = $port && $port != ($secure ? 443 : 80) ? $port : '';
+			self::setDefaultBaseUrl(array(
+				'scheme' => $scheme,
+				'host' => $hostname,
+				'port' => $port,
+				'path' => '/',
+			));
+		}
+		return $asString ? self::build(self::$defaultBaseUrl) : self::$defaultBaseUrl;
 	}
-	
+
+	/**
+	 * Set base url for this instance.
+	 *
+	 * @param $baseUrl
+	 */
+	public function setBaseUrl($baseUrl) {
+		$this->baseUrl = is_array($baseUrl) ? $baseUrl : self::parse($baseUrl);
+		// Add default components
+		$this->baseUrl += array(
+			'scheme' => '',
+			'user' => '',
+			'pass' => '',
+			'host' => '',
+			'port' => '',
+			'path' => ''
+		);
+	}
+
+	/**
+	 * Get base url for this instance, either as an array (as returned by parse_url) or
+	 * as a string.
+	 *
+	 * @param bool $asString
+	 * @return array|null|string
+	 */
+	public function getBaseUrl($asString = false) {
+		$base = $this->baseUrl === null ? self::getDefaultBaseUrl() : $this->baseUrl;
+		return $asString ? self::build($base) : $base;
+	}
+
 	/**
 	 * Get the base part of the URL. Base includes everything up to path, ie the
 	 * following parts: scheme, user, password, host and port.
 	 *
+	 * @param bool $force
 	 * @return string
 	 */
-	public function getBase() {
+	public function getBase($force = false) {
 		if($this->isAbsolute()) {
-			// scheme
-			$ret = ($this->scheme ? $this->scheme : self::$baseUrlInfo['scheme']) . ":";
-
-			if ($this->hasAuthority()) {
-				$ret .= '//';
-
-				// credentials
-				if($this->user || $this->password)
-					$ret .= $this->user . ":" . $this->password . '@';
-
-				// host
-				$ret .= $this->host ? $this->host : self::$baseUrlInfo['host'];
-
-				// port
-				if($this->port)
-					$ret .= ":" . $this->port;
-			}
-			
-			return $ret;
+			return self::build(array(
+				'scheme' => $this->scheme,
+				'user' => $this->user,
+				'pass' => $this->password,
+				'host' => $this->host,
+				'port' => $this->port,
+			));
+		} else if ($force) {
+			$base = $this->getBaseUrl();
+			$base['path'] = '';
+			return self::build($base);
 		} else {
 			return "";
 		}

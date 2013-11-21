@@ -106,9 +106,9 @@ class Curry_Application {
 	 * Handler for reverse-routing.
 	 *
 	 * @param string $path
-	 * @param array $env
+	 * @param string|array $query
 	 */
-	public function reverseRoute(&$path, array &$env)
+	public function reverseRoute(&$path, &$query)
 	{
 		// remove matching base path
 		$baseUrl = Curry_URL::getBaseUrl();
@@ -118,7 +118,7 @@ class Curry_Application {
 			$path = substr($path, strlen($basePath));
 			$basePathRemoved = true;
 		}
-		Curry_Route_ModelRoute::reverse($path, $env);
+		Curry_Route_ModelRoute::reverse($path, $query);
 		// re-add base path if it was removed
 		if ($basePathRemoved) {
 			$path = $basePath . $path;

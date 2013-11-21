@@ -249,8 +249,8 @@ class Curry_Core {
 		self::initPropel();
 		self::initCache();
 		self::initEncoding();
-		
-		Curry_URL::setBaseUrl(self::$config->curry->baseUrl);
+
+		Curry_URL::setDefaultBaseUrl(self::$config->curry->baseUrl);
 		Curry_URL::setDefaultSecret(self::$config->curry->secret);
 		
 		self::triggerHook('Curry_Core::postInit');
@@ -273,43 +273,6 @@ class Curry_Core {
 			}
 		}
 		throw new Exception('Autoloader not found.');
-	}
-	
-	/**
-	 * Check if the current request is served over HTTPS.
-	 *
-	 * @return bool
-	 */
-	public static function isSecure()
-	{
-		return !empty($_SERVER['HTTPS'])
-			? strtolower($_SERVER['HTTPS']) != 'off'
-			: (isset($_SERVER['SERVER_PORT']) ? $_SERVER['SERVER_PORT'] == 443 : false);
-	}
-	
-	/**
-	 * Get the base url (not including any path information).
-	 *
-	 * @return string
-	 */
-	private static function getBaseUrl()
-	{
-		// Scheme
-		$secure = self::isSecure();
-		$base = $secure ? 'https://' : 'http://';
-		// Hostname
-		if(isset($_SERVER['HTTP_HOST']))
-			$base .= $_SERVER['HTTP_HOST'];
-		elseif(isset($_SERVER['SERVER_ADDR']))
-			$base .= $_SERVER['SERVER_ADDR'];
-		else
-			$base .= 'localhost';
-		// Port
-		if(isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] != ($secure ? 443 : 80))
-			$base .= ':'.$_SERVER['SERVER_PORT'];
-		// Path
-		$base .= '/';
-		return $base;
 	}
 	
 	/**
@@ -382,7 +345,7 @@ class Curry_Core {
 		$config = array(
 			'curry' => array(
 				'name' => "untitled",
-				'baseUrl' => self::getBaseUrl(),
+				'baseUrl' => '',
 				'adminEmail' => "info@example.com",
 				
 				'statistics' => false,
@@ -435,6 +398,9 @@ class Curry_Core {
 		
 		if($loadUserConfig)
 			Curry_Array::extend($config, $userConfig);
+
+		// Fix base url
+		$config['curry']['baseUrl'] = url($config['curry']['baseUrl'])->getAbsolute();
 
 		if (!$config['curry']['projectPath'])
 			throw new Exception('Project path could not be found, please use a configuration file to specify the path');

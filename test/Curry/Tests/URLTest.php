@@ -5,7 +5,6 @@ namespace Curry\Tests;
 class URLTest extends \PHPUnit_Framework_TestCase {
 
 	const TEST_URL = 'http://user:password@currycms.com:80/path?foo=bar#fragment';
-	const BASE_URL = 'http://localhost/project/';
 
 	public function testUrlFull()
 	{
@@ -23,6 +22,7 @@ class URLTest extends \PHPUnit_Framework_TestCase {
 
 	public function testUris()
 	{
+		\Curry_URL::setDefaultBaseUrl('');
 		$uris = array(
 			'ftp://ftp.is.co.za/rfc/rfc1808.txt',
 			'http://www.ietf.org/rfc/rfc2396.txt',
@@ -57,12 +57,24 @@ class URLTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('path/to/file', $url->getPath());
 	}
 
-	public function testUrlProjectRelativePath()
+	public function testUrlBaseRelativePath()
 	{
-		\Curry_URL::setBaseUrl(self::BASE_URL);
+		$relative = 'path/to/file';
+		$baseUrl = 'http://domain.com/sub/';
+		$defaultBaseUrl = 'http://localhost/project/';
+
+		\Curry_URL::setDefaultBaseUrl($defaultBaseUrl);
+
+		// No base specified (should use default)
+		$url = new \Curry_URL($relative);
+		$this->assertEquals('/project/'.$relative, $url->getRelative());
+		$this->assertEquals($defaultBaseUrl.$relative, $url->getAbsolute());
+
+		// Base specified on instance
 		$url = new \Curry_URL('path/to/file');
-		$this->assertEquals('/project/path/to/file', $url->getRelative());
-		$this->assertEquals(self::BASE_URL.'path/to/file', $url->getAbsolute());
+		$url->setBaseUrl($baseUrl);
+		$this->assertEquals('/sub/'.$relative, $url->getRelative());
+		$this->assertEquals($baseUrl.$relative, $url->getAbsolute());
 	}
 
 	public function testUrlScriptRelativePath()

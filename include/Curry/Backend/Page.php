@@ -541,6 +541,7 @@ class Curry_Backend_Page extends Curry_Backend
 		if(isPost('pid_metadata') && $form->isValid($_POST)) {
 			Curry_Backend_PageHelper::savePageMetadata($pageRevision, $form->getValues());
 			$form = Curry_Backend_PageHelper::getMetadataForm($pageRevision);
+			PagePeer::changePage();
 			$this->addMessage('Page metadata was saved.', self::MSG_SUCCESS);
 		}
 		

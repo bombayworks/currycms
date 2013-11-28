@@ -226,7 +226,7 @@ class Curry_Backend_FileBrowser extends Curry_Backend
   {% for path in paths %}
   <ul class="folder {{path.IsRoot?'root':''}}" data-finder='{"path":"{{path.Path}}","action":"{{path.UploadUrl}}"}'>
     {% for file in path.files %}
-    <li class="{{file.IsSelected?'selected':(file.IsHighlighted?'highlighted':'')}} {{file.Icon}}"><a href="{{file.Url}}" class="navigate" data-finder='{"name":"{{file.Name}}","path":"{{file.Path}}"}'>{{file.Name}}</a></li>
+    <li class="{{(file.IsFolder?'is-folder':'is-file')~(file.IsSelected?' selected':(file.IsHighlighted?' highlighted':''))}}"><a href="{{file.Url}}" class="navigate" data-finder='{"name":"{{file.Name}}","path":"{{file.Path}}"}'><span class="{{file.Icon}}"></span>{{file.Name}}</a></li>
     {% endfor %}
   </ul>
   {% endfor %}
@@ -615,7 +615,7 @@ TPL
 				'IsSelected' => ($name == $root) && (count($parts) == 0),
 				'Url' => (string)url('', array('module','path' => $name)),
 				'Path' => $name,
-				'Icon' => 'icon_folder',
+				'Icon' => 'icon-folder-'.($name == $root ? 'open' : 'close'),
 			);
 		}
 		
@@ -676,7 +676,7 @@ TPL
 				'IsHighlighted' => $name == $highlighted,
 				'IsSelected' => in_array($vpath, $selected),
 				'IsFolder' => $entry->isDir(),
-				'Icon' => $entry->isDir() ? 'icon_folder' : Curry_Util::getIconFromExtension(pathinfo($entry->getPathname(), PATHINFO_EXTENSION)),
+				'Icon' => $entry->isDir() ? 'icon-folder-'.($name == $highlighted ? 'open' : 'close') : Curry_Util::getIconFromExtension(pathinfo($entry->getPathname(), PATHINFO_EXTENSION)),
 				'Url' => (string)url('', array('module','path' => $vpath)),
 				'Path' => $vpath,
 			);

@@ -59,13 +59,13 @@ class Curry_Backend_PackageManager extends Curry_ModelBackend {
 		$flexigrid = new Curry_Flexigrid('PackageManager', 'Packages', url('', array("module", "view"=>"Json")));
 		$flexigrid->setPrimaryKey('name');
 		
-		$flexigrid->addLinkButton('Install / Upgrade', 'icon_package_add', url('', array('module','view'=>'Install')), 1);
-		$flexigrid->addLinkButton('Remove', 'icon_package_delete', url('', array('module','view'=>'Remove')), 1);
-		$flexigrid->addDialogButton('Show details', 'icon_magnifier', 'PackageManagerDetails', 'Show details', url('', array('module','view'=>'Details')), array(), 1);
+		$flexigrid->addLinkButton('Install / Upgrade', 'icon-plus-sign', url('', array('module','view'=>'Install')), 1);
+		$flexigrid->addLinkButton('Remove', 'icon-minus-sign', url('', array('module','view'=>'Remove')), 1);
+		$flexigrid->addDialogButton('Show details', 'icon-search', 'PackageManagerDetails', 'Show details', url('', array('module','view'=>'Details')), array(), 1);
 		
 		$flexigrid->addSeparator();
-		$flexigrid->addLinkButton('Update repositories', 'icon_world_go', url('', array('module','view'=>'UpdateRepositories')));
-		$flexigrid->addLinkButton('Manage repositories', 'icon_world_edit', url('', array('module','view'=>'Repositories')), -1);
+		$flexigrid->addLinkButton('Update repositories', 'icon-refresh', url('', array('module','view'=>'UpdateRepositories')));
+		$flexigrid->addLinkButton('Manage repositories', 'icon-globe', url('', array('module','view'=>'Repositories')), -1);
 		
 		$flexigrid->addColumn('icon', '', array('width' => 20, 'sortable'=>false));
 		$flexigrid->addColumn('name', 'Name', array('width' => 150, 'sortable'=>false));

@@ -166,7 +166,7 @@ class Curry_Flexigrid_Propel extends Curry_Flexigrid {
 	 * @param string $url
 	 */
 	public function addExportExcelButton($url) {
-		$this->addButton('Export', array('bclass' => 'icon_page_excel', 'onpress' => new Zend_Json_Expr("function(com, grid) {
+		$this->addButton('Export', array('bclass' => 'icon-table', 'onpress' => new Zend_Json_Expr("function(com, grid) {
 			var items = $('.trSelected',grid);
 			var url = '$url';
 			items.each(function(i) {

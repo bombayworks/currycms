@@ -463,11 +463,31 @@ body {
 	margin-bottom: .5em;
 	line-height: 1.3;
 }
-.flexigrid div.fbutton span {
-	line-height: normal;
-	background-color: transparent;
+.flexigrid div.fbutton {
+	color: #444;
+}
+.flexigrid div.fbutton div {
+	line-height: 20px;
+}
+.flexigrid div.fbutton .icon-plus-sign {
+	color: #494;
+}
+.flexigrid div.fbutton .icon-minus-sign {
+	color: #f44;
+}
+.flexigrid div.fbutton:hover {
+	color: #000;
+}
+.flexigrid div.fbutton span[class^="icon_"],
+.flexigrid div.fbutton span[class*=" icon_"] {
 	background-repeat: no-repeat;
 	background-position: left center;
+	padding-left: 17px;
+	height: 14px;
+}
+.flexigrid div.fbutton span[class^="icon-"],
+.flexigrid div.fbutton span[class*=" icon-"] {
+	font-size: 14px;
 }
 .flexigrid table {
 	width: auto;

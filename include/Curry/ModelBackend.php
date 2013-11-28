@@ -66,7 +66,7 @@ abstract class Curry_ModelBackend extends Curry_Backend {
 		$flexigrid->addDeleteButton();
 		if(in_array('translatable', array_keys(PropelQuery::from($modelClass)->getTableMap()->getBehaviors()))) {
 			$langcode = LanguageQuery::create()->findOne()->getLangcode();
-			$flexigrid->addLinkButton('View Translations', 'icon_flag', url('', $_GET)->add(array('translate' => true, 'langcode' => $langcode)));
+			$flexigrid->addLinkButton('View Translations', 'icon-flag', url('', $_GET)->add(array('translate' => true, 'langcode' => $langcode)));
 		}
 		return $flexigrid;
 	}

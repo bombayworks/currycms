@@ -307,7 +307,6 @@ class Curry_Admin {
 		header("Content-type: text/html; charset=".$encoding);
 		
 		$htmlHead = $this->getHtmlHead();
-		$htmlHead->addStylesheet('shared/css/icons.css');
 		$htmlHead->addScript('shared/libs/jquery-ui-1.8.17/js/jquery-1.7.1.min.js');
 		$htmlHead->addScript('shared/backend/common/js/core.js');
 		$htmlHead->addScript('shared/backend/common/js/plugins.js');

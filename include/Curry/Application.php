@@ -228,7 +228,7 @@ class Curry_Application {
 	{
 		$cacheName = __CLASS__ . '_' . 'AutoPublish';
 		if(($nextPublish = Curry_Core::$cache->load($cacheName)) === false) {
-			trace_notice('Doing auto-publish');
+			Curry_Core::logger()->notice('Doing auto-publish');
 			$revisions = PageRevisionQuery::create()
 				->filterByPublishDate(null, Criteria::ISNOTNULL)
 				->orderByPublishDate()
@@ -238,7 +238,7 @@ class Curry_Application {
 				if($revision->getPublishDate('U') <= time()) {
 					// publish revision
 					$page = $revision->getPage();
-					trace_notice('Publishing page: ' . $page->getUrl());
+					Curry_Core::logger()->notice('Publishing page: ' . $page->getUrl());
 					$page->setActivePageRevision($revision);
 					$revision->setPublishedDate(time());
 					$revision->setPublishDate(null);
@@ -250,7 +250,7 @@ class Curry_Application {
 				}
 			}
 			$revisions->clearIterator();
-			trace_notice('Next publish is in '.($nextPublish - time()) . ' seconds.');
+			Curry_Core::logger()->info('Next publish is in '.($nextPublish - time()) . ' seconds.');
 			Curry_Core::$cache->save(true, $cacheName, array(), $nextPublish - time());
 		}
 	}
@@ -265,7 +265,7 @@ class Curry_Application {
 		$locale = Curry_Language::setLanguage($language);
 		$language = Curry_Language::getLanguage();
 		if($language)
-			trace_notice('Current language is now '.$language->getName().' (with locale '.$locale.')');
+			Curry_Core::logger()->info('Current language is now '.$language->getName().' (with locale '.$locale.')');
 	}
 	
 	/**
@@ -275,7 +275,7 @@ class Curry_Application {
 	 */
 	public function handle(Curry_Request $request)
 	{
-		trace_notice('Starting request at '.$request->getUri());
+		Curry_Core::logger()->info('Starting request at '.$request->getUri());
 		
 		if(Curry_Core::$config->curry->autoPublish)
 			$this->autoPublish();
@@ -323,7 +323,7 @@ class Curry_Application {
 		
 		// Maintenance enabled?
 		if(Curry_Core::$config->curry->maintenance->enabled && !$forceShow) {
-			Curry_Core::log("Maintenance enabled");
+			Curry_Core::logger()->debug("Maintenance enabled");
 			
 			header('HTTP/1.1 503 Service Temporarily Unavailable');
 			header('Status: 503 Service Temporarily Unavailable');
@@ -364,7 +364,7 @@ class Curry_Application {
 			$time = microtime(true);
 			$cacheName = __CLASS__ . '_Page_' . md5($request->getUri());
 			if(($cache = Curry_Core::$cache->load($cacheName)) !== false) {
-				trace_notice('Using cached page content');
+				Curry_Core::logger()->info('Using cached page content');
 				foreach($cache['headers'] as $header)
 					header($header);
 				echo $cache['content'];
@@ -380,12 +380,12 @@ class Curry_Application {
 				$page = $this->redirectPage($page, $request);
 			}
 			catch(Exception $e) {
-				Curry_Core::log('Error when trying to find page: ' . $e->getMessage(), Zend_Log::ERR);
+				Curry_Core::logger()->notice('Error when trying to find page: ' . $e->getMessage());
 				$page = null;
 			}
 			// make sure page is enabled
 			if(($page instanceof Page) && !$forceShow && !$page->getEnabled()) {
-				Curry_Core::log('Page is not accessible', Zend_Log::ERR);
+				Curry_Core::logger()->notice('Page is not accessible');
 				$page = null;
 			}
 		}
@@ -408,10 +408,10 @@ class Curry_Application {
 		if($language) {
 			$this->setLanguage($language);
 		} else if($fallbackLanguage) {
-			trace_warning('Using fallback language');
+			Curry_Core::logger()->info('Using fallback language');
 			$this->setLanguage($fallbackLanguage);
 		} else {
-			trace_warning('Language not set for page');
+			Curry_Core::logger()->notice('Language not set for page');
 		}
 		
 		// Attempt to render page
@@ -419,12 +419,12 @@ class Curry_Application {
 			$this->render($page->getPageRevision(), $request, $vars, $options);
 		}
 		catch(Curry_Exception_Unauthorized $e) {
-			Curry_Core::log($e->getMessage(), Zend_Log::ERR);
+			Curry_Core::logger()->notice($e->getMessage());
 			if(!headers_sent())
 				header("HTTP/1.1 " . $e->getStatusCode() . " " . $e->getMessage());
 			
 			if(Curry_Core::$config->curry->errorPage->unauthorized) {
-				Curry_Core::log('Showing unauthorized page', Zend_Log::NOTICE);
+				Curry_Core::logger()->debug('Showing unauthorized page');
 				$page = PageQuery::create()->findPk(Curry_Core::$config->curry->errorPage->unauthorized);
 				if(!$page)
 					throw new Exception('Unauthorized page not found');
@@ -438,7 +438,7 @@ class Curry_Application {
 					$this->render($page->getPageRevision(), $request, $vars, $options);
 				}
 				catch(Exception $e2) {
-					Curry_Core::log('An error occured while trying to generate the unauthorized page: ' . $e2->getMessage(), Zend_Log::ERR);
+					Curry_Core::logger()->error('An error occured while trying to generate the unauthorized page: ' . $e2->getMessage());
 					throw $e;
 				}
 			} else {
@@ -446,12 +446,12 @@ class Curry_Application {
 			}
 		}
 		catch(Curry_Exception_HttpError $e) {
-			Curry_Core::log($e->getMessage(), Zend_Log::ERR);
+			Curry_Core::logger()->notice($e->getMessage());
 			if(!headers_sent())
 				header("HTTP/1.1 ".$e->getStatusCode()." ".$e->getMessage());
 		}
 		catch(Exception $e) {
-			Curry_Core::log($e->getMessage(), Zend_Log::ERR);
+			Curry_Core::logger()->critical($e->getMessage());
 			if(!headers_sent())
 				header("HTTP/1.1 500 Internal server error");
 			
@@ -459,8 +459,8 @@ class Curry_Application {
 				Curry_Core::sendErrorNotification($e);
 			
 			if(Curry_Core::$config->curry->errorPage->error) {
-				
-				Curry_Core::log('Trying to show error page', Zend_Log::NOTICE);
+
+				Curry_Core::logger()->debug('Trying to show error page');
 				$page = PageQuery::create()->findPk(Curry_Core::$config->curry->errorPage->error);
 				if(!$page)
 					throw new Exception('Error page not found');
@@ -474,7 +474,7 @@ class Curry_Application {
 					$this->render($page->getPageRevision(), $request, $vars, $options);
 				}
 				catch(Exception $e2) {
-					Curry_Core::log('An error occured, additionally an error occured while trying to generate the error page: ' . $e2->getMessage(), Zend_Log::ERR);
+					Curry_Core::logger()->error('An error occured, additionally an error occured while trying to generate the error page: ' . $e2->getMessage());
 					throw $e;
 				}
 			} else {
@@ -493,7 +493,7 @@ class Curry_Application {
 	 */
 	protected function render(PageRevision $pageRevision, Curry_Request $request, array $vars, array $options)
 	{
-		Curry_Core::log('Showing page ' . $pageRevision->getPage()->getName() . ' (PageRevisionId: '.$pageRevision->getPageRevisionId().')', Zend_Log::NOTICE);
+		Curry_Core::logger()->notice('Showing page ' . $pageRevision->getPage()->getName() . ' (PageRevisionId: '.$pageRevision->getPageRevisionId().')');
 		
 		$time = microtime(true);
 		$queries = Curry_Propel::getQueryCount();

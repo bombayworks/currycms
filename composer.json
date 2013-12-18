@@ -16,6 +16,7 @@
   "include-path": ["include/"],
   "require": {
     "php": ">=5.3.7",
+    "monolog/monolog": "1.*",
     "propel/propel1": "1.6.*",
     "bombayworks/zendframework1": "1.12.*",
     "twig/twig": "1.12.*",

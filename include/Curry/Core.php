@@ -23,7 +23,7 @@
  */
 function trace($value)
 {
-	Curry_Core::log($value, 7/*Zend_Log::DEBUG*/);
+	Curry_Core::logger()->debug($value);
 }
 
 /**
@@ -33,7 +33,7 @@ function trace($value)
  */
 function trace_notice($value)
 {
-	Curry_Core::log($value, 6/*Zend_Log::INFO*/);
+	Curry_Core::logger()->notice($value);
 }
 
 /**
@@ -43,7 +43,7 @@ function trace_notice($value)
  */
 function trace_warning($value)
 {
-	Curry_Core::log($value, 4/*Zend_Log::WARN*/);
+	Curry_Core::logger()->warning($value);
 }
 
 /**
@@ -53,7 +53,7 @@ function trace_warning($value)
  */
 function trace_error($value)
 {
-	Curry_Core::log($value, 3/*Zend_Log::ERR*/);
+	Curry_Core::logger()->error($value);
 }
 
 /**
@@ -165,16 +165,9 @@ class Curry_Core {
 	private static $index;
 	
 	/**
-	 * The log-writer used by $logger.
-	 * 
-	 * @var Zend_Log_Writer_Abstract
-	 */
-	private static $writer;
-	
-	/**
 	 * Optional logger instance.
 	 * 
-	 * @var Zend_Log
+	 * @var \Monolog\Logger
 	 */
 	private static $logger;
 
@@ -529,22 +522,15 @@ class Curry_Core {
 	private static function initLogging()
 	{
 		$log = self::$config->curry->log;
+		self::$logger = new \Monolog\Logger('currycms');
 		switch ($log->method) {
 			case 'firebug':
-				self::$writer = new Zend_Log_Writer_Firebug();
-				self::$writer->setPriorityStyle(self::LOG_TABLE, 'TABLE');
-				
-				$request = new Zend_Controller_Request_Http();
-				$response = new Zend_Controller_Response_Http();
-				$channel = Zend_Wildfire_Channel_HttpHeaders::getInstance();
-				$channel->setRequest($request);
-				$channel->setResponse($response);
 				ob_start();
-				
+				self::$logger->pushHandler(new \Monolog\Handler\FirePHPHandler());
 				break;
 				
 			case 'file':
-				self::$writer = new Zend_Log_Writer_Stream($log->file);
+				self::$logger->pushHandler(new \Monolog\Handler\StreamHandler($log->file));
 				break;
 			
 			case 'none':
@@ -552,10 +538,7 @@ class Curry_Core {
 				return;
 		}
 		
-		self::$logger = new Zend_Log(self::$writer);
-		self::$logger->addPriority('TABLE', self::LOG_TABLE);
-		
-		self::log("Logging initialized", Zend_Log::NOTICE);
+		Curry_Core::logger()->debug("Logging initialized");
 	}
 	
 	/**
@@ -567,23 +550,33 @@ class Curry_Core {
 	{
 		return self::$logger !== null;
 	}
-	
+
+	/**
+	 * Return logger instance.
+	 *
+	 * @return \Monolog\Logger
+	 */
+	public static function logger()
+	{
+		return self::$logger;
+	}
+
 	/**
 	 * Create log message with the specified level.
 	 *
 	 * @param mixed $message String or object to be logged.
-	 * @param int $level One of the Zend_Log level constants.
+	 * @param int $level One of the log level constants.
 	 */
 	public static function log($message, $level = null)
 	{
 		if(self::$logger) {
 			if($level === null)
-				$level = Zend_Log::DEBUG;
+				$level = \Monolog\Logger::DEBUG;
 			try {
-				self::$logger->log($message, $level);
+				self::$logger->log($level, $message);
 			}
 			catch(Exception $e) {
-				
+
 			}
 		}
 	}
@@ -594,7 +587,7 @@ class Curry_Core {
 	private static function initPropel()
 	{
 		if(!file_exists(self::$config->curry->propel->conf)) {
-			self::log("Propel configuration missing, skipping propel initialization.");
+			Curry_Core::logger()->notice("Propel configuration missing, skipping propel initialization.");
 			return;
 		}
 
@@ -666,7 +659,7 @@ class Curry_Core {
 						'file_name_prefix' => $uniqueId
 					);
 				}
-				trace_notice('Using '.$backend.' as caching backend');
+				Curry_Core::logger()->info('Using '.$backend.' as caching backend');
 				break;
 				
 			case 'file':
@@ -690,7 +683,7 @@ class Curry_Core {
 			default:
 				$backend = 'Black Hole';
 				$frontendOptions['caching'] = false;
-				self::log("Caching is not enabled", Zend_Log::WARN);
+				Curry_Core::logger()->info("Caching is not enabled");
 		}
 		
 		self::$cache = Zend_Cache::factory('Core', $backend, $frontendOptions, $backendOptions);
@@ -832,10 +825,10 @@ class Curry_Core {
 				'</body></html>'
 			);
 			$mail->send();
-			trace_notice('Sent error notification');
+			Curry_Core::logger()->info('Sent error notification');
 		}
 		catch(Exception $e) {
-			trace_warning('Failed to send error notification');
+			Curry_Core::logger()->error('Failed to send error notification');
 		}
 	}
 	
@@ -855,23 +848,9 @@ class Curry_Core {
 			
 			$queryCount = Curry_Propel::getQueryCount();
 			$generationTime = self::getExecutionTime();
-			self::log("Generation time: ".round($generationTime, 3)."s", Zend_Log::NOTICE);
-			self::log("Peak memory usage: ".Curry_Util::humanReadableBytes(memory_get_peak_usage()), Zend_Log::NOTICE);
-			self::log("SQL query count: ".($queryCount !== null ? $queryCount : 'n/a'), Zend_Log::NOTICE);
-			
-			if(self::$writer instanceof Zend_Log_Writer_Firebug && !headers_sent()) {
-				// Flush log data to browser
-				$channel = Zend_Wildfire_Channel_HttpHeaders::getInstance();
-				$response = $channel->getResponse();
-				$channel->flush();
-				
-				//$response->sendHeaders();
-				// send headers manually so http status (3xx) doesn't get overridden
-				foreach ($response->getRawHeaders() as $header)
-					header($header);
-				foreach($response->getHeaders() as $header)
-					header($header['name'] . ': ' . $header['value'], $header['replace']);
-			}
+			Curry_Core::logger()->debug("Generation time: ".round($generationTime, 3)."s");
+			Curry_Core::logger()->debug("Peak memory usage: ".Curry_Util::humanReadableBytes(memory_get_peak_usage()));
+			Curry_Core::logger()->debug("SQL query count: ".($queryCount !== null ? $queryCount : 'n/a'));
 		}
 	}
 

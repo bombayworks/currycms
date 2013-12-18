@@ -105,7 +105,7 @@ class Curry_PageGenerator
 	 */
 	protected function insertModule(Curry_PageModuleWrapper $pageModuleWrapper)
 	{
-		Curry_Core::log(($pageModuleWrapper->getEnabled() ? 'Inserting' : 'Skipping').' module "'.$pageModuleWrapper->getName().'" of type "'.$pageModuleWrapper->getClassName() . '" with target "'.$pageModuleWrapper->getTarget().'"');
+		Curry_Core::logger()->debug(($pageModuleWrapper->getEnabled() ? 'Inserting' : 'Skipping').' module "'.$pageModuleWrapper->getName().'" of type "'.$pageModuleWrapper->getClassName() . '" with target "'.$pageModuleWrapper->getTarget().'"');
 		
 		if(!$pageModuleWrapper->getEnabled())
 			return "";
@@ -252,9 +252,8 @@ class Curry_PageGenerator
 			foreach($this->moduleDebugInfo as $mdi)
 				$totalTime += $mdi[5];
 			$labels = array('Name', 'Class', 'Template', 'Target', 'Cached','Time (ms)', 'Cpu (ms)', 'Memory Delta', 'Memory Peak', 'Queries');
-			Curry_Core::log(array(
-					"Modules(".count($this->moduleDebugInfo)."): ".round($totalTime / 1000.0, 3)."s",
-					array_merge(array($labels), $this->moduleDebugInfo)), Curry_Core::LOG_TABLE);
+			Curry_Core::logger()->debug("Modules(".count($this->moduleDebugInfo)."): ".round($totalTime / 1000.0, 3)."s",
+					array_merge(array($labels), $this->moduleDebugInfo));
 		}
 	}
 	

@@ -41,7 +41,7 @@ class Curry_Backend_DomainMapping extends Curry_Backend {
 		if(!is_writable(Curry_Core::$config->curry->configPath))
 			$this->addMessage("Configuration file doesn't seem to be writable.", self::MSG_ERROR);
 			
-		$config = new Zend_Config(require(Curry_Core::$config->curry->configPath), true);
+		$config = Curry_Core::openConfiguration();
 
 		$pages = PagePeer::getSelect();
 
@@ -101,14 +101,7 @@ class Curry_Backend_DomainMapping extends Curry_Backend {
 
 	
 			try {
-				$writer = new Zend_Config_Writer_Array();
-				$writer->write(Curry_Core::$config->curry->configPath, $config);
-	            if(extension_loaded('apc')) {
-	                if(function_exists('apc_delete_file'))
-	                    @apc_delete_file(Curry_Core::$config->curry->configPath);
-	                else
-	                    @apc_clear_cache();
-	            }
+				Curry_Core::writeConfiguration($config);
 				$this->addMessage("Settings saved.", self::MSG_SUCCESS);
 			}
 			catch (Exception $e) {

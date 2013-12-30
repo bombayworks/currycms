@@ -52,7 +52,7 @@ class Curry_Backend_System extends Curry_Backend {
 		else if(!is_writable($configFile))
 			$this->addMessage("Configuration file doesn't seem to be writable.", self::MSG_ERROR);
 			
-		$config = new Zend_Config($configFile ? require($configFile) : array(), true);
+		$config = Curry_Core::openConfiguration();
 		$defaultConfig = Curry_Core::getDefaultConfiguration();
 		
 		$form = new Curry_Form(array(
@@ -380,7 +380,7 @@ class Curry_Backend_System extends Curry_Backend {
 	/**
 	 * Save the config file.
 	 *
-	 * @param Zend_Config $config
+	 * @param Zend\Config\Config $config
 	 * @param array $values
 	 */
 	private function saveSettings(&$config, array $values)
@@ -469,14 +469,7 @@ class Curry_Backend_System extends Curry_Backend {
 			unset($config->curry->upgradeVersion);
 		
 		try {
-			$writer = new Zend_Config_Writer_Array();
-			$writer->write(Curry_Core::$config->curry->configPath, $config);
-			if(extension_loaded('apc')) {
-				if(function_exists('apc_delete_file'))
-					@apc_delete_file(Curry_Core::$config->curry->configPath);
-				else
-					@apc_clear_cache();
-			}
+			Curry_Core::writeConfiguration($config);
 			$this->addMessage("Settings saved.", self::MSG_SUCCESS);
 		}
 		catch (Exception $e) {
@@ -487,13 +480,13 @@ class Curry_Backend_System extends Curry_Backend {
 	/**
 	 * Set configuration variable. If value is an empty string, the variable will be unset.
 	 *
-	 * @param Zend_Config $config
+	 * @param Zend\Config\Config $config
 	 * @param string $name
 	 * @param string $value
 	 */
 	private static function setvar(&$config, $name, $value)
 	{
-		if($config instanceof Zend_Config) {
+		if($config instanceof Zend\Config\Config) {
 			if($value != '')
 				$config->$name = $value;
 			else
@@ -779,10 +772,9 @@ class Curry_Backend_System extends Curry_Backend {
 					try {
 						if($this->$migrateMethod()) {
 							// update configuration migrateVersion number
-							$config = new Zend_Config(require(Curry_Core::$config->curry->configPath), true);
+							$config = Curry_Core::openConfiguration();
 							$config->curry->migrateVersion = $nextVersion;
-							$writer = new Zend_Config_Writer_Array();
-							$writer->write(Curry_Core::$config->curry->configPath, $config);
+							Curry_Core::writeConfiguration($config);
 							$currentVersion = $nextVersion;
 							$this->addMessage('Migration to version '.$nextVersion.' was successful!', self::MSG_SUCCESS);
 						} else {

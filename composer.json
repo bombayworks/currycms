@@ -17,10 +17,22 @@
   "require": {
     "php": ">=5.3.7",
     "propel/propel1": "1.6.*",
-    "bombayworks/zendframework1": "1.12.*",
+    "zf1/zend-cache": "~1.12",
+    "zf1/zend-session": "~1.12",
+    "zf1/zend-log": "~1.12",
+    "zf1/zend-json": "~1.12",
+    "zf1/zend-mail": "~1.12",
+    "zf1/zend-locale": "~1.12",
+    "zf1/zend-form": "~1.12",
+    "zf1/zend-file-transfer": "~1.12",
+    "zf1/zend-search": "~1.12",
+    "zf1/zend-search-lucene": "~1.12",
+    "zf1/zend-wildfire": "~1.12",
+    "zf1/zend-version": "~1.12",
     "twig/twig": "1.12.*",
     "ircmaxell/password-compat": "1.0.*",
-    "oyatel/minify": "dev-master"
+    "oyatel/minify": "dev-master",
+    "zendframework/zend-config": "2.*"
   },
   "require-dev": {
     "phpunit/phpunit": "3.7.*"

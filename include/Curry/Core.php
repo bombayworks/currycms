@@ -139,7 +139,7 @@ class Curry_Core {
 	/**
 	 * Global configuration object
 	 * 
-	 * @var Zend_Config
+	 * @var \Zend\Config\Config
 	 */
 	public static $config;
 	
@@ -224,7 +224,7 @@ class Curry_Core {
 		}
 		
 		// load configuration
-		self::$config = new Zend_Config(self::getConfig($config));
+		self::$config = new \Zend\Config\Config(self::getConfig($config));
 		
 		// add project path to autoloader
 		if($initAutoloader) {
@@ -297,11 +297,46 @@ class Curry_Core {
 	/**
 	 * Get a configuration object with the default configuration-options.
 	 *
-	 * @return Zend_Config
+	 * @return \Zend\Config\Config
 	 */
 	public static function getDefaultConfiguration()
 	{
-		return new Zend_Config(self::getConfig(self::$config->curry->configPath, false));
+		return new \Zend\Config\Config(self::getConfig(self::$config->curry->configPath, false));
+	}
+
+	/**
+	 * Open configuration for changes.
+	 *
+	 * @param string|null $file
+	 * @return \Zend\Config\Config
+	 */
+	public static function openConfiguration($file = null)
+	{
+		if ($file === null) {
+			$file = Curry_Core::$config->curry->configPath;
+		}
+		return new \Zend\Config\Config($file ? require($file) : array(), true);
+	}
+
+	/**
+	 * Write configuration.
+	 *
+	 * @param \Zend\Config\Config $config
+	 * @param string|null $file
+	 */
+	public static function writeConfiguration(\Zend\Config\Config $config, $file = null)
+	{
+		if ($file === null) {
+			$file = Curry_Core::$config->curry->configPath;
+		}
+		$writer = new \Zend\Config\Writer\PhpArray();
+		$writer->toFile($file, $config);
+		if(extension_loaded('apc')) {
+			if(function_exists('apc_delete_file'))
+				@apc_delete_file(Curry_Core::$config->curry->configPath);
+			else
+				@apc_clear_cache();
+		}
 	}
 	
 	/**
@@ -451,16 +486,14 @@ class Curry_Core {
 	 */
 	public static function registerHook($name, $callback)
 	{
-		$config = new Zend_Config(require(Curry_Core::$config->curry->hooksPath), true);
-		$hooks = $config->toArray();
+		$hooks = require(Curry_Core::$config->curry->hooksPath);
 		if(!array_key_exists($name, $hooks))
 			$hooks[$name] = array();
 		if(!in_array($callback, $hooks[$name], true))
 			$hooks[$name][] = $callback;
 		self::$hooks = $hooks;
-		
-		$writer = new Zend_Config_Writer_Array();
-		$writer->write(Curry_Core::$config->curry->hooksPath, new Zend_Config($hooks));
+
+		file_put_contents(Curry_Core::$config->curry->hooksPath, '<?php return '.var_export(self::$hooks));
 	}
 	
 	/**
@@ -471,8 +504,7 @@ class Curry_Core {
 	 */
 	public static function unregisterHook($name, $callback)
 	{
-		$config = new Zend_Config(require(Curry_Core::$config->curry->hooksPath), true);
-		$hooks = $config->toArray();
+		$hooks = require(Curry_Core::$config->curry->hooksPath);
 		if(array_key_exists($name, $hooks)) {
 			foreach($hooks[$name] as $key => $hook)
 				if($hook === $callback)
@@ -480,8 +512,7 @@ class Curry_Core {
 		}
 		self::$hooks = $hooks;
 		
-		$writer = new Zend_Config_Writer_Array();
-		$writer->write(Curry_Core::$config->curry->hooksPath, new Zend_Config($hooks));
+		file_put_contents(Curry_Core::$config->curry->hooksPath, '<?php return '.var_export(self::$hooks));
 	}
 	
 	/**
@@ -494,8 +525,7 @@ class Curry_Core {
 	{
 		if(!self::$hooks) {
 			if (file_exists(Curry_Core::$config->curry->hooksPath)) {
-				$config = new Zend_Config(require(Curry_Core::$config->curry->hooksPath));
-				self::$hooks = $config->toArray();
+				self::$hooks = require(Curry_Core::$config->curry->hooksPath);
 			} else {
 				self::$hooks = array();
 			}

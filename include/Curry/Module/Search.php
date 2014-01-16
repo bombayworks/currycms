@@ -18,9 +18,9 @@
 
 /**
  * Search in the search-index and show matching results.
- * 
+ *
  * Requires a template, available variables:
- * 
+ *
  * * Query (int): Input query.
  * * NumHits (int): Number of matching documents.
  * * Total (int): Total number of searched documents.
@@ -32,7 +32,7 @@
  *   * Score (number): A matching score calculated by lucene search.
  *   * Fields (array): An array of all stored fields for this document.
  *   * RelatedObject (object): The object related to this document. For page hits, this would be the Page object.
- * 
+ *
  * @package Curry\Module
  */
 class Curry_Module_Search extends Curry_Module {
@@ -61,7 +61,7 @@ class Curry_Module_Search extends Curry_Module {
 	public function getCacheProperties()
 	{
 		$r = $this->getRequest();
-		return new Curry_CacheProperties($r->get);
+		return new Curry_CacheProperties((array)$r->get);
 	}
 
 	/** {@inheritdoc} */

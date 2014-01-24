@@ -98,6 +98,11 @@ class Curry_Backend_System extends Curry_Backend {
 					'label' => 'Admin email',
 					'value' => isset($config->curry->adminEmail) ? $config->curry->adminEmail : '',
 				)),
+				'divertOutMailToAdmin' => array('checkbox', array(
+						'label' => 'Divert outgoing email to adminEmail',
+						'value' => isset($config->curry->divertOutMailToAdmin) ? $config->curry->divertOutMailToAdmin : '',
+						'description' => 'All outgoing Curry_Mail will be diverted to adminEmail.',
+				)),
 				'developmentMode' => array('checkbox', array(
 					'label' => 'Development mode',
 					'value' => isset($config->curry->developmentMode) ? $config->curry->developmentMode : '',
@@ -389,6 +394,7 @@ class Curry_Backend_System extends Curry_Backend {
 		self::setvar($config->curry, 'name', $values['general']['name']);
 		self::setvar($config->curry, 'baseUrl', $values['general']['baseUrl']);
 		self::setvar($config->curry, 'adminEmail', $values['general']['adminEmail']);
+		$config->curry->divertOutMailToAdmin = (bool)$values['general']['divertOutMailToAdmin'];
 		self::setvar($config->curry, 'fallbackLanguage', $values['general']['fallbackLanguage'] ? $values['general']['fallbackLanguage'] : null);
 		$config->curry->developmentMode = (bool)$values['general']['developmentMode'];
 		$config->curry->forceDomain = (bool)$values['general']['forceDomain'];
@@ -841,12 +847,12 @@ class Curry_Backend_System extends Curry_Backend {
 	{
 		$projectName = Curry_Core::$config->curry->name;
 		$body =<<<HTML
-<p>If you can read this email, then you have correctly configured your email settings.</p>
-<p>This is an automated email. Please do not reply to this email.</p>
+<p>If you can read this email message, then you have correctly configured your email settings.</p>
+<p>This is an automated email. Please do not reply.</p>
 <pre style="font-size:11pt">
 {$values['message']}
 </pre>
-<p>&nbsp;</p>
+<br/>
 <p>{$projectName}</p>
 HTML;
 
@@ -859,7 +865,11 @@ HTML;
 				->setBodyText(strip_tags($body))
 				->send()
 				;
+			if (Curry_Core::$config->curry->divertOutMailToAdmin) {
+				$ret = 'Outgoing email was diverted to adminEmail at '.Curry_Core::$config->curry->adminEmail;
+			} else {
 				$ret = 'An email has been sent to your email address at '.$values['toEmail'];
+			}
 		} catch (Exception $e) {
 			$ret = 'An exception has been thrown: '.$e->getMessage();
 		}

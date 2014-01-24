@@ -98,10 +98,10 @@ class Curry_Backend_System extends Curry_Backend {
 					'label' => 'Admin email',
 					'value' => isset($config->curry->adminEmail) ? $config->curry->adminEmail : '',
 				)),
-				'forceAdminEmail' => array('checkbox', array(
-						'label' => 'Force Admin email',
-						'value' => isset($config->curry->forceAdminEmail) ? $config->curry->forceAdminEmail : '',
-						'description' => 'If set then all email sent with Curry_Mail::send() will be sent to adminEmail.',
+				'divertOutMailToAdmin' => array('checkbox', array(
+						'label' => 'Divert outgoing email to adminEmail',
+						'value' => isset($config->curry->divertOutMailToAdmin) ? $config->curry->divertOutMailToAdmin : '',
+						'description' => 'All outgoing Curry_Mail will be diverted to adminEmail.',
 				)),
 				'developmentMode' => array('checkbox', array(
 					'label' => 'Development mode',
@@ -394,7 +394,7 @@ class Curry_Backend_System extends Curry_Backend {
 		self::setvar($config->curry, 'name', $values['general']['name']);
 		self::setvar($config->curry, 'baseUrl', $values['general']['baseUrl']);
 		self::setvar($config->curry, 'adminEmail', $values['general']['adminEmail']);
-		$config->curry->forceAdminEmail = (bool)$values['general']['forceAdminEmail'];
+		$config->curry->divertOutMailToAdmin = (bool)$values['general']['divertOutMailToAdmin'];
 		self::setvar($config->curry, 'fallbackLanguage', $values['general']['fallbackLanguage'] ? $values['general']['fallbackLanguage'] : null);
 		$config->curry->developmentMode = (bool)$values['general']['developmentMode'];
 		$config->curry->forceDomain = (bool)$values['general']['forceDomain'];
@@ -865,8 +865,8 @@ HTML;
 				->setBodyText(strip_tags($body))
 				->send()
 				;
-			if (Curry_Core::$config->curry->forceAdminEmail) {
-				$ret = 'Force Admin email is set.'."\n".'An email has been sent to Admin email at '.Curry_Core::$config->curry->adminEmail;
+			if (Curry_Core::$config->curry->divertOutMailToAdmin) {
+				$ret = 'Outgoing email was diverted to adminEmail at '.Curry_Core::$config->curry->adminEmail;
 			} else {
 				$ret = 'An email has been sent to your email address at '.$values['toEmail'];
 			}

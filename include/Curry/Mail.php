@@ -81,7 +81,7 @@ class Curry_Mail extends Zend_Mail
 	 */
 	public function send($transport = null)
 	{
-		if (Curry_Core::$config->curry->forceAdminEmail) {
+		if (Curry_Core::$config->curry->divertOutMailToAdmin) {
 			$subject = '(dev) ' . $this->getSubject();
 			$this->clearSubject();
 			$this->setSubject($subject);

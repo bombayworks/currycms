@@ -347,6 +347,7 @@ class Curry_Core {
 				'name' => "untitled",
 				'baseUrl' => '/',
 				'adminEmail' => "info@example.com",
+				'divertOutMailToAdmin' => false,
 				
 				'statistics' => false,
 				'applicationClass' => 'Curry_Application',

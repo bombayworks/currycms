@@ -102,7 +102,7 @@ class Curry_Backend_Indexer extends Curry_Backend {
 	 */
 	public static function doRebuild($ajax = false)
 	{
-		$ses = new Zend_Session_Namespace(__CLASS__);
+		$ses = new \Zend\Session\Container(__CLASS__);
 		$index = Curry_Core::getSearchIndex();
 		$app = new Curry_Application();
 		Curry_URL::setReverseRouteCallback(array($app, 'reverseRoute'));
@@ -271,7 +271,7 @@ class Curry_Backend_Indexer extends Curry_Backend {
 		if (Curry_Core::$config->curry->indexerClass)
 			$models[] = '@custom';
 
-		$ses = new Zend_Session_Namespace(__CLASS__);
+		$ses = new \Zend\Session\Container(__CLASS__);
 		$ses->models = $models;
 		$ses->model = 0;
 		$ses->offset = 0;
@@ -341,7 +341,7 @@ HTML;
 
 			Curry_Backend_Indexer::initRebuild();
 			Curry_Backend_Indexer::doRebuild();
-			$ses = new Zend_Session_Namespace(__CLASS__);
+			$ses = new \Zend\Session\Container(__CLASS__);
 			if ($ses->failed)
 				$this->addMessage($ses->failed.' entries failed indexing.', self::MSG_WARNING);
 

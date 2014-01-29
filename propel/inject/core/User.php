@@ -21,7 +21,8 @@ public static function login()
 {
 	$setCookie = false;
 	$redirect = false;
-	$session = Zend_Session::sessionExists() ? new Zend_Session_Namespace(__CLASS__) : null;
+	$sessionManager = \Zend\Session\Container::getDefaultManager();
+	$session = $sessionManager->sessionExists() ? new \Zend\Session\Container(__CLASS__) : null;
 
 	if(isset($_GET['logout'])) {
 		self::doLogout();
@@ -55,9 +56,10 @@ public static function doLogout()
 {
 	self::$user = null;
 
-	if(Zend_Session::sessionExists()) {
-		$session = new Zend_Session_Namespace(__CLASS__);
-		$session->unsetAll();
+	$sessionManager = \Zend\Session\Container::getDefaultManager();
+	if($sessionManager->sessionExists()) {
+		$session = new \Zend\Session\Container(__CLASS__);
+		$session->exchangeArray(array()); // unset all
 	}
 
 	if(isset($_COOKIE[self::COOKIE_NAME]))
@@ -67,7 +69,7 @@ public static function doLogout()
 public function setLoggedIn($setCookie = false)
 {
 	// Store in session
-	$session = new Zend_Session_Namespace(__CLASS__);
+	$session = new \Zend\Session\Container(__CLASS__);
 	$session->token = $this->getLoginToken();
 
 	// Create cookie

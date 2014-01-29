@@ -18,7 +18,6 @@
     "php": ">=5.3.7",
     "propel/propel1": "1.6.*",
     "zf1/zend-cache": "~1.12",
-    "zf1/zend-session": "~1.12",
     "zf1/zend-log": "~1.12",
     "zf1/zend-json": "~1.12",
     "zf1/zend-mail": "~1.12",
@@ -32,7 +31,9 @@
     "twig/twig": "1.12.*",
     "ircmaxell/password-compat": "1.0.*",
     "oyatel/minify": "dev-master",
-    "zendframework/zend-config": "2.*"
+    "zendframework/zend-config": "2.*",
+    "zendframework/zend-session": "2.*",
+    "zendframework/zend-eventmanager": "2.*",
   },
   "require-dev": {
     "phpunit/phpunit": "3.7.*"

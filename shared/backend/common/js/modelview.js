@@ -356,7 +356,7 @@
 					height = $wrapper.clearQueue().css('height','').height();
 				base.populate(content.rows);
 				var postHeight = $wrapper.height();
-				$wrapper.height(height).animate({height: postHeight}, function() { $(this).css('height', ''); });
+				$wrapper.height(height).animate({height: postHeight}, function() { $(this).css('height', '').css('overflow', ''); });
 				base.$el.find('.modelview-pager').replaceWith(base.buildPager());
 			});
 		};

@@ -111,7 +111,7 @@ class Curry_PageGenerator_Html extends Curry_PageGenerator {
 			$this->adminPanel();
 		else if (Curry_Core::$config->curry->liveEdit && User::getUser()) {
 			// Add button to toggle live edit
-			$url = json_encode(url('', $_GET)->add(array('curry_inline_admin'=>1))->getAbsolute());
+			$url = json_encode(url('', $_GET)->add(array('curry_inline_admin'=>1))->remove('curry_force_show')->getAbsolute());
 			$htmlHead = $this->getHtmlHead();
 			$htmlHead->addInlineScript(<<<JS
 document.addEventListener('DOMContentLoaded', function() {

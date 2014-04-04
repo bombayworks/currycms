@@ -236,7 +236,6 @@
 .header-main .group-system > a:before { content: "\f013"; }
 /* 2nd level */
 .header-main ul ul {
-	display: block;
 	position: absolute;
 	left: -9999px;
 	top: 0;
@@ -256,6 +255,10 @@
 	opacity: 1;
 	left: 80px;
 }
+/* fixes iOS touch hover/click issue */
+.header-main li ul li { display: none; }
+.header-main li:hover ul li { display: block; }
+/* end of fix */
 .header-main li li a {
 	padding-left: 15px;
 	line-height: 39px;

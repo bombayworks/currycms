@@ -502,7 +502,7 @@ class Curry_Backend_DatabaseHelper {
 		$total = 0;
 		$skipped = 0;
 		$failed = 0;
-		$session = new Zend_Session_Namespace(__CLASS__);
+		$session = new \Zend\Session\Container(__CLASS__);
 		
 		$con = Propel::getConnection();
 		$con->beginTransaction();

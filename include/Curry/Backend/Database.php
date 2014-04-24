@@ -575,7 +575,7 @@ class Curry_Backend_Database extends Curry_Backend
 			$this->addMessage("Configuration file doesn't seem to be writable.", self::MSG_ERROR);
 			return;
 		}
-		$config = new Zend_Config(require(Curry_Core::$config->curry->configPath), true);
+		$config = Curry_Core::openConfiguration();
 		$restoreConfig = clone $config;
 		
 		$config->curry->backend->noauth = true;
@@ -584,10 +584,9 @@ class Curry_Backend_Database extends Curry_Backend
 			$config->curry->maintenance->page = false;
 			$config->curry->maintenance->message = "Rebuilding database, please wait...";
 		}
-		
-		$writer = new Zend_Config_Writer_Array();
-		$writer->write(Curry_Core::$config->curry->configPath, $config);
-		
+
+		Curry_Core::writeConfiguration($config);
+
 		try {
 			$filename = Curry_Backend_DatabaseHelper::createBackupName('backup_%Y-%m-%d_%H-%M-%S_autorebuild.txt');
 			$this->beginDetails('Dumping database to: '.$filename);
@@ -614,8 +613,7 @@ class Curry_Backend_Database extends Curry_Backend
 		}
 		
 		if($restoreConfig !== null) {
-			$writer = new Zend_Config_Writer_Array();
-			$writer->write(Curry_Core::$config->curry->configPath, $restoreConfig);
+			Curry_Core::writeConfiguration($restoreConfig);
 		}
 	}
 	

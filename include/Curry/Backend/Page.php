@@ -426,7 +426,7 @@ class Curry_Backend_Page extends Curry_Backend
 		if(isset($_GET['view']) && in_array($_GET['view'], $access))
 			return $_GET['view'];
 			
-		$ses = new Zend_Session_Namespace(__CLASS__);
+		$ses = new \Zend\Session\Container(__CLASS__);
 		if(isset($ses->pageView) && in_array($ses->pageView, $access))
 			return $ses->pageView;
 		
@@ -531,7 +531,7 @@ class Curry_Backend_Page extends Curry_Backend
 	 */
 	public function showPageMetadata()
 	{
-		$ses = new Zend_Session_Namespace(__CLASS__);
+		$ses = new \Zend\Session\Container(__CLASS__);
 		$ses->pageView = 'PageMetadata';
 		
 		$page = self::getPage(PageAccessPeer::PERM_META);
@@ -584,7 +584,7 @@ class Curry_Backend_Page extends Curry_Backend
 	{
 		$page = self::getPage(PageAccessPeer::PERM_REVISIONS);
 		
-		$ses = new Zend_Session_Namespace(__CLASS__);
+		$ses = new \Zend\Session\Container(__CLASS__);
 		$ses->pageView = 'PageRevisions';
 		
 		$this->addPageMenu($page);
@@ -716,7 +716,7 @@ class Curry_Backend_Page extends Curry_Backend
 	 */
 	public function showCopyPaste()
 	{
-		$ses = new Zend_Session_Namespace(__CLASS__);
+		$ses = new \Zend\Session\Container(__CLASS__);
 		$ses->pageView = 'CopyPaste';
 		
 		$page = self::getPage(PageAccessPeer::PERM_MODULES);
@@ -773,7 +773,7 @@ class Curry_Backend_Page extends Curry_Backend
 	 */
 	public function showPageProperties()
 	{
-		$ses = new Zend_Session_Namespace(__CLASS__);
+		$ses = new \Zend\Session\Container(__CLASS__);
 		$ses->pageView = 'PageProperties';
 		
 		$page = self::getPage(PageAccessPeer::PERM_PROPERTIES);
@@ -795,7 +795,7 @@ class Curry_Backend_Page extends Curry_Backend
 	 */
 	public function showPagePermissions()
 	{
-		$ses = new Zend_Session_Namespace(__CLASS__);
+		$ses = new \Zend\Session\Container(__CLASS__);
 		$ses->pageView = 'PagePermissions';
 		
 		$page = self::getPage(PageAccessPeer::PERM_PERMISSIONS);
@@ -811,7 +811,7 @@ class Curry_Backend_Page extends Curry_Backend
 	 */
 	public function showContent()
 	{
-		$ses = new Zend_Session_Namespace(__CLASS__);
+		$ses = new \Zend\Session\Container(__CLASS__);
 		$ses->pageView = 'Content';
 		
 		$page = self::getPage(PageAccessPeer::PERM_CONTENT);

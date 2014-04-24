@@ -268,11 +268,10 @@ class Curry_Backend_Setup extends Curry_Backend {
 	public function showSetupComplete()
 	{
 		// Disable setup and enable backend authorization
-		$config = new Zend_Config(require(Curry_Core::$config->curry->configPath), true);
+		$config = Curry_Core::openConfiguration();
 		$config->curry->setup = false;
 		$config->curry->backend->noauth = false;
-		$writer = new Zend_Config_Writer_Array();
-		$writer->write(Curry_Core::$config->curry->configPath, $config);
+		Curry_Core::writeConfiguration($config);
 
 		$backendUrl = url('');
 		$frontendUrl = url('~/');
@@ -665,7 +664,7 @@ HTML
 		}
 
 		if (file_exists(Curry_Core::$config->curry->configPath)) {
-			$config = new Zend_Config(require(Curry_Core::$config->curry->configPath), true);
+			$config = Curry_Core::openConfiguration();
 			$config->curry->name = $values['name'];
 			$config->curry->adminEmail = $values['email'];
 			if ($values['base_url'])
@@ -674,8 +673,7 @@ HTML
 				unset($config->curry->baseUrl);
 			$config->curry->developmentMode = (bool)$values['development_mode'];
 			$config->curry->secret = sha1(uniqid(mt_rand(), true) . microtime());
-			$writer = new Zend_Config_Writer_Array();
-			$writer->write(Curry_Core::$config->curry->configPath, $config);
+			Curry_Core::writeConfiguration($config);
 		}
 
 		return true;

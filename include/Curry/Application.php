@@ -295,7 +295,7 @@ class Curry_Application {
 		if($validUser) {
 			
 			// check for inline-admin
-			$adminNamespace = new Zend_Session_Namespace('Curry_Admin');
+			$adminNamespace = new \Zend\Session\Container('Curry_Admin');
 			if(Curry_Core::$config->curry->liveEdit && !$request->getParam('curry_force_show')) {
 				if($request->hasParam('curry_inline_admin'))
 					$adminNamespace->inlineAdmin = $request->getParam('curry_inline_admin') ? true : false;

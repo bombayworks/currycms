@@ -555,7 +555,7 @@ TPL
 			$result['uploaded_virtual'][] = $virtualPath . '/' . $name;
 			$result['uploaded_public'][] = self::physicalToPublic($target);
 		}
-		$ses = new Zend_Session_Namespace(__CLASS__);
+		$ses = new \Zend\Session\Container(__CLASS__);
 		$ses->uploadOverwrite = $overwrite;
 		return $result;
 	}
@@ -569,7 +569,7 @@ TPL
 	public function actionUploadOverwrite($params)
 	{
 		$files = (array)$params['overwrite'];
-		$ses = new Zend_Session_Namespace(__CLASS__);
+		$ses = new \Zend\Session\Container(__CLASS__);
 		$sessionFiles = (array)$ses->uploadOverwrite;
 		foreach($files as $name => $overwrite) {
 			if(!isset($sessionFiles[$name]))

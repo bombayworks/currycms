@@ -717,7 +717,7 @@ class Curry_Core {
 				Curry_Core::logger()->info("Caching is not enabled");
 		}
 		
-		self::$cache = Zend_Cache::factory('Core', $backend, $frontendOptions, $backendOptions);
+		self::$cache = Zend_Cache::factory('Core', $backend, $frontendOptions, $backendOptions, false, false, true);
 	}
 	
 	/**

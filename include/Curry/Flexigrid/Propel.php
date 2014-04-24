@@ -417,8 +417,8 @@ class Curry_Flexigrid_Propel extends Curry_Flexigrid {
 			}
 			else {
 				try {
-					if($this->tableMap->hasColumn($column)) {
-						$phpName = $this->tableMap->getColumn($column)->getPhpName();
+					if($this->tableMap->hasColumnByInsensitiveCase($column)) {
+						$phpName = $this->tableMap->getColumnByInsensitiveCase($column)->getPhpName();
 					} else {
 						$tmp = $this->query->getAsColumns();
 						if(isset($tmp[$column])) {

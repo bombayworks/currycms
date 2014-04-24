@@ -550,11 +550,11 @@ class Curry_Backend_Page extends Curry_Backend
 		
 		if(self::getPagePermission(PageQuery::create()->findRoot(), PageAccessPeer::PERM_META)) {
 			$url = url('', array('module', 'view' => 'NewMetadata'));
-			$this->addDialogCommand('Add new field', $url, 'icon_textfield_add');
+			$this->addDialogCommand('Add new field', $url, 'icon-plus');
 		}
 		
 		$url = url('', array('module' => 'Curry_Backend_Database', 'view' => 'Table', 'table' => 'Metadata'));
-		$this->addCommand('Edit fields', $url, 'icon_table_edit');
+		$this->addCommand('Edit fields', $url, 'icon-table');
 	}
 	
 	/**

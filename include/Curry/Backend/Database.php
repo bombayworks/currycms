@@ -218,15 +218,15 @@ class Curry_Backend_Database extends Curry_Backend
 		$editUrl = url('', array("module", "table","view"=>"Row"));
 		$flexigrid->addAddButton($editUrl);
 		$flexigrid->addEditButton($editUrl);
-		$flexigrid->addCommandButton('Delete', 'icon_delete', 'dodelete'); // TODO: Add confirmation.
+		$flexigrid->addCommandButton('Delete', 'icon-minus-sign', 'dodelete'); // TODO: Add confirmation.
 		$flexigrid->addSeparator();
-		$flexigrid->addCommandButton('Empty', 'icon_bin_empty', 'empty'); // TODO: Add confirmation.
-		$flexigrid->addLinkButton('Check relations', 'icon_wrench', (string)url('', array('module','view'=>'Cleanup','table')));
+		$flexigrid->addCommandButton('Empty', 'icon-trash', 'empty'); // TODO: Add confirmation.
+		$flexigrid->addLinkButton('Check relations', 'icon-wrench', (string)url('', array('module','view'=>'Cleanup','table')));
 		if(array_key_exists('nested_set', $tableMap->getBehaviors()))
-			$flexigrid->addLinkButton('Repair nested set', 'icon_wrench', (string)url('', array('module','view'=>'RepairNestedSet','table')));
+			$flexigrid->addLinkButton('Repair nested set', 'icon-wrench', (string)url('', array('module','view'=>'RepairNestedSet','table')));
 		$flexigrid->addSeparator();
-		$flexigrid->addLinkButton('Import', 'icon_page_excel', (string)url('', array('module','view'=>'Import','table')));
-		$flexigrid->addLinkButton('Export', 'icon_page_excel', (string)url('', array('module','view'=>'Export','table')));
+		$flexigrid->addLinkButton('Import', 'icon-table', (string)url('', array('module','view'=>'Import','table')));
+		$flexigrid->addLinkButton('Export', 'icon-table', (string)url('', array('module','view'=>'Export','table')));
 		
 		return $flexigrid;
 	}

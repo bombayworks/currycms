@@ -468,7 +468,7 @@ class Curry_Flexigrid {
 	 */
 	public function addAddButton($url, array $dialogOptions = array(), $buttonOptions = array())
 	{
-		$this->addDialogButton('Add', 'icon_add', 'add_dialog', 'Create new '.$this->options['title'], $url, $dialogOptions, -1, true, $buttonOptions);
+		$this->addDialogButton('Add', 'icon-plus-sign', 'add_dialog', 'Create new '.$this->options['title'], $url, $dialogOptions, -1, true, $buttonOptions);
 	}
 
 	/**
@@ -480,7 +480,7 @@ class Curry_Flexigrid {
 	 */
 	public function addEditButton($url, array $dialogOptions = array(), $buttonOptions = array())
 	{
-		$this->addDialogButton('Edit', 'icon_pencil', 'edit_dialog', 'Edit '.$this->options['title'], $url, $dialogOptions, 1, true, $buttonOptions);
+		$this->addDialogButton('Edit', 'icon-edit', 'edit_dialog', 'Edit '.$this->options['title'], $url, $dialogOptions, 1, true, $buttonOptions);
 	}
 
 	/**
@@ -490,7 +490,7 @@ class Curry_Flexigrid {
 	 */
 	public function addDeleteButton($options = array())
 	{
-		$this->addButton("Delete", array_merge((array) $options, array("bclass" => "icon_delete", "onpress" => new Zend_Json_Expr("function(com, grid) {
+		$this->addButton("Delete", array_merge((array) $options, array("bclass" => "icon-minus-sign", "onpress" => new Zend_Json_Expr("function(com, grid) {
 			var items = $('.trSelected', grid);
 			if(items.length && confirm('Delete ' + items.length + ' {$this->options['title']}? \\nWARNING: This cannot be undone.')) {
 				var ids = $.map(items, function(item) { return $.data(item, '{$this->primaryKey}'); });

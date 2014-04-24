@@ -202,74 +202,45 @@ class Curry_Util {
 	public static function getIconFromExtension($extension)
 	{
 		switch(strtolower($extension)) {
-			case 'pdf':
-				return 'icon_page_white_acrobat';
-			case 'as':
-				return 'icon_page_white_actionscript';
-			case 'c':
-				return 'icon_page_white_c';
-			case 'iso':
-				return 'icon_page_white_cd';
 			case 'htm':
 			case 'html':
 			case 'xml':
-				return 'icon_page_white_code';
-			case 'cf':
-			case 'cfc':
-				return 'icon_page_white_coldfusion';
+				return 'icon-code';
 			case 'zip':
 			case 'rar':
 			case 'tar':
 			case 'gz':
-				return 'icon_page_white_compressed';
-			case 'cpp':
-				return 'icon_page_white_cplusplus';
-			case 'cs':
-				return 'icon_page_white_csharp';
+				return 'icon-archive';
 			case 'sql':
 			case 'db':
-				return 'icon_page_white_database';
 			case 'xls':
 			case 'xlsx':
-				return 'icon_page_white_excel';
+				return 'icon-table';
 			case 'fla':
 			case 'swf':
-				return 'icon_page_white_flash';
-			case 'fh10':
-			case 'fh11':
-				return 'icon_page_white_freehand';
+			case 'ogv':
+			case 'mp4':
+			case 'flv':
+			case 'avi':
+				return 'icon-film';
 			case 'js':
-				return 'icon_page_white_gear';
-			case 'h':
-			case 'hpp':
-				return 'icon_page_white_h';
 			case 'php':
-				return 'icon_page_white_php';
+				return 'icon-cog';
 			case 'bmp':
 			case 'gif':
 			case 'jpg':
 			case 'png':
-				return 'icon_page_white_picture';
-			case 'ppt':
-			case 'pptx':
-				return 'icon_page_white_powerpoint';
-			case 'rb':
-				return 'icon_page_white_ruby';
+				return 'icon-picture';
 			case 'txt':
 			case 'rtf':
-				return 'icon_page_white_text';
-			case 'svg':
-			case 'ai':
-				return 'icon_page_white_vector';
-			case 'vsproj':
-				return 'icon_page_white_visualstudio';
 			case 'doc':
 			case 'docx':
-				return 'icon_page_white_word';
+			case 'pdf':
+				return 'icon-file-text-alt';
 			case 'url':
-				return 'icon_page_white_world';
+				return 'icon-world';
 		}
-		return 'icon_page_white';
+		return 'icon-file-alt';
 	}
 	
 	/**

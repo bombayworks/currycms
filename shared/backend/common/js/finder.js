@@ -110,7 +110,7 @@
         				});
         				
 						var element = null;
-						base.$el.find('.folder:not(.root), .icon_folder .navigate').not(this).not($li.parent()).not($helper).not($helper.children()).each(function() {
+						base.$el.find('.folder:not(.root), .is-folder .navigate').not(this).not($li.parent()).not($helper).not($helper.children()).each(function() {
 							var offset = $(this).offset();
 							offset.right = offset.left + $(this).outerWidth();
 							offset.bottom = offset.top + $(this).outerHeight();
@@ -118,8 +118,10 @@
 								element = this;
 						});
 						
-						if(target)
+						if(target && target !== element) {
 							$(target).removeClass('drop-target');
+							target = null;
+						}
 						if(element) {
 							target = element;
 							$(target).addClass('drop-target');

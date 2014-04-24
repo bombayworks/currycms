@@ -31,9 +31,8 @@
 	.finder ul.folder li {
 		list-style-type: none;
 		white-space: nowrap;
-		background-repeat: no-repeat;
-		background-position: 1px center;
 		margin: 1px 0px;
+		padding-left: 1px;
 	}
 	.finder ul.folder li.selected {
 		background-color: #8cbf26;
@@ -43,7 +42,16 @@
 	}
 	.finder ul.folder li a {
 		display: inline-block;
-		padding-left: 20px;
+		text-decoration: none;
+	}
+	.finder ul.folder li .icon-picture {
+		color: green;
+	}
+	.finder ul.folder li.is-file a {
+		color: #666;
+	}
+	.finder ul.folder li.is-file a:hover {
+		color: #000;
 	}
 	.finder ul.folder li.selected a {
 		color: white;

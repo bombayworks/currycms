@@ -3,24 +3,28 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "cd95faa4f3f5eb8d53a9243c8662c56d",
+    "hash": "38d9210a40248ea3319d4cc163b3527e",
     "packages": [
         {
             "name": "bombayworks/zendframework1",
-            "version": "v1.12.3",
+            "version": "v1.12.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bombayworks/zendframework1.git",
-                "reference": "v1.12.3"
+                "reference": "f83796e2fcaf18bea1480988ab61de02a8168535"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bombayworks/zendframework1/zipball/v1.12.3",
-                "reference": "v1.12.3",
+                "url": "https://api.github.com/repos/bombayworks/zendframework1/zipball/f83796e2fcaf18bea1480988ab61de02a8168535",
+                "reference": "f83796e2fcaf18bea1480988ab61de02a8168535",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.2.11"
+            },
+            "require-dev": {
+                "phpunit/dbunit": "1.3.*",
+                "phpunit/phpunit": "3.7.*"
             },
             "bin": [
                 "bin/zf.sh",
@@ -29,15 +33,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-trunk": "1.12.x-dev",
-                    "dev-release-1.0": "1.0.x-dev",
-                    "dev-release-1.5": "1.5.x-dev",
-                    "dev-release-1.6": "1.6.x-dev",
-                    "dev-release-1.7": "1.7.x-dev",
-                    "dev-release-1.8": "1.8.x-dev",
-                    "dev-release-1.9": "1.9.x-dev",
-                    "dev-release-1.10": "1.10.x-dev",
-                    "dev-release-1.11": "1.11.x-dev"
+                    "dev-master": "1.12.x-dev"
                 }
             },
             "autoload": {
@@ -60,7 +56,7 @@
                 "ZF1",
                 "framework"
             ],
-            "time": "2013-03-13 17:09:28"
+            "time": "2014-04-15 17:01:21"
         },
         {
             "name": "ircmaxell/password-compat",

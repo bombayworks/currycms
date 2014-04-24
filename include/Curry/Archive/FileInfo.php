@@ -16,104 +16,108 @@
  * @link       http://currycms.com
  */
 
+namespace Curry\Archive;
+use Exception;
+
 /**
  * Describes an entry in an archive. Compatible with SplFileInfo.
  *
  * @package Curry\Archive
  */
-class Curry_Archive_FileInfo {
+class FileInfo
+{
 	/**
 	 * Entry is a file.
 	 */
 	const TYPE_FILE = 'file';
-	
+
 	/**
 	 * Entry is a symlink.
 	 */
 	const TYPE_LINK = 'link';
-	
+
 	/**
 	 * Entry is a directory.
 	 */
 	const TYPE_DIR = 'dir';
-	
+
 	/**
 	 * Filename.
 	 *
 	 * @var string
 	 */
 	protected $filename;
-	
+
 	/**
 	 * Entry type. Refers to one of the TYPE_ constants.
 	 *
 	 * @var string
 	 */
 	protected $type;
-	
+
 	/**
 	 * Size of file in bytes. Only applies to TYPE_FILE.
 	 *
 	 * @var integer
 	 */
 	protected $size;
-	
+
 	/**
 	 * Modified time (unix timestamp).
 	 *
 	 * @var int
 	 */
 	protected $mtime;
-	
+
 	/**
 	 * Link target path. Only applies to TYPE_LINK.
 	 *
 	 * @var string
 	 */
 	protected $linkTarget;
-	
+
 	/**
 	 * Entry unix permissions.
 	 *
 	 * @var int
 	 */
 	protected $perms;
-	
+
 	/**
 	 * User ID.
 	 *
 	 * @var int
 	 */
 	protected $uid;
-	
+
 	/**
 	 * Group ID.
 	 *
 	 * @var int
 	 */
 	protected $gid;
-	
+
 	/**
 	 * Options used when extracting.
 	 *
 	 * @var array
 	 */
 	protected $options;
-	
+
 	/**
 	 * Object used to read data from.
 	 *
-	 * @var Curry_Archive_Reader
+	 * @var Reader
 	 */
 	protected $sourceReader = null;
-	
+
 	/**
 	 * Byte offset in $sourceReader from where to extract file.
 	 *
 	 * @var int
 	 */
 	protected $sourcePosition = null;
-	
+
 	/**
 	 * Create archive file entry.
 	 *
@@ -125,11 +129,11 @@ class Curry_Archive_FileInfo {
 	 * @param int $perms
 	 * @param int $uid
 	 * @param int $gid
-	 * @param Curry_Archive_Reader $reader
+	 * @param Reader $reader
 	 * @param int $position
 	 * @param array $options
 	 */
-	public function __construct($filename, $type, $size, $mtime, $linkTarget, $perms, $uid, $gid, Curry_Archive_Reader $reader = null, $position = null, $options = array())
+	public function __construct($filename, $type, $size, $mtime, $linkTarget, $perms, $uid, $gid, Reader $reader = null, $position = null, $options = array())
 	{
 		$this->filename = $filename;
 		$this->type = $type;
@@ -143,7 +147,7 @@ class Curry_Archive_FileInfo {
 		$this->sourcePosition = $position;
 		$this->options = $options;
 	}
-	
+
 	/**
 	 * Get name of this entry, without path.
 	 *
@@ -153,7 +157,7 @@ class Curry_Archive_FileInfo {
 	{
 		return basename($this->filename);
 	}
-	
+
 	/**
 	 * Get full name of this entry, including path.
 	 *
@@ -163,7 +167,7 @@ class Curry_Archive_FileInfo {
 	{
 		return $this->filename;
 	}
-	
+
 	/**
 	 * Get name of this entry, excluding path and possibly extension ($suffix).
 	 *
@@ -174,7 +178,7 @@ class Curry_Archive_FileInfo {
 	{
 		return basename($this->filename, $suffix);
 	}
-	
+
 	/**
 	 * Get extension (the part after the last .) from filename.
 	 *
@@ -184,7 +188,7 @@ class Curry_Archive_FileInfo {
 	{
 		return pathinfo($this->filename, PATHINFO_EXTENSION);
 	}
-	
+
 	/**
 	 * Get parent path of this entry.
 	 *
@@ -194,7 +198,7 @@ class Curry_Archive_FileInfo {
 	{
 		return dirname($this->filename);
 	}
-	
+
 	/**
 	 * Get extraction target. Depending on extraction options this may not be the same as filename.
 	 *
@@ -204,7 +208,7 @@ class Curry_Archive_FileInfo {
 	{
 		return $this->options['target'] ? $this->options['target'] : $this->filename;
 	}
-	
+
 	/**
 	 * Type of entry.
 	 *
@@ -214,7 +218,7 @@ class Curry_Archive_FileInfo {
 	{
 		return $this->type;
 	}
-	
+
 	/**
 	 * Size of entry in bytes. Only applies to TYPE_FILE.
 	 *
@@ -224,7 +228,7 @@ class Curry_Archive_FileInfo {
 	{
 		return $this->size;
 	}
-	
+
 	/**
 	 * Get modified time (unix timestamp)
 	 *
@@ -234,7 +238,7 @@ class Curry_Archive_FileInfo {
 	{
 		return $this->mtime;
 	}
-	
+
 	/**
 	 * Get link target destination. Only applies to TYPE_LINK.
 	 *
@@ -244,7 +248,7 @@ class Curry_Archive_FileInfo {
 	{
 		return $this->linkTarget;
 	}
-	
+
 	/**
 	 * Get unix permissions.
 	 *
@@ -254,7 +258,7 @@ class Curry_Archive_FileInfo {
 	{
 		return $this->perms;
 	}
-	
+
 	/**
 	 * Get OwnerID.
 	 *
@@ -264,7 +268,7 @@ class Curry_Archive_FileInfo {
 	{
 		return $this->uid;
 	}
-	
+
 	/**
 	 * Get GroupID.
 	 *
@@ -274,7 +278,7 @@ class Curry_Archive_FileInfo {
 	{
 		return $this->gid;
 	}
-	
+
 	/**
 	 * Get extraction options.
 	 *
@@ -284,7 +288,7 @@ class Curry_Archive_FileInfo {
 	{
 		return $this->options;
 	}
-	
+
 	/**
 	 * Check if this has type equal to TYPE_FILE.
 	 *
@@ -294,7 +298,7 @@ class Curry_Archive_FileInfo {
 	{
 		return $this->type == self::TYPE_FILE;
 	}
-	
+
 	/**
 	 * Check if this has type equal to TYPE_LINK.
 	 *
@@ -304,7 +308,7 @@ class Curry_Archive_FileInfo {
 	{
 		return $this->type == self::TYPE_LINK;
 	}
-	
+
 	/**
 	 * Check if this has type equal to TYPE_DIR.
 	 *
@@ -314,7 +318,7 @@ class Curry_Archive_FileInfo {
 	{
 		return $this->type == self::TYPE_DIR;
 	}
-	
+
 	/**
 	 * Extract entry to target destination. Only applies to TYPE_FILE.
 	 *
@@ -322,25 +326,25 @@ class Curry_Archive_FileInfo {
 	 */
 	public function extract($target = null)
 	{
-		if(!$this->isFile())
+		if (!$this->isFile())
 			throw new Exception('Cannot extract non-file');
-		
-		if(!($this->sourceReader && $this->sourcePosition))
+
+		if (!($this->sourceReader && $this->sourcePosition))
 			throw new Exception('Unable to extract file: ' . $this->filename);
-		
-		if($target === null)
+
+		if ($target === null)
 			$target = $this->getTarget();
-		
+
 		$file = @fopen($target, "wb");
 		if (!$file)
 			throw new Exception("Error while opening '$target' in write binary mode");
-		
-		if($this->size)
+
+		if ($this->size)
 			$this->sourceReader->extractFromPositionToFile($file, $this->sourcePosition, $this->size);
-		
+
 		fclose($file);
 	}
-	
+
 	/**
 	 * Get the contents of the file and return as string.
 	 *
@@ -348,27 +352,27 @@ class Curry_Archive_FileInfo {
 	 */
 	public function getContents()
 	{
-		if(!$this->isFile())
+		if (!$this->isFile())
 			throw new Exception('Cannot extract non-file');
-		if(!$this->size)
+		if (!$this->size)
 			return '';
-		if(!($this->sourceReader && $this->sourcePosition))
+		if (!($this->sourceReader && $this->sourcePosition))
 			throw new Exception('Unable to extract file: ' . $this->filename);
 		return $this->sourceReader->extractFromPosition($this->sourcePosition, $this->size);
 	}
-	
+
 	/**
 	 * Set Archive Reader and byte offset for extraction.
 	 *
-	 * @param Curry_Archive_Reader $reader
+	 * @param Reader $reader
 	 * @param int $position
 	 */
-	public function setSource(Curry_Archive_Reader $reader, $position)
+	public function setSource(Reader $reader, $position)
 	{
 		$this->sourceReader = $reader;
 		$this->sourcePosition = $position;
 	}
-	
+
 	/**
 	 * String representation will return the filename.
 	 *

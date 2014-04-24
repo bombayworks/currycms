@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Archive\Archive;
 
 /**
  * Change system settings.
@@ -533,9 +534,9 @@ class Curry_Backend_System extends Curry_Backend {
 				'compression' => array('select',array(
 					'label' => 'Compression',
 					'multiOptions' => array(
-						Curry_Archive::COMPRESSION_NONE => 'None',
-						Curry_Archive::COMPRESSION_GZ => 'Gzip',
-						//Curry_Archive::COMPRESSION_BZ2 => 'Bzip2',
+						Archive::COMPRESSION_NONE => 'None',
+						Archive::COMPRESSION_GZ => 'Gzip',
+						//Archive::COMPRESSION_BZ2 => 'Bzip2',
 					),
 				)),
 				'save' => array('submit', array(
@@ -548,7 +549,7 @@ class Curry_Backend_System extends Curry_Backend {
 			// create archive
 			@set_time_limit(0);
 			$compression = $form->compression->getValue();
-			$tar = new Curry_Archive('', $compression);
+			$tar = new Archive('', $compression);
 			
 			// set up file list
 			$options = array(
@@ -611,7 +612,7 @@ class Curry_Backend_System extends Curry_Backend {
 			}
 			
 			$filename = str_replace(" ", "_", Curry_Core::$config->curry->name)."-bundle-".date("Ymd").".tar" . ($compression ? ".$compression" : '');
-			header("Content-type: " . Curry_Archive::getCompressionMimeType($compression));
+			header("Content-type: " . Archive::getCompressionMimeType($compression));
 			header("Content-disposition: attachment; filename=" . Curry_String::escapeQuotedString($filename));
 			
 			// do not use output buffering

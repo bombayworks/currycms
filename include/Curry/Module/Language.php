@@ -54,9 +54,9 @@ class Curry_Module_Language extends Curry_Module {
 			if($page)
 				url($page->getUrl(), $_GET)->redirect();
 			else
-				Curry_Core::log('Redirect page not found', Zend_Log::WARN);
+				Curry_Core::logger()->notice('Redirect page not found');
 		} else
-			Curry_Core::log('No languages found', Zend_Log::WARN);
+			Curry_Core::logger()->notice('No languages found');
 		
 		return '';
 	}

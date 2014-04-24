@@ -292,7 +292,7 @@ abstract class Curry_Backend {
 		catch (Exception $e) {
 			if(!headers_sent())
 				header("HTTP/1.0 500 Internal server error: ".str_replace("\n", "  ", $e->getMessage()));
-			Curry_Core::log($e->getMessage());
+			Curry_Core::logger()->error($e->getMessage());
 			$this->addMessage($e->getMessage(), self::MSG_ERROR);
 			if(Curry_Core::$config->curry->developmentMode)
 				$this->addMainContent("<pre>" . htmlspecialchars($e->getTraceAsString()) . "</pre>");

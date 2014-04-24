@@ -16,6 +16,7 @@
   "include-path": ["include/"],
   "require": {
     "php": ">=5.3.7",
+    "monolog/monolog": "1.*",
     "propel/propel1": "1.6.*",
     "zf1/zend-cache": "~1.12",
     "zf1/zend-log": "~1.12",

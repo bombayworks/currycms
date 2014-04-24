@@ -719,12 +719,19 @@ class Curry_Backend_System extends Curry_Backend {
 	protected static function getReleases()
 	{
 		try {
-			$tags = file_get_contents('https://api.github.com/repos/bombayworks/currycms/tags');
-			$tags = json_decode($tags, true);
+			// Override user agent
+			$opts = array(
+				'http' => array(
+					'header' => "User-Agent: CurryCMS/".Curry_Core::VERSION." (http://currycms.com)\r\n"
+				)
+			);
+			$context = stream_context_create($opts);
+			$tags = file_get_contents('https://api.github.com/repos/bombayworks/currycms/tags', null, $context);
+			$tags = json_decode($tags);
 			$versions = array();
 			foreach($tags as $tag) {
-				if(preg_match('/^v?([\d\.]+.*)$/', strtolower($tag['name']), $m)) {
-					$tag['version'] = $m[1];
+				if(preg_match('/^v?([\d\.]+.*)$/', strtolower($tag->name), $m)) {
+					$tag->version = $m[1];
 					$versions[$m[1]] = $tag;
 				}
 			}
@@ -732,6 +739,7 @@ class Curry_Backend_System extends Curry_Backend {
 			return $versions;
 		}
 		catch (Exception $e) {
+			trace_warning('Failed to fetch release list: '.$e->getMessage());
 			return null;
 		}
 	}
@@ -762,8 +770,10 @@ class Curry_Backend_System extends Curry_Backend {
 		} else {
 			$latest = count($releases) ? array_pop($releases) : null;
 			if($latest) {
-				if (version_compare($latest['version'], Curry_Core::VERSION, '>')) {
-					$this->addMessage('New release found: '.$latest['name']);
+				$this->addMessage('Installed version: '.Curry_Core::VERSION);
+				$this->addMessage('Latest version: '.$latest->version);
+				if (version_compare($latest->version, Curry_Core::VERSION, '>')) {
+					$this->addMessage('New release found: '.$latest->name);
 				} else {
 					$this->addMessage('You already have the latest version.', self::MSG_SUCCESS);
 				}

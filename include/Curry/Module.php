@@ -69,10 +69,10 @@ abstract class Curry_Module
 			return self::$modules;
 		
 		// find all backend directories
-		$dirs = glob(Curry_Util::path(Curry_Core::$config->curry->projectPath,'include','*','Module'), GLOB_ONLYDIR);
+		$dirs = glob(Curry_Util::path(\Curry\App::getInstance()->config->curry->projectPath,'include','*','Module'), GLOB_ONLYDIR);
 		if(!$dirs)
 			$dirs = array();
-		$dirs[] = Curry_Util::path(Curry_Core::$config->curry->basePath, 'include','Curry','Module');
+		$dirs[] = Curry_Util::path(\Curry\App::getInstance()->config->curry->basePath, 'include','Curry','Module');
 		
 		// find all php files in the directories
 		self::$modules = array();

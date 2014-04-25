@@ -59,10 +59,10 @@ class Curry_String
 	 */
 	public static function getRewriteString($sString)
 	{
-		 $string = strtolower(htmlentities($sString, null, Curry_Core::$config->curry->internalEncoding));
+		 $string = strtolower(htmlentities($sString, null, \Curry\App::getInstance()->config->curry->internalEncoding));
 		 $string = preg_replace("/&(.)(uml);/", "$1e", $string);
 		 $string = preg_replace("/&(.)(acute|cedil|circ|ring|tilde|uml);/", "$1", $string);
-		 //$string = strtolower(iconv(Curry_Core::$config->curry->internalEncoding, 'ASCII//TRANSLIT', $sString));
+		 //$string = strtolower(iconv(\Curry\App::getInstance()->config->curry->internalEncoding, 'ASCII//TRANSLIT', $sString));
 		 $string = preg_replace("/([^a-z0-9]+)/", "-", html_entity_decode($string));
 		 $string = trim($string, "-");
 		 return $string;
@@ -138,7 +138,7 @@ class Curry_String
 	 */
 	public static function toEncoding($str, $encoding, $unhandledChars = self::ICONV_TRANSLIT)
 	{
-		$internalEncoding = Curry_Core::$config->curry->internalEncoding;
+		$internalEncoding = \Curry\App::getInstance()->config->curry->internalEncoding;
 		
 		if($encoding == $internalEncoding)
 			return $str;
@@ -165,7 +165,7 @@ class Curry_String
 	 */
 	public static function toInternalEncoding($str, $encoding, $unhandledChars = self::ICONV_TRANSLIT)
 	{
-		$internalEncoding = Curry_Core::$config->curry->internalEncoding;
+		$internalEncoding = \Curry\App::getInstance()->config->curry->internalEncoding;
 		
 		if($encoding == $internalEncoding)
 			return $str;
@@ -192,9 +192,9 @@ class Curry_String
 	 */
 	public static function toOutputEncoding($str, $encoding = null, $unhandledChars = self::ICONV_TRANSLIT)
 	{
-		$outputEncoding = Curry_Core::$config->curry->outputEncoding;
+		$outputEncoding = \Curry\App::getInstance()->config->curry->outputEncoding;
 		if(!$encoding)
-			$encoding = Curry_Core::$config->curry->internalEncoding;
+			$encoding = \Curry\App::getInstance()->config->curry->internalEncoding;
 			
 		if($encoding == $outputEncoding)
 			return $str;

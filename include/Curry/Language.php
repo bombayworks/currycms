@@ -158,7 +158,7 @@ class Curry_Language {
 	 */
 	public static function get($variableName, $language = null)
 	{
-		if(Curry_Core::$config->curry->updateTranslationStrings)
+		if(\Curry\App::getInstance()->config->curry->updateTranslationStrings)
 			self::$used[] = $variableName;
 		
 		$language = self::_getLanguage($language);

@@ -186,10 +186,10 @@ abstract class Curry_Backend {
 			return self::$backendList;
 			
 		// find all backend directories
-		$dirs = glob(Curry_Util::path(Curry_Core::$config->curry->projectPath,'include','*','Backend'), GLOB_ONLYDIR);
+		$dirs = glob(Curry_Util::path(\Curry\App::getInstance()->config->curry->projectPath,'include','*','Backend'), GLOB_ONLYDIR);
 		if(!$dirs)
 			$dirs = array();
-		$dirs[] = Curry_Util::path(Curry_Core::$config->curry->basePath,'include','Curry','Backend');
+		$dirs[] = Curry_Util::path(\Curry\App::getInstance()->config->curry->basePath,'include','Curry','Backend');
 		
 		// find all php files in the directories
 		self::$backendList = array();
@@ -292,9 +292,9 @@ abstract class Curry_Backend {
 		catch (Exception $e) {
 			if(!headers_sent())
 				header("HTTP/1.0 500 Internal server error: ".str_replace("\n", "  ", $e->getMessage()));
-			Curry_Core::logger()->error($e->getMessage());
+			\Curry\App::getInstance()->logger->error($e->getMessage());
 			$this->addMessage($e->getMessage(), self::MSG_ERROR);
-			if(Curry_Core::$config->curry->developmentMode)
+			if(\Curry\App::getInstance()->config->curry->developmentMode)
 				$this->addMainContent("<pre>" . htmlspecialchars($e->getTraceAsString()) . "</pre>");
 		}
 		

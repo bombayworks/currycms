@@ -16,8 +16,8 @@
   "include-path": ["include/"],
   "require": {
     "php": ">=5.3.7",
-    "monolog/monolog": "1.*",
-    "propel/propel1": "1.6.*",
+    "monolog/monolog": "~1.9",
+    "propel/propel1": "~1.6",
     "zf1/zend-cache": "~1.12",
     "zf1/zend-log": "~1.12",
     "zf1/zend-json": "~1.12",
@@ -29,12 +29,13 @@
     "zf1/zend-search-lucene": "~1.12",
     "zf1/zend-wildfire": "~1.12",
     "zf1/zend-version": "~1.12",
-    "twig/twig": "1.12.*",
-    "ircmaxell/password-compat": "1.0.*",
+    "twig/twig": "~1.12",
+    "ircmaxell/password-compat": "~1.0",
     "oyatel/minify": "dev-master",
-    "zendframework/zend-config": "2.*",
-    "zendframework/zend-session": "2.*",
-    "zendframework/zend-eventmanager": "2.*"
+    "zendframework/zend-config": "~2.2",
+    "zendframework/zend-session": "~2.2",
+    "zendframework/zend-eventmanager": "~2.2",
+    "symfony/http-foundation": "~2.4"
   },
   "require-dev": {
     "phpunit/phpunit": "3.7.*"

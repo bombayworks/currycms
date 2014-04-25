@@ -109,7 +109,7 @@ class Curry_PageGenerator_Html extends Curry_PageGenerator {
 		
 		if($this->inlineAdmin)
 			$this->adminPanel();
-		else if (Curry_Core::$config->curry->liveEdit && User::getUser()) {
+		else if (\Curry\App::getInstance()->config->curry->liveEdit && User::getUser()) {
 			// Add button to toggle live edit
 			$url = json_encode(url('', $_GET)->add(array('curry_inline_admin'=>1))->remove('curry_force_show')->getAbsolute());
 			$htmlHead = $this->getHtmlHead();
@@ -141,7 +141,7 @@ JS
 	public function renderTemplate($template, $moduleContent)
 	{
 		if ($this->inlineAdmin) {
-			$excluded = Curry_Core::$config->curry->backend->placeholderExclude->toArray();
+			$excluded = \Curry\App::getInstance()->config->curry->backend->placeholderExclude->toArray();
 			$placeholders = array();
 			$tpl = $template;
 			while($tpl) {
@@ -203,7 +203,7 @@ JS
 		$htmlHead->addScript(Curry_Backend::JQUERY_JS);
 		$htmlHead->addInlineScript('window.inlineAdminContent = '.json_encode($content).';');
 		$htmlHead->addScript("shared/backend/common/js/inline-admin.js");
-		$htmlHead->addStyleSheet("shared/backend/".Curry_Core::$config->curry->backend->theme."/css/inline-admin.css");
+		$htmlHead->addStyleSheet("shared/backend/".\Curry\App::getInstance()->config->curry->backend->theme."/css/inline-admin.css");
 	}
 	
 	/**

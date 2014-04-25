@@ -33,7 +33,7 @@ class Curry_Backend_Css extends Curry_Backend_FileEditor
 	public function __construct()
 	{
 		parent::__construct();
-		$this->root = Curry_Core::$config->curry->wwwPath.DIRECTORY_SEPARATOR.'css';
+		$this->root = \Curry\App::getInstance()->config->curry->wwwPath.DIRECTORY_SEPARATOR.'css';
 	}
 
 	/** {@inheritdoc} */

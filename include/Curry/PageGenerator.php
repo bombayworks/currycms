@@ -105,13 +105,13 @@ class Curry_PageGenerator
 	 */
 	protected function insertModule(Curry_PageModuleWrapper $pageModuleWrapper)
 	{
-		Curry_Core::logger()->debug(($pageModuleWrapper->getEnabled() ? 'Inserting' : 'Skipping').' module "'.$pageModuleWrapper->getName().'" of type "'.$pageModuleWrapper->getClassName() . '" with target "'.$pageModuleWrapper->getTarget().'"');
+		\Curry\App::getInstance()->logger->debug(($pageModuleWrapper->getEnabled() ? 'Inserting' : 'Skipping').' module "'.$pageModuleWrapper->getName().'" of type "'.$pageModuleWrapper->getClassName() . '" with target "'.$pageModuleWrapper->getTarget().'"');
 		
 		if(!$pageModuleWrapper->getEnabled())
 			return "";
 
 		$cached = false;
-		$devMode = Curry_Core::$config->curry->developmentMode;
+		$devMode = \Curry\App::getInstance()->config->curry->developmentMode;
 		if ($devMode) {
 			$time = microtime(true);
 			$sqlQueries = Curry_Propel::getQueryCount();
@@ -128,7 +128,7 @@ class Curry_PageGenerator
 		$cacheName = $this->getModuleCacheName($pageModuleWrapper, $module);
 
 		// try to use cached content
-		if($cp !== null && ($cache = Curry_Core::$cache->load($cacheName)) !== false) {
+		if($cp !== null && ($cache = \Curry\App::getInstance()->cache->load($cacheName)) !== false) {
 			$cached = true;
 			$this->insertCachedModule($cache);
 			$content = $cache['content'];
@@ -163,10 +163,10 @@ class Curry_PageGenerator
 			$memoryUsage = memory_get_usage(true) - $memoryUsage;
 			$sqlQueries = $sqlQueries !== null ? Curry_Propel::getQueryCount() - $sqlQueries : null;
 
-			$cpuLimit = Curry_Core::$config->curry->debug->moduleCpuLimit;
-			$timeLimit = Curry_Core::$config->curry->debug->moduleTimeLimit;
-			$memoryLimit = Curry_Core::$config->curry->debug->moduleMemoryLimit;
-			$sqlLimit = Curry_Core::$config->curry->debug->moduleSqlLimit;
+			$cpuLimit = \Curry\App::getInstance()->config->curry->debug->moduleCpuLimit;
+			$timeLimit = \Curry\App::getInstance()->config->curry->debug->moduleTimeLimit;
+			$memoryLimit = \Curry\App::getInstance()->config->curry->debug->moduleMemoryLimit;
+			$sqlLimit = \Curry\App::getInstance()->config->curry->debug->moduleSqlLimit;
 
 			if (($userTime + $systemTime) > $cpuLimit || $time > $timeLimit)
 				trace_warning('Module generation time exceeded limit');
@@ -201,7 +201,7 @@ class Curry_PageGenerator
 	 */
 	protected function saveModuleCache($cacheName, $lifetime)
 	{
-		Curry_Core::$cache->save($this->moduleCache, $cacheName, array(), $lifetime);
+		\Curry\App::getInstance()->cache->save($this->moduleCache, $cacheName, array(), $lifetime);
 	}
 	
 	/**
@@ -247,12 +247,12 @@ class Curry_PageGenerator
 	 */
 	protected function postGeneration()
 	{
-		if (Curry_Core::$config->curry->developmentMode) {
+		if (\Curry\App::getInstance()->config->curry->developmentMode) {
 			$totalTime = 0;
 			foreach($this->moduleDebugInfo as $mdi)
 				$totalTime += $mdi[5];
 			$labels = array('Name', 'Class', 'Template', 'Target', 'Cached','Time (ms)', 'Cpu (ms)', 'Memory Delta', 'Memory Peak', 'Queries');
-			Curry_Core::logger()->debug("Modules(".count($this->moduleDebugInfo)."): ".round($totalTime / 1000.0, 3)."s",
+			\Curry\App::getInstance()->logger->debug("Modules(".count($this->moduleDebugInfo)."): ".round($totalTime / 1000.0, 3)."s",
 					array_merge(array($labels), $this->moduleDebugInfo));
 		}
 	}
@@ -358,7 +358,7 @@ class Curry_PageGenerator
 	 */
 	protected function sendContent($content)
 	{
-		$internalEncoding = Curry_Core::$config->curry->internalEncoding;
+		$internalEncoding = \Curry\App::getInstance()->config->curry->internalEncoding;
 		$outputEncoding = $this->getOutputEncoding();
 		if ($outputEncoding && $internalEncoding != $outputEncoding) {
 			trace_warning('Converting output from internal coding');
@@ -382,7 +382,7 @@ class Curry_PageGenerator
 	 */
 	public function getOutputEncoding()
 	{
-		return $this->getPage()->getInheritedProperty('Encoding', Curry_Core::$config->curry->outputEncoding);
+		return $this->getPage()->getInheritedProperty('Encoding', \Curry\App::getInstance()->config->curry->outputEncoding);
 	}
 	
 	/**
@@ -419,9 +419,9 @@ class Curry_PageGenerator
 		$langcode = (string)Curry_Language::getLangCode();
 		$cacheName = __CLASS__ . '_ModuleWrappers_' . $this->pageRevision->getPageRevisionId() . '_' . $langcode;
 		
-		if(($moduleWrappers = Curry_Core::$cache->load($cacheName)) === false) {
+		if(($moduleWrappers = \Curry\App::getInstance()->cache->load($cacheName)) === false) {
 			$moduleWrappers = $this->pageRevision->getPageModuleWrappers($langcode);
-			Curry_Core::$cache->save($moduleWrappers, $cacheName);
+			\Curry\App::getInstance()->cache->save($moduleWrappers, $cacheName);
 		}
 			
 		return $moduleWrappers;

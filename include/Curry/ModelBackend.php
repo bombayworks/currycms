@@ -127,7 +127,7 @@ abstract class Curry_ModelBackend extends Curry_Backend {
 		catch (Exception $e) {
 			if(!headers_sent())
 				header("HTTP/1.0 500 Internal server error: ".str_replace("\n", "  ", $e->getMessage()));
-			Curry_Core::logger()->error($e->getMessage(), array('exception' => $e));
+			\Curry\App::getInstance()->logger->error($e->getMessage(), array('exception' => $e));
 			$this->addMessage($e->getMessage(), self::MSG_ERROR);
 			$this->addMainContent("<pre>" . htmlspecialchars($e->getTraceAsString()) . "</pre>");
 		}

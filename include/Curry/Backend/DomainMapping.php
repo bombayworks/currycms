@@ -38,7 +38,7 @@ class Curry_Backend_DomainMapping extends Curry_Backend {
 	public function showMain()
 	{
 
-		if(!is_writable(Curry_Core::$config->curry->configPath))
+		if(!is_writable(\Curry\App::getInstance()->config->curry->configPath))
 			$this->addMessage("Configuration file doesn't seem to be writable.", self::MSG_ERROR);
 			
 		$config = Curry_Core::openConfiguration();

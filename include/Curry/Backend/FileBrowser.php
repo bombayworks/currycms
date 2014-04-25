@@ -35,7 +35,7 @@ class Curry_Backend_FileBrowser extends Curry_Backend
 	public function __construct()
 	{
 		parent::__construct();
-		$this->rootPath = Curry_Core::$config->curry->wwwPath.DIRECTORY_SEPARATOR;
+		$this->rootPath = \Curry\App::getInstance()->config->curry->wwwPath.DIRECTORY_SEPARATOR;
 	}
 	
 	/**
@@ -80,7 +80,7 @@ class Curry_Backend_FileBrowser extends Curry_Backend
 		$roots = array();
 		foreach($fbas as $fba) {
 			$path = $fba->getPath();
-			$realpath = realpath(Curry_Core::$config->curry->wwwPath . DIRECTORY_SEPARATOR . $fba->getPath());
+			$realpath = realpath(\Curry\App::getInstance()->config->curry->wwwPath . DIRECTORY_SEPARATOR . $fba->getPath());
 			if($realpath) {
 				$roots[$fba->getName()] = array(
 					'path' => $path,
@@ -162,7 +162,7 @@ class Curry_Backend_FileBrowser extends Curry_Backend
 	 */
 	public static function physicalToPublic($physical)
 	{
-		$www = Curry_Core::$config->curry->wwwPath;
+		$www = \Curry\App::getInstance()->config->curry->wwwPath;
 		if(substr($physical, 0, strlen($www)) == $www)
 			return substr($physical, strlen($www) + 1);
 		throw new Curry_Exception('Unable to map "'.$physical.'" to public path');
@@ -419,7 +419,7 @@ TPL
 		
 		if($zip) {
 			require_once 'pclzip/pclzip.lib.php';
-			$tempfile = tempnam(Curry_Core::$config->curry->tempPath, "curry-download");
+			$tempfile = tempnam(\Curry\App::getInstance()->config->curry->tempPath, "curry-download");
 			$archive = new PclZip($tempfile);
 			if(!$archive->create($physicals, PCLZIP_OPT_REMOVE_PATH, dirname($physicals[0]))) {
 				$this->addMessage('Unable to create zip.');
@@ -443,7 +443,7 @@ TPL
 	 */
 	public static function filterFilename($filename)
 	{
-		$filename = iconv(Curry_Core::$config->curry->internalEncoding, 'ASCII//TRANSLIT', $filename);
+		$filename = iconv(\Curry\App::getInstance()->config->curry->internalEncoding, 'ASCII//TRANSLIT', $filename);
 		$filename = preg_replace('/\s+/', '_', $filename);
 		$filename = preg_replace('/([^a-z0-9._-]+)/i', '-', $filename);
 		return $filename;
@@ -545,7 +545,7 @@ TPL
 						'target' => $target,
 						'temp' => $sourceHash,
 					);
-					$target = Curry_Core::$config->curry->tempPath . DIRECTORY_SEPARATOR . $sourceHash;
+					$target = \Curry\App::getInstance()->config->curry->tempPath . DIRECTORY_SEPARATOR . $sourceHash;
 					move_uploaded_file($source, $target);
 					continue;
 				}
@@ -575,7 +575,7 @@ TPL
 			if(!isset($sessionFiles[$name]))
 				throw new Exception('File to overwrite not found in session');
 			$sessionFile = $sessionFiles[$name];
-			$tempFile = Curry_Core::$config->curry->tempPath . DIRECTORY_SEPARATOR . $sessionFile['temp'];
+			$tempFile = \Curry\App::getInstance()->config->curry->tempPath . DIRECTORY_SEPARATOR . $sessionFile['temp'];
 			if($overwrite === 'true') {
 				if(file_exists($sessionFile['target']))
 					self::trashFile($sessionFile['target']);
@@ -627,7 +627,7 @@ TPL
 		$current = '';
 		while(1) {
 			$currentPath = $rootPath . $current;
-			if(!is_dir(Curry_Core::$config->curry->wwwPath . DIRECTORY_SEPARATOR . $currentPath))
+			if(!is_dir(\Curry\App::getInstance()->config->curry->wwwPath . DIRECTORY_SEPARATOR . $currentPath))
 				break;
 			$next = count($parts) ? $parts[0] : '';
 			$paths[] = $this->getPathInfo($currentPath, $root . $current, $next, $selected);
@@ -657,7 +657,7 @@ TPL
 			'files' => array(),
 		);
 		
-		$realpath = realpath(Curry_Core::$config->curry->wwwPath .DIRECTORY_SEPARATOR. $path);
+		$realpath = realpath(\Curry\App::getInstance()->config->curry->wwwPath .DIRECTORY_SEPARATOR. $path);
 		
 		$dit = new DirectoryIterator($realpath);
 		foreach($dit as $entry) {
@@ -811,7 +811,7 @@ TPL
 	 */
 	protected function trashFile($file)
 	{
-		$trashPath = Curry_Core::$config->curry->trashPath . DIRECTORY_SEPARATOR;
+		$trashPath = \Curry\App::getInstance()->config->curry->trashPath . DIRECTORY_SEPARATOR;
 		if($trashPath) {
 			if(!file_exists($trashPath))
 				mkdir($trashPath, 0777, true);
@@ -865,7 +865,7 @@ TPL
 			'exit' => $exitUrl,
 			'method' => 'get',
 			'image' => $imageUrl,
-			'referrer' => Curry_Core::$config->curry->name,
+			'referrer' => \Curry\App::getInstance()->config->curry->name,
 			'title' => basename($image),
 		));
 		

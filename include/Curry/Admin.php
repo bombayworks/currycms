@@ -271,13 +271,13 @@ class Curry_Admin {
 	{
 		if(!$this->twig) {
 			$path = Curry_Util::path('shared', 'backend');
-			$backendPath = Curry_Util::path(true, Curry_Core::$config->curry->wwwPath, $path);
+			$backendPath = Curry_Util::path(true, \Curry\App::getInstance()->config->curry->wwwPath, $path);
 			if (!$backendPath)
-				$backendPath = Curry_Util::path(true, Curry_Core::$config->curry->basePath, $path);
+				$backendPath = Curry_Util::path(true, \Curry\App::getInstance()->config->curry->basePath, $path);
 			if (!$backendPath)
 				throw new Exception('Backend path (shared/backend) not found.');
 			$templatePaths = array(
-				Curry_Util::path($backendPath, Curry_Core::$config->curry->backend->theme, 'templates'),
+				Curry_Util::path($backendPath, \Curry\App::getInstance()->config->curry->backend->theme, 'templates'),
 				Curry_Util::path($backendPath, 'common', 'templates'),
 			);
 			$templatePaths = array_filter($templatePaths, 'is_dir');
@@ -307,7 +307,7 @@ class Curry_Admin {
 		$backendList = null;
 
 		// Set content-type with charset (some webservers may otherwise override the charset)
-		$encoding = Curry_Core::$config->curry->outputEncoding;
+		$encoding = \Curry\App::getInstance()->config->curry->outputEncoding;
 		header("Content-type: text/html; charset=".$encoding);
 		
 		$htmlHead = $this->getHtmlHead();
@@ -319,30 +319,30 @@ class Curry_Admin {
 		$htmlHead->addScript('shared/js/URI.js');
 		
 		// Project backend css/js
-		if (file_exists( Curry_Core::$config->curry->wwwPath . '/css/backend.css' ))
+		if (file_exists( \Curry\App::getInstance()->config->curry->wwwPath . '/css/backend.css' ))
 			$htmlHead->addStylesheet('css/backend.css');
-		if (file_exists( Curry_Core::$config->curry->wwwPath . '/js/backend.js' ))
+		if (file_exists( \Curry\App::getInstance()->config->curry->wwwPath . '/js/backend.js' ))
 			$htmlHead->addScript('js/backend.js');
 		
 		// Set language
-		if(Curry_Core::$config->curry->fallbackLanguage)
-			Curry_Language::setLanguage(Curry_Core::$config->curry->fallbackLanguage);
+		if(\Curry\App::getInstance()->config->curry->fallbackLanguage)
+			Curry_Language::setLanguage(\Curry\App::getInstance()->config->curry->fallbackLanguage);
 		
 		// Globals
-		$twig->addGlobal('ProjectName', Curry_Core::$config->curry->name);
+		$twig->addGlobal('ProjectName', \Curry\App::getInstance()->config->curry->name);
 		$twig->addGlobal('Encoding', $encoding);
 		$twig->addGlobal('Version', Curry_Core::VERSION);
 		
 		// Logotype
-		if(Curry_Core::$config->curry->backend->logotype)
-			$twig->addGlobal('Logotype', Curry_Core::$config->curry->backend->logotype);
+		if(\Curry\App::getInstance()->config->curry->backend->logotype)
+			$twig->addGlobal('Logotype', \Curry\App::getInstance()->config->curry->backend->logotype);
 
 		// Current module
 		$currentModule = 'Curry_Backend_Page';
 		if(isset($_GET['module']))
 			$currentModule = $_GET['module'];
 
-		if(Curry_Core::$config->curry->setup) {
+		if(\Curry\App::getInstance()->config->curry->setup) {
 			if ($currentModule !== 'Curry_Backend_Setup')
 				url('', array('module' => 'Curry_Backend_Setup'))->redirect();
 			if(!class_exists('User'))
@@ -350,7 +350,7 @@ class Curry_Admin {
 			else
 				User::dummyAuth();
 			$backendList = array('Curry_Backend_Setup' => 'Setup');
-		} else if(Curry_Core::$config->curry->backend->noauth)
+		} else if(\Curry\App::getInstance()->config->curry->backend->noauth)
 			User::dummyAuth();
 		
 		$user = User::getUser();
@@ -451,9 +451,9 @@ class Curry_Admin {
 						if(!in_array($currentModule, $systemModules)) {
 							if(self::isPropelBuildInvalid())
 								$this->backend->addMessage('Propel has been upgraded and you need to rebuild your database, use <a href="'.url('', array('module' => 'Curry_Backend_Database', 'view' => 'Propel')).'">auto rebuild</a>.', Curry_Backend::MSG_WARNING, false);
-							if(Curry_Core::$config->curry->backend->noauth)
+							if(\Curry\App::getInstance()->config->curry->backend->noauth)
 								$this->backend->addMessage('Authorization has been disabled for backend. You can re-enable it if you go to <a href="'.url('', array('module' => 'Curry_Backend_System')).'">System Settings</a>.', Curry_Backend::MSG_WARNING, false);
-							if(Curry_Core::$config->curry->maintenance->enabled)
+							if(\Curry\App::getInstance()->config->curry->maintenance->enabled)
 								$this->backend->addMessage('Site has been disabled for maintenance. You can re-enable it in <a href="'.url('', array('module' => 'Curry_Backend_System')).'">System Settings</a>.', Curry_Backend::MSG_WARNING, false);
 							$this->doAutoBackup();
 						}
@@ -482,7 +482,7 @@ class Curry_Admin {
 	 */
 	public function doAutoBackup()
 	{
-		$autoBackup = Curry_Core::$config->curry->autoBackup;
+		$autoBackup = \Curry\App::getInstance()->config->curry->autoBackup;
 		if($autoBackup) {
 			$filename = Curry_Backend_DatabaseHelper::createBackupName("backup_%Y-%m-%d_%H-%M-%S_autobackup.txt");
 			

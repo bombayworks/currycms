@@ -96,7 +96,7 @@ class Curry_Module_Article extends Curry_Module {
 	{
 		$editor = $this->editor;
 		if(!$editor)
-			$editor = strtolower(Curry_Core::$config->curry->defaultEditor);
+			$editor = strtolower(\Curry\App::getInstance()->config->curry->defaultEditor);
 			
 		$elementType = 'textarea';
 		if($editor == self::CODEMIRROR)

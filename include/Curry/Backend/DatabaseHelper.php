@@ -56,7 +56,7 @@ class Curry_Backend_DatabaseHelper {
 	 */
 	public static function createBackupName($format)
 	{
-		$basepath = Curry_Core::$config->curry->projectPath . '/data/backup/';
+		$basepath = \Curry\App::getInstance()->config->curry->projectPath . '/data/backup/';
 		if(!file_exists($basepath))
 			mkdir($basepath, 0777, true);
 		
@@ -175,7 +175,7 @@ class Curry_Backend_DatabaseHelper {
 		$data = json_encode(array(
 			'header' => array(
 				'version' => Curry_Backend_DatabaseHelper::VERSION,
-				'name' => Curry_Core::$config->curry->name,
+				'name' => \Curry\App::getInstance()->config->curry->name,
 				'curry-version' => Curry_Core::VERSION,
 				'page-version' => defined('Page::VERSION') ? Page::VERSION : 0,
 				'date' => date(DATE_RFC822),
@@ -443,7 +443,7 @@ class Curry_Backend_DatabaseHelper {
 		$autoloader = Curry_Core::getAutoloader();
 		$generatorBase = dirname(dirname(dirname($autoloader->findFile('AbstractPropelDataModelTask'))));
 		$buildXml = $generatorBase . '/build.xml';
-		$projectPath = Curry_Core::$config->curry->projectPath . '/propel';
+		$projectPath = \Curry\App::getInstance()->config->curry->projectPath . '/propel';
 
 		$argv[] = '-logger';
 		$argv[] = 'phing.listener.AnsiColorLogger';

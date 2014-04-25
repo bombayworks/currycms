@@ -38,23 +38,23 @@ class Curry_Route_Page implements Curry_IRoute {
 		
 		// use domain mapping to restrict page to a certain page-branch
 		$rootPage = null;
-		if(Curry_Core::$config->curry->domainMapping->enabled){
+		if(\Curry\App::getInstance()->config->curry->domainMapping->enabled){
 			$currentDomain = strtolower($_SERVER['HTTP_HOST']);
-			foreach (Curry_Core::$config->curry->domainMapping->domains as $domain) {
+			foreach (\Curry\App::getInstance()->config->curry->domainMapping->domains as $domain) {
 				if(strtolower($domain->domain) === $currentDomain
 				|| ($domain->include_www && strtolower('www.'.$domain->domain) === $currentDomain)){
 					$rootPage = $domain->base_page;
 					break;
 				}
 			}
-			if(!$rootPage && Curry_Core::$config->curry->domainMapping->default)
-				$rootPage = Curry_Core::$config->curry->domainMapping->default;
+			if(!$rootPage && \Curry\App::getInstance()->config->curry->domainMapping->default)
+				$rootPage = \Curry\App::getInstance()->config->curry->domainMapping->default;
 			if($rootPage)
 				$rootPage = PageQuery::create()->findPk($rootPage);
 		}
 		
 		// attempt to find page using url
-		if(Curry_Core::$config->curry->pageCache) {
+		if(\Curry\App::getInstance()->config->curry->pageCache) {
 			$pages = array();
 			$allPages = Page::getCachedPages();
 			foreach($allPages as $page) {

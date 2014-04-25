@@ -39,7 +39,7 @@ class Curry_Backend_InlineAdmin extends Curry_Backend
 	/** {@inheritdoc} */
 	public function showMain()
 	{
-		if(!Curry_Core::$config->curry->liveEdit) {
+		if(!\Curry\App::getInstance()->config->curry->liveEdit) {
 			$this->addMessage('Live edit is not enabled, go to <a href="'.url('', array('module' => 'Curry_Backend_System')).'">System Settings</a> to enable it.', Curry_Backend::MSG_WARNING, false);
 			return;
 		}

@@ -47,7 +47,7 @@ class Curry_Backend_System extends Curry_Backend {
 	{
 		$this->addMainMenu();
 		
-		$configFile = Curry_Core::$config->curry->configPath;
+		$configFile = \Curry\App::getInstance()->config->curry->configPath;
 		if(!$configFile)
 			$this->addMessage("Configuration file not set.", self::MSG_ERROR);
 		else if(!is_writable($configFile))
@@ -62,7 +62,7 @@ class Curry_Backend_System extends Curry_Backend {
 		));
 
 		$themes = array();
-		$backendPath = Curry_Util::path(true, Curry_Core::$config->curry->wwwPath, 'shared', 'backend');
+		$backendPath = Curry_Util::path(true, \Curry\App::getInstance()->config->curry->wwwPath, 'shared', 'backend');
 		if($backendPath) {
 			foreach (new DirectoryIterator($backendPath) as $entry) {
 				$name = $entry->getFilename();
@@ -578,26 +578,26 @@ class Curry_Backend_System extends Curry_Backend {
 			);
 			
 			if($form->project->isChecked()) {
-				$tar->add(Curry_Core::$config->curry->projectPath, 'cms/', array_merge($options, array(
+				$tar->add(\Curry\App::getInstance()->config->curry->projectPath, 'cms/', array_merge($options, array(
 					array('path' => 'data/', 'pattern' => 'data/*/*', 'pattern_subject' => 'path', 'skip' => true),
 				)));
 			}
 			
 			if($form->www->isChecked()) {
-				$tar->add(Curry_Core::$config->curry->wwwPath, 'www/', array_merge($options, array(
+				$tar->add(\Curry\App::getInstance()->config->curry->wwwPath, 'www/', array_merge($options, array(
 					array('path' => 'shared', 'skip' => true),
 					array('path' => 'shared/', 'skip' => true),
 				)));
 			}
 			
 			if($form->base->isChecked()) {
-				$sharedPath = realpath(Curry_Core::$config->curry->wwwPath . '/shared');
+				$sharedPath = realpath(\Curry\App::getInstance()->config->curry->wwwPath . '/shared');
 				if($sharedPath)
 					$tar->add($sharedPath, 'www/shared/', $options);
-				$tar->add(Curry_Core::$config->curry->basePath.'/include', 'curry/include/', $options);
-				$tar->add(Curry_Core::$config->curry->basePath.'/propel', 'curry/propel/', $options);
-				$tar->add(Curry_Core::$config->curry->basePath.'/vendor', 'curry/vendor/', $options);
-				$tar->add(Curry_Core::$config->curry->basePath.'/.htaccess', 'curry/', $options);
+				$tar->add(\Curry\App::getInstance()->config->curry->basePath.'/include', 'curry/include/', $options);
+				$tar->add(\Curry\App::getInstance()->config->curry->basePath.'/propel', 'curry/propel/', $options);
+				$tar->add(\Curry\App::getInstance()->config->curry->basePath.'/vendor', 'curry/vendor/', $options);
+				$tar->add(\Curry\App::getInstance()->config->curry->basePath.'/.htaccess', 'curry/', $options);
 			}
 			
 			if($form->database->isChecked()) {
@@ -611,7 +611,7 @@ class Curry_Backend_System extends Curry_Backend {
 				fclose($fp);
 			}
 			
-			$filename = str_replace(" ", "_", Curry_Core::$config->curry->name)."-bundle-".date("Ymd").".tar" . ($compression ? ".$compression" : '');
+			$filename = str_replace(" ", "_", \Curry\App::getInstance()->config->curry->name)."-bundle-".date("Ymd").".tar" . ($compression ? ".$compression" : '');
 			header("Content-type: " . Archive::getCompressionMimeType($compression));
 			header("Content-disposition: attachment; filename=" . Curry_String::escapeQuotedString($filename));
 			
@@ -658,7 +658,7 @@ class Curry_Backend_System extends Curry_Backend {
 		$contents.= "//////////////////////////////////////////////////////////\n\n";
 		$contents.= 'Curry_Install::show(isset($_GET[\'step\']) ? $_GET[\'step\'] : \'\');';
 
-		$contents = str_replace("{{INSTALL_CSS}}", file_get_contents(Curry_Core::$config->curry->basePath.'/shared/backend/common/css/install.css'), $contents);
+		$contents = str_replace("{{INSTALL_CSS}}", file_get_contents(\Curry\App::getInstance()->config->curry->basePath.'/shared/backend/common/css/install.css'), $contents);
 
 		Curry_Application::returnData($contents, 'text/plain', 'install.php');
 	}
@@ -672,7 +672,7 @@ class Curry_Backend_System extends Curry_Backend {
 	{
 		$this->addMainMenu();
 		
-		Curry_Core::$cache->clean(Zend_Cache::CLEANING_MODE_ALL);
+		\Curry\App::getInstance()->cache->clean(Zend_Cache::CLEANING_MODE_ALL);
 		Curry_Twig_Template::getSharedEnvironment()->clearCacheFiles();
 		if(extension_loaded('apc'))
 			@apc_clear_cache();
@@ -694,7 +694,7 @@ class Curry_Backend_System extends Curry_Backend {
 		$this->addMessage('Propel: '. Propel::VERSION);
 		$this->addMessage('Twig: '. Twig_Environment::VERSION);
 		
-		$license = Curry_Core::$config->curry->basePath.'/LICENSE.txt';
+		$license = \Curry\App::getInstance()->config->curry->basePath.'/LICENSE.txt';
 		if (file_exists($license))
 			$this->addMainContent('<pre>'.htmlspecialchars(file_get_contents($license)).'</pre>');
 		else
@@ -781,7 +781,7 @@ class Curry_Backend_System extends Curry_Backend {
 		
 		$form = self::getButtonForm('migrate', 'Migrate');
 		if (isPost() && $form->isValid($_POST) && $form->migrate->isChecked()) {
-			$currentVersion = Curry_Core::$config->curry->migrationVersion;
+			$currentVersion = \Curry\App::getInstance()->config->curry->migrationVersion;
 			while($currentVersion < Curry_Core::MIGRATION_VERSION) {
 				$nextVersion = $currentVersion + 1;
 				$migrateMethod = 'doMigrate'.$nextVersion;
@@ -848,7 +848,7 @@ class Curry_Backend_System extends Curry_Backend {
 	
 	protected function sendTestEmail(array $values)
 	{
-		$projectName = Curry_Core::$config->curry->name;
+		$projectName = \Curry\App::getInstance()->config->curry->name;
 		$body =<<<HTML
 <p>If you can read this email message, then you have correctly configured your email settings.</p>
 <p>This is an automated email. Please do not reply.</p>
@@ -862,14 +862,14 @@ HTML;
 		try {
 			$mail = new Curry_Mail();
 			$mail->addTo($values['toEmail'], $values['toEmail'])
-				->setFrom(Curry_Core::$config->curry->adminEmail, $projectName)
-				->setSubject('Test email from '.Curry_Core::$config->curry->name)
+				->setFrom(\Curry\App::getInstance()->config->curry->adminEmail, $projectName)
+				->setSubject('Test email from '.\Curry\App::getInstance()->config->curry->name)
 				->setBodyHtml($body)
 				->setBodyText(strip_tags($body))
 				->send()
 				;
-			if (Curry_Core::$config->curry->divertOutMailToAdmin) {
-				$ret = 'Outgoing email was diverted to adminEmail at '.Curry_Core::$config->curry->adminEmail;
+			if (\Curry\App::getInstance()->config->curry->divertOutMailToAdmin) {
+				$ret = 'Outgoing email was diverted to adminEmail at '.\Curry\App::getInstance()->config->curry->adminEmail;
 			} else {
 				$ret = 'An email has been sent to your email address at '.$values['toEmail'];
 			}

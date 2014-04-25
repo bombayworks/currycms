@@ -39,12 +39,12 @@ class Curry_Route_ModelRoute implements Curry_IRoute {
 	{
 		if(self::$urlToModel === null) {
 			$cacheName = __CLASS__ . '_' . 'UrlToModel';
-			if((self::$urlToModel = Curry_Core::$cache->load($cacheName)) === false) {
+			if((self::$urlToModel = \Curry\App::getInstance()->cache->load($cacheName)) === false) {
 				self::$urlToModel = PageQuery::create()
 					->filterByModelRoute(null, Criteria::ISNOTNULL)
 					->find()
 					->toKeyValue('Url', 'ModelRoute');
-				Curry_Core::$cache->save(self::$urlToModel, $cacheName);
+				\Curry\App::getInstance()->cache->save(self::$urlToModel, $cacheName);
 			}
 		}
 		return isset(self::$urlToModel[$url]) ? self::$urlToModel[$url] : null;

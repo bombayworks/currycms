@@ -43,7 +43,7 @@ class Curry_Mail extends Zend_Mail
 			self::initMail();
 		}
 		if ($charset === null) {
-			$charset = Curry_Core::$config->curry->outputEncoding;
+			$charset = \Curry\App::getInstance()->config->curry->outputEncoding;
 		}
 		parent::__construct($charset);
 	}
@@ -56,7 +56,7 @@ class Curry_Mail extends Zend_Mail
 	public function setBodyText($txt, $charset = null, $encoding = Zend_Mime::ENCODING_QUOTEDPRINTABLE)
 	{
 		if ($charset === null) {
-			$charset = Curry_Core::$config->curry->internalEncoding;
+			$charset = \Curry\App::getInstance()->config->curry->internalEncoding;
 		}
 		return parent::setBodyText($txt, $charset, $encoding);
 	}
@@ -69,7 +69,7 @@ class Curry_Mail extends Zend_Mail
 	public function setBodyHtml($html, $charset = null, $encoding = Zend_Mime::ENCODING_QUOTEDPRINTABLE)
 	{
 		if ($charset === null) {
-			$charset = Curry_Core::$config->curry->internalEncoding;
+			$charset = \Curry\App::getInstance()->config->curry->internalEncoding;
 		}
 		return parent::setBodyHtml($html, $charset, $encoding);
 	}
@@ -81,12 +81,12 @@ class Curry_Mail extends Zend_Mail
 	 */
 	public function send($transport = null)
 	{
-		if (Curry_Core::$config->curry->divertOutMailToAdmin) {
+		if (\Curry\App::getInstance()->config->curry->divertOutMailToAdmin) {
 			$subject = '(dev) ' . $this->getSubject();
 			$this->clearSubject();
 			$this->setSubject($subject);
 			$this->clearRecipients();
-			$this->addTo(Curry_Core::$config->curry->adminEmail);
+			$this->addTo(\Curry\App::getInstance()->config->curry->adminEmail);
 		}
 		return parent::send($transport);
 	}
@@ -99,7 +99,7 @@ class Curry_Mail extends Zend_Mail
 		if(self::$initialized)
 			return;
 		self::$initialized = true;
-		$mail = Curry_Core::$config->curry->mail;
+		$mail = \Curry\App::getInstance()->config->curry->mail;
 		switch(strtolower($mail->method)) {
 			case 'smtp':
 				$transport = new Zend_Mail_Transport_Smtp($mail->host, $mail->options->toArray());

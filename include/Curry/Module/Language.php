@@ -54,9 +54,9 @@ class Curry_Module_Language extends Curry_Module {
 			if($page)
 				url($page->getUrl(), $_GET)->redirect();
 			else
-				Curry_Core::logger()->notice('Redirect page not found');
+				\Curry\App::getInstance()->logger->notice('Redirect page not found');
 		} else
-			Curry_Core::logger()->notice('No languages found');
+			\Curry\App::getInstance()->logger->notice('No languages found');
 		
 		return '';
 	}

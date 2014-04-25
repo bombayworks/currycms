@@ -61,9 +61,9 @@ class Curry_Module_SendForm extends Curry_Module {
 	public function __construct()
 	{
 		$this->to = "";
-		$this->from = Curry_Core::$config->curry->adminEmail;
-		$this->sender = Curry_Core::$config->curry->name;
-		$this->subject = Curry_Core::$config->curry->name . ', form';
+		$this->from = \Curry\App::getInstance()->config->curry->adminEmail;
+		$this->sender = \Curry\App::getInstance()->config->curry->name;
+		$this->subject = \Curry\App::getInstance()->config->curry->name . ', form';
 	}
 	
 	/** {@inheritdoc} */

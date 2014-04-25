@@ -571,7 +571,7 @@ class Curry_Backend_Database extends Curry_Backend
 	 */
 	public function doAutoRebuild()
 	{
-		if(!is_writable(Curry_Core::$config->curry->configPath)) {
+		if(!is_writable(\Curry\App::getInstance()->config->curry->configPath)) {
 			$this->addMessage("Configuration file doesn't seem to be writable.", self::MSG_ERROR);
 			return;
 		}
@@ -902,7 +902,7 @@ class Curry_Backend_Database extends Curry_Backend
 				$fp = fopen("php://temp", 'r+');
 				Curry_Backend_DatabaseHelper::dumpDatabase($fp, $values['tables'], $this);
 				rewind($fp);
-				$name = Curry_String::getRewriteString(Curry_Core::$config->curry->name).'-db.txt';
+				$name = Curry_String::getRewriteString(\Curry\App::getInstance()->config->curry->name).'-db.txt';
 				Curry_Application::returnData($fp, 'application/octet-stream', $name);
 			} else if($values['type'] == 'online') {
 				$filename = Curry_Backend_DatabaseHelper::createBackupName($values['name']);

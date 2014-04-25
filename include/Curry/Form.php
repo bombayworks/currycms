@@ -107,7 +107,7 @@ class Curry_Form extends Zend_Form
 	public function addCsrfProtection()
 	{
 		if($this->getMethod() == "post" && isset($this->_elements['csrf']) == false){
-			$salt = md5($this->getAction().$this->uniqueId.Curry_Core::$config->curry->secret);
+			$salt = md5($this->getAction().$this->uniqueId.\Curry\App::getInstance()->config->curry->secret);
 			$this->addElement('hash','csrf',array(
 				'timeout' => 3600,
 				'salt' => $salt,

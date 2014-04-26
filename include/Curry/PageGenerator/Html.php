@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Controller\Frontend;
 
 /**
  * Page Generator for HTML documents.
@@ -44,10 +45,10 @@ class Curry_PageGenerator_Html extends Curry_PageGenerator {
 	 * @param PageRevision $pageRevision
 	 * @param Curry_Request $request
 	 */
-	public function __construct(PageRevision $pageRevision, Curry_Request $request)
+	public function __construct(PageRevision $pageRevision)
 	{
 		$this->htmlHead = new Curry_HtmlHead();
-		parent::__construct($pageRevision, $request);
+		parent::__construct($pageRevision);
 	}
 
 	/**
@@ -131,10 +132,11 @@ document.addEventListener('DOMContentLoaded', function() {
 	document.body.appendChild(el);
 });
 JS
-);
+			);
 		}
-		
-		$appVars = Curry_Application::getInstance()->getGlobalVariables();
+
+		// TODO:
+		$appVars = \Curry\App::getInstance()->globals;
 		$appVars->HtmlHead = $this->htmlHead->getContent();
 	}
 

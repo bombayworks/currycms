@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Controller\Frontend;
 
 /**
  * Adds input/output encoding to Zend_Mail.
@@ -124,7 +125,7 @@ class Curry_Mail extends Zend_Mail
 	 */
 	public static function createFromPage($page, $request = null, array $variables = array())
 	{
-		$app = Curry_Application::getInstance();
+		$app = Frontend::getInstance();
 		
 		// If a URL is provided, attempt to find page using route
 		if(is_string($page)) {

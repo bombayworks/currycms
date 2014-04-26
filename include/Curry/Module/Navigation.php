@@ -217,7 +217,7 @@ TPL
 		$p['parent'] = new Curry_OnDemand(array($this, 'twigGetParent'), $page);
 		$p['subpages'] = new Curry_OnDemand(array($this, 'twigGetSubpages'), $page);
 		
-		$activePage = $this->getPageGenerator()->getPage();
+		$activePage = \Curry\App::getInstance()->page;
 		$p['IsActive'] = $activePage->getUrl() === $page->getUrl();
 		$p['IsActiveSubpage'] = new Curry_OnDemand(array($this, 'twigGetActiveSubpage'), $page, $activePage);
 		

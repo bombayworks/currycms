@@ -17,5 +17,5 @@ public static function getSelect(Page $rootPage = null)
 
 static public function changePage()
 {
-	Curry_Core::$cache->clean(Zend_Cache::CLEANING_MODE_ALL);
+	\Curry\App::getInstance()->cache->clean(Zend_Cache::CLEANING_MODE_ALL);
 }

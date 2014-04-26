@@ -16,6 +16,12 @@
  * @link       http://currycms.com
  */
 
+namespace Curry\Controller;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\KernelEvents;
+
 /**
  * Main class for the frontend.
  * 
@@ -24,7 +30,7 @@
  * 
  * @package Curry
  */
-class Curry_Application {
+class Frontend implements EventSubscriberInterface {
 	/**
 	 * List of routes.
 	 *
@@ -38,68 +44,39 @@ class Curry_Application {
 	protected $globalVariables = null;
 	
 	/**
-	 * Singleton instance for this class.
-	 *
-	 * @var Curry_Application
-	 */
-	protected static $instance;
-
-	/**
 	 * Array of background functions to be executed on shutdown.
 	 *
 	 * @var array
 	 */
 	protected static $backgroundFunctions = null;
-	
-	/**
-	 * Get global singleton instance.
-	 *
-	 * @return Curry_Application
-	 */
-	public static function getInstance()
-	{
-		if(!isset(self::$instance)) {
-			//$applicationClass = \Curry\App::getInstance()->config->curry->applicationClass;
-			self::$instance = new self;//new $applicationClass;
-			//Curry_Core::triggerHook('Curry_Application::init');
-		}
-		return self::$instance;
-	}
-	
+
 	/**
 	 * Initializes the application. Sets up default routes.
 	 */
 	public function __construct()
 	{
-		if(\Curry\App::getInstance()->config->curry->pageCache && class_exists('Page')) {
-			Page::getCachedPages();
+		if(\Curry\App::getInstance()->config->curry->pageCache && class_exists('\\Page')) {
+			\Page::getCachedPages();
 		}
-
-		$this->addRoute(new Curry_Route_ModelRoute());
-		$this->addRoute(new Curry_Route_Page());
-		Curry_URL::setReverseRouteCallback(array($this, 'reverseRoute'));
+		\Curry_URL::setReverseRouteCallback(array($this, 'reverseRoute'));
 	}
 
-	public function getGlobalVariables()
+	public static function getSubscribedEvents()
 	{
-		if ($this->globalVariables === null) {
-			$this->globalVariables = (object)array(
-				'ProjectName' => \Curry\App::getInstance()->config->curry->name,
-				'BaseUrl' => \Curry\App::getInstance()->config->curry->baseUrl,
-				'DevelopmentMode' => \Curry\App::getInstance()->config->curry->developmentMode,
-			);
-		}
-		return $this->globalVariables;
+		return array(
+			KernelEvents::REQUEST => 'onKernelRequest',
+			//KernelEvents::FINISH_REQUEST => array(array('onKernelFinishRequest', 0)),
+		);
 	}
-	
-	/**
-	 * Add a route to the top of the routing list.
-	 *
-	 * @param Curry_IRoute $route
-	 */
-	public function addRoute(Curry_IRoute $route)
+
+	public function onKernelRequest(GetResponseEvent $event)
 	{
-		array_unshift($this->routes, $route);
+		$request = $event->getRequest();
+		$page = $this->findPage($request);
+		if ($page) {
+			$request->attributes->set('_page', $page);
+			$request->attributes->set('_controller', array($this, 'index'));
+		}
 	}
 	
 	/**
@@ -111,58 +88,90 @@ class Curry_Application {
 	public function reverseRoute(&$path, &$query)
 	{
 		// remove matching base path
-		$baseUrl = Curry_URL::getDefaultBaseUrl();
+		$baseUrl = \Curry_URL::getDefaultBaseUrl();
 		$basePath = $baseUrl['path'];
 		$basePathRemoved = false;
-		if (Curry_String::startsWith($path, $basePath) && $path !== '/') {
+		if (\Curry_String::startsWith($path, $basePath) && $path !== '/') {
 			$path = substr($path, strlen($basePath));
 			$basePathRemoved = true;
 		}
-		Curry_Route_ModelRoute::reverse($path, $query);
+		\Curry_Route_ModelRoute::reverse($path, $query);
 		// re-add base path if it was removed
 		if ($basePathRemoved) {
 			$path = $basePath . $path;
 		}
 	}
 	
-	/**
-	 * Find Page from a request object using routes.
-	 *
-	 * @param Curry_Request $request
-	 * @return Page
-	 */
-	public function findPage(Curry_Request $request)
+	public function findPage(Request $request)
 	{
-		// use routes to find
-		$loop = true;
-		while($loop) {
-			$loop = false;
-			foreach($this->routes as $route) {
-				$ret = $route->route($request);
-				if($ret === true) {
-					$loop = true;
+		$requestUri = $request->getPathInfo();
+
+		// remove base path
+		$baseUrl = \Curry_URL::getDefaultBaseUrl();
+		$basePath = $baseUrl['path'];
+		if (strpos($requestUri, $basePath) === 0)
+			$requestUri = substr($requestUri, strlen($basePath));
+
+		// add trailing slash if missing
+		if($requestUri && substr($requestUri,-1) != '/')
+			$requestUri .= '/';
+
+		// use domain mapping to restrict page to a certain page-branch
+		$rootPage = null;
+		if(\Curry\App::getInstance()->config->curry->domainMapping->enabled){
+			$currentDomain = strtolower($_SERVER['HTTP_HOST']);
+			foreach (\Curry\App::getInstance()->config->curry->domainMapping->domains as $domain) {
+				if(strtolower($domain->domain) === $currentDomain
+					|| ($domain->include_www && strtolower('www.'.$domain->domain) === $currentDomain)){
+					$rootPage = $domain->base_page;
 					break;
 				}
-				else if($ret instanceof Page)
-					return $ret;
 			}
+			if(!$rootPage && \Curry\App::getInstance()->config->curry->domainMapping->default)
+				$rootPage = \Curry\App::getInstance()->config->curry->domainMapping->default;
+			if($rootPage)
+				$rootPage = \PageQuery::create()->findPk($rootPage);
 		}
-		
-		throw new Exception('Page not found');
+
+		// attempt to find page using url
+		if(\Curry\App::getInstance()->config->curry->pageCache) {
+			$pages = array();
+			$allPages = \Page::getCachedPages();
+			foreach($allPages as $page) {
+				if($page->getUrl() == $requestUri) {
+					if(!$rootPage || $rootPage->isAncestorOf($page) || $rootPage->getPageId() == $page->getPageId())
+						$pages[] = $page;
+				}
+			}
+		} else {
+			$pages = \PageQuery::create()
+				->filterByUrl($requestUri)
+				->_if($rootPage)
+				->branchOf($rootPage)
+				->_endif()
+				->joinWith('Page.ActivePageRevision apr', \Criteria::LEFT_JOIN)
+				->find();
+		}
+
+		if(count($pages) > 1)
+			throw new \Exception('URL refers to multiple pages: ' . $requestUri);
+		else if(count($pages) == 1)
+			return $pages[0];
+		return null;
 	}
 	
 	/**
 	 * Handle page redirection.
 	 *
-	 * @param Page $page
-	 * @param Curry_Request $r
-	 * @return Page
+	 * @param \Page $page
+	 * @param \Curry_Request $r
+	 * @return \Page
 	 */
-	public function redirectPage(Page $page, Curry_Request $r)
+	public function redirectPage(\Page $page, \Curry_Request $r)
 	{
 		while($page && $page->getRedirectMethod()) {
 			switch($page->getRedirectMethod()) {
-				case PagePeer::REDIRECT_METHOD_CLONE:
+				case \PagePeer::REDIRECT_METHOD_CLONE:
 					if($page->getRedirectUrl() !== null) {
 						readfile($page->getRedirectUrl());
 						exit;
@@ -176,7 +185,7 @@ class Curry_Application {
 					break;
 					
 				default:
-					$code = ($page->getRedirectMethod() == PagePeer::REDIRECT_METHOD_PERMANENT ? 301 : 302);
+					$code = ($page->getRedirectMethod() == \PagePeer::REDIRECT_METHOD_PERMANENT ? 301 : 302);
 					url($page->getFinalUrl(), $r->get)->redirect($code);
 					break;
 			}
@@ -185,52 +194,16 @@ class Curry_Application {
 		return $page;
 	}
 
-	protected function getRequestUri()
-	{
-		// separate path and query-string
-		$requestUri = explode('?', rawurldecode(Curry_URL::getRequestUri()), 2);
-
-		// remove matching base path
-		$baseUrl = Curry_URL::getDefaultBaseUrl();
-		$basePath = $baseUrl['path'];
-		if ($basePath === $requestUri[0]) {
-			$requestUri[0] = '/';
-		} else if (Curry_String::startsWith($requestUri[0], $basePath)) {
-			$requestUri[0] = substr($requestUri[0], strlen($basePath));
-		}
-
-		return join('?', $requestUri);
-	}
-
-	protected function createRequest()
-	{
-		$request = new Curry_Request($_SERVER['REQUEST_METHOD'], $this->getRequestUri());
-		$request->addParamSource('cookie', $_COOKIE);
-		$request->addParamSource('post', $_POST);
-		$request->addParamSource('get', $_GET);
-		$request->addParamSource('env', $_ENV);
-		return $request;
-	}
-	
-	/**
-	 * Initialize the request and handle it. This is the main method of this class.
-	 */
-	public function run()
-	{
-		$request = $this->createRequest();
-		$this->handle($request);
-	}
-
 	/**
 	 * Do automatic publishing of pages.
 	 */
 	public function autoPublish()
 	{
-		$cacheName = __CLASS__ . '_' . 'AutoPublish';
+		$cacheName = strtr(__CLASS__, '\\', '_') . '_' . 'AutoPublish';
 		if(($nextPublish = \Curry\App::getInstance()->cache->load($cacheName)) === false) {
 			\Curry\App::getInstance()->logger->notice('Doing auto-publish');
-			$revisions = PageRevisionQuery::create()
-				->filterByPublishDate(null, Criteria::ISNOTNULL)
+			$revisions = \PageRevisionQuery::create()
+				->filterByPublishDate(null, \Criteria::ISNOTNULL)
 				->orderByPublishDate()
 				->find();
 			$nextPublish = time() + 86400;
@@ -262,22 +235,24 @@ class Curry_Application {
 	 */
 	public function setLanguage($language)
 	{
-		$locale = Curry_Language::setLanguage($language);
-		$language = Curry_Language::getLanguage();
+		$locale = \Curry_Language::setLanguage($language);
+		$language = \Curry_Language::getLanguage();
 		if($language)
 			\Curry\App::getInstance()->logger->info('Current language is now '.$language->getName().' (with locale '.$locale.')');
 	}
 	
-	/**
-	 * Handle the specified request.
-	 *
-	 * @param Curry_Request $request
-	 */
-	public function handle(Curry_Request $request)
+	public function index()
 	{
-		\Curry\App::getInstance()->logger->info('Starting request at '.$request->getUri());
+		$app = \Curry\App::getInstance();
+		$request = $app->request;
+		$page = $request->attributes->get('_page');
+		$pageRevision = $page->getPageRevision();
+
+		$app->logger->info('Starting request at '.$request->getUri());
+
+		/*
 		
-		if(\Curry\App::getInstance()->config->curry->autoPublish)
+		if($app->config->curry->autoPublish)
 			$this->autoPublish();
 		
 		$page = null;
@@ -286,24 +261,24 @@ class Curry_Application {
 		$forceShow = false;
 		$showWorking = false;
 
-		if(\Curry\App::getInstance()->config->curry->setup) {
+		if($app->config->curry->setup) {
 			die('Site is not yet configured, go to admin.php and configure your site.');
 		}
 		
 		// check if we have a valid backend-user logged in
-		$validUser = !!User::getUser();
+		$validUser = null;//!!\User::getUser();
 		if($validUser) {
 			
 			// check for inline-admin
 			$adminNamespace = new \Zend\Session\Container('Curry_Admin');
-			if(\Curry\App::getInstance()->config->curry->liveEdit && !$request->getParam('curry_force_show')) {
+			if($app->config->curry->liveEdit && !$request->getParam('curry_force_show')) {
 				if($request->hasParam('curry_inline_admin'))
 					$adminNamespace->inlineAdmin = $request->getParam('curry_inline_admin') ? true : false;
 				if($adminNamespace->inlineAdmin) {
 					$options['inlineAdmin'] = true;
 					$forceShow = true;
 					$showWorking = true;
-					Curry_InlineAdmin::$active = true;
+					\Curry_InlineAdmin::$active = true;
 				}
 			}
 
@@ -318,24 +293,24 @@ class Curry_Application {
 				$forceShow = true;
 				
 			if($showWorking)
-				Page::setRevisionType(Page::WORKING_REVISION);
+				\Page::setRevisionType(Page::WORKING_REVISION);
 		}
 		
 		// Maintenance enabled?
-		if(\Curry\App::getInstance()->config->curry->maintenance->enabled && !$forceShow) {
-			\Curry\App::getInstance()->logger->debug("Maintenance enabled");
+		if($app->config->curry->maintenance->enabled && !$forceShow) {
+			$app->logger->debug("Maintenance enabled");
 			
 			header('HTTP/1.1 503 Service Temporarily Unavailable');
 			header('Status: 503 Service Temporarily Unavailable');
 			header('Retry-After: 3600');
 			
 			$message = 'Page is down for maintenance, please check back later.';
-			if(\Curry\App::getInstance()->config->curry->maintenance->message)
-				$message = \Curry\App::getInstance()->config->curry->maintenance->message;
+			if($app->config->curry->maintenance->message)
+				$message = $app->config->curry->maintenance->message;
 			
-			$page = \Curry\App::getInstance()->config->curry->maintenance->page;
+			$page = $app->config->curry->maintenance->page;
 			if($page !== null)
-				$page = PageQuery::create()->findPk((int)$page);
+				$page = \PageQuery::create()->findPk((int)$page);
 			if(!$page)
 				die($message);
 				
@@ -343,11 +318,11 @@ class Curry_Application {
 		}
 		
 		// Check force domain?
-		if(\Curry\App::getInstance()->config->curry->forceDomain && !$forceShow) {
+		if($app->config->curry->forceDomain && !$forceShow) {
 			$uri = $request->getUri();
-			$url = parse_url(\Curry\App::getInstance()->config->curry->baseUrl);
+			$url = parse_url($app->config->curry->baseUrl);
 			if(strcasecmp($_SERVER['HTTP_HOST'], $url['host']) !== 0) {
-				$location = substr(\Curry\App::getInstance()->config->curry->baseUrl, 0, -1) . $uri;
+				$location = substr($app->config->curry->baseUrl, 0, -1) . $uri;
 				header("Location: " . $location, true, 301);
 				exit;
 			}
@@ -362,13 +337,13 @@ class Curry_Application {
 		// Attempt to find cached page
 		if($request->getMethod() === 'GET') {
 			$time = microtime(true);
-			$cacheName = __CLASS__ . '_Page_' . md5($request->getUri());
-			if(($cache = \Curry\App::getInstance()->cache->load($cacheName)) !== false) {
-				\Curry\App::getInstance()->logger->info('Using cached page content');
+			$cacheName = strtr(__CLASS__, '\\', '_') . '_Page_' . md5($request->getUri());
+			if(($cache = $app->cache->load($cacheName)) !== false) {
+				$app->logger->info('Using cached page content');
 				foreach($cache['headers'] as $header)
 					header($header);
 				echo $cache['content'];
-				Curry_Core::triggerHook('Curry_Application::render', $cache['page_id'], $cache['page_revision_id'], microtime(true) - $time, 0);
+				//Curry_Core::triggerHook('Curry\Controller\Frontend::render', $cache['page_id'], $cache['page_revision_id'], microtime(true) - $time, 0);
 				return;
 			}
 		}
@@ -379,13 +354,13 @@ class Curry_Application {
 				$page = $this->findPage($request);
 				$page = $this->redirectPage($page, $request);
 			}
-			catch(Exception $e) {
-				\Curry\App::getInstance()->logger->notice('Error when trying to find page: ' . $e->getMessage());
+			catch(\Exception $e) {
+				$app->logger->notice('Error when trying to find page: ' . $e->getMessage());
 				$page = null;
 			}
 			// make sure page is enabled
-			if(($page instanceof Page) && !$forceShow && !$page->getEnabled()) {
-				\Curry\App::getInstance()->logger->notice('Page is not accessible');
+			if(($page instanceof \Page) && !$forceShow && !$page->getEnabled()) {
+				$app->logger->notice('Page is not accessible');
 				$page = null;
 			}
 		}
@@ -393,150 +368,41 @@ class Curry_Application {
 		// Page was not found, attempt to find 404 page
 		if(!$page) {
 			header("HTTP/1.1 404 Not Found");
-			if(\Curry\App::getInstance()->config->curry->errorPage->notFound) {
-				$page = PageQuery::create()->findPk(\Curry\App::getInstance()->config->curry->errorPage->notFound);
+			if($app->config->curry->errorPage->notFound) {
+				$page = PageQuery::create()->findPk($app->config->curry->errorPage->notFound);
 				if(!$page || !$page->getEnabled())
-					throw new Exception('Page not found, additionally the page-not-found page could not be found.');
+					throw new \Exception('Page not found, additionally the page-not-found page could not be found.');
 			} else {
 				die('Page not found');
 			}
 		}
+		*/
+		$vars = array();
+		$options = array();
 		
 		// Set language
 		$language = $page->getInheritedProperty('Language');
-		$fallbackLanguage = \Curry\App::getInstance()->config->curry->fallbackLanguage;
+		$fallbackLanguage = $app->config->curry->fallbackLanguage;
 		if($language) {
 			$this->setLanguage($language);
 		} else if($fallbackLanguage) {
-			\Curry\App::getInstance()->logger->info('Using fallback language');
+			$app->logger->info('Using fallback language');
 			$this->setLanguage($fallbackLanguage);
 		} else {
-			\Curry\App::getInstance()->logger->notice('Language not set for page');
+			$app->logger->notice('Language not set for page');
 		}
 		
 		// Attempt to render page
-		try {
-			$this->render($page->getPageRevision(), $request, $vars, $options);
-		}
-		catch(Curry_Exception_Unauthorized $e) {
-			\Curry\App::getInstance()->logger->notice($e->getMessage());
-			if(!headers_sent())
-				header("HTTP/1.1 " . $e->getStatusCode() . " " . $e->getMessage());
-			
-			if(\Curry\App::getInstance()->config->curry->errorPage->unauthorized) {
-				\Curry\App::getInstance()->logger->debug('Showing unauthorized page');
-				$page = PageQuery::create()->findPk(\Curry\App::getInstance()->config->curry->errorPage->unauthorized);
-				if(!$page)
-					throw new Exception('Unauthorized page not found');
-					
-				try {
-					$vars = array('curry' => array('error' => array(
-						'Message' => $e->getMessage(),
-						'Trace' => $e->getTraceAsString()
-					)));
-					$options = array();
-					$this->render($page->getPageRevision(), $request, $vars, $options);
-				}
-				catch(Exception $e2) {
-					\Curry\App::getInstance()->logger->error('An error occured while trying to generate the unauthorized page: ' . $e2->getMessage());
-					throw $e;
-				}
-			} else {
-				throw $e;
-			}
-		}
-		catch(Curry_Exception_HttpError $e) {
-			\Curry\App::getInstance()->logger->notice($e->getMessage());
-			if(!headers_sent())
-				header("HTTP/1.1 ".$e->getStatusCode()." ".$e->getMessage());
-		}
-		catch(Exception $e) {
-			\Curry\App::getInstance()->logger->critical($e->getMessage());
-			if(!headers_sent())
-				header("HTTP/1.1 500 Internal server error");
-			
-			if(\Curry\App::getInstance()->config->curry->errorNotification)
-				Curry_Core::sendErrorNotification($e);
-			
-			if(\Curry\App::getInstance()->config->curry->errorPage->error) {
+		$app->logger->notice('Showing page ' . $page->getName() . ' (PageRevisionId: '.$pageRevision->getPageRevisionId().')');
 
-				\Curry\App::getInstance()->logger->debug('Trying to show error page');
-				$page = PageQuery::create()->findPk(\Curry\App::getInstance()->config->curry->errorPage->error);
-				if(!$page)
-					throw new Exception('Error page not found');
-					
-				try {
-					$vars = array('curry' => array('error' => array(
-						'Message' => $e->getMessage(),
-						'Trace' => $e->getTraceAsString()
-					)));
-					$options = array();
-					$this->render($page->getPageRevision(), $request, $vars, $options);
-				}
-				catch(Exception $e2) {
-					\Curry\App::getInstance()->logger->error('An error occured, additionally an error occured while trying to generate the error page: ' . $e2->getMessage());
-					throw $e;
-				}
-			} else {
-				throw $e;
-			}
-		}
-	}
-	
-	/**
-	 * Render the specified page revision.
-	 *
-	 * @param PageRevision $pageRevision
-	 * @param Curry_Request $request
-	 * @param array $vars
-	 * @param array $options
-	 */
-	protected function render(PageRevision $pageRevision, Curry_Request $request, array $vars, array $options)
-	{
-		\Curry\App::getInstance()->logger->notice('Showing page ' . $pageRevision->getPage()->getName() . ' (PageRevisionId: '.$pageRevision->getPageRevisionId().')');
-		
-		$time = microtime(true);
-		$queries = Curry_Propel::getQueryCount();
-		
-		$cacheName = __CLASS__ . '_Page_' . md5($request->getUri());
-		$cacheLifetime = $pageRevision->getPage()->getCacheLifetime();
-		$doCache = $request->getMethod() === 'GET' && $cacheLifetime !== 0;
-		
-		if($doCache)
-			ob_start();
-			
-		$generator = self::createPageGenerator($pageRevision, $request);
-		$generator->display($vars, $options);
-		
-		if($doCache) {
-			$cache = array(
-				'page_id' => $pageRevision->getPageId(),
-				'page_revision_id' => $pageRevision->getPageRevisionId(),
-				'headers' => headers_list(),
-				'content' => ob_get_flush(),
-			);
-			\Curry\App::getInstance()->cache->save($cache, $cacheName, array(), $cacheLifetime < 0 ? false : $cacheLifetime);
-		}
-		
-		if(\Curry\App::getInstance()->config->curry->updateTranslationStrings)
-			Curry_Language::updateLanguageStrings();
-		
-		$time = microtime(true) - $time;
-		$queries = $queries !== null ? Curry_Propel::getQueryCount() - $queries : null;
-		Curry_Core::triggerHook('Curry_Application::render', $pageRevision->getPageId(), $pageRevision->getPageRevisionId(), $time, $queries);
-	}
-	
-	/**
-	 * Create a PageGenerator instance for the specified PageRevision.
-	 *
-	 * @param PageRevision $pageRevision
-	 * @param Curry_Request $request
-	 * @return Curry_PageGenerator
-	 */
-	public static function createPageGenerator(PageRevision $pageRevision, Curry_Request $request)
-	{
-		$generatorClass = $pageRevision->getPage()->getInheritedProperty('Generator', \Curry\App::getInstance()->config->curry->defaultGeneratorClass);
-		return new $generatorClass($pageRevision, $request);
+		$generatorClass = $pageRevision->getPage()->getInheritedProperty('Generator', $app->config->curry->defaultGeneratorClass);
+		$generator = new $generatorClass($pageRevision, $request);
+
+		$app->page = $page;
+		$app->pageRevision = $pageRevision;
+		$app->generator = $generator;
+
+		return $generator->render($vars, $options);
 	}
 
 	/**
@@ -656,7 +522,7 @@ class Curry_Application {
 	{
 		header('Content-Description: File Transfer');
 		header('Content-Transfer-Encoding: binary');
-		header("Content-Disposition: attachment; filename=".Curry_String::escapeQuotedString($filename));
+		header("Content-Disposition: attachment; filename=".\Curry_String::escapeQuotedString($filename));
 		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 		header('Pragma: public');
 		header("Content-type: $contentType");
@@ -679,7 +545,7 @@ class Curry_Application {
 			if ($exit)
 				fclose($data);
 		} else
-			throw new Curry_Exception('Data is of unknown type.');
+			throw new \Curry_Exception('Data is of unknown type.');
 		if($exit)
 			exit;
 	}
@@ -699,7 +565,7 @@ class Curry_Application {
 			$filename = basename($file);
 		header('Content-Description: File Transfer');
 		header('Content-Transfer-Encoding: binary');
-		header('Content-Disposition: attachment; filename='.Curry_String::escapeQuotedString($filename));
+		header('Content-Disposition: attachment; filename='.\Curry_String::escapeQuotedString($filename));
 		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 		header('Pragma: public');
 		header('Content-type: '.$contentType);

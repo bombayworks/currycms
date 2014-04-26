@@ -81,7 +81,7 @@ class CmsTest extends \PHPUnit_Framework_TestCase {
 	protected static function handleRequest(\Curry_Request $request)
 	{
 		ob_start();
-		$app = \Curry_Application::getInstance();
+		$app = \Curry\Controller\Frontend::getInstance();
 		$app->handle($request);
 		return ob_get_clean();
 	}

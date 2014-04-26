@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Controller\Frontend;
 
 /**
  * Simple backend to create and edit files.
@@ -148,7 +149,7 @@ abstract class Curry_Backend_FileEditor extends Curry_Backend {
 			if ($_POST['_ajaxsubmit']) {
 				$form->render(); // fixes issue with csrf-token
 				$ajax['values'] = $form->getValues();
-				Curry_Application::returnJson($ajax);
+				Frontend::returnJson($ajax);
 			}
 		}
 

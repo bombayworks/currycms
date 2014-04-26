@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Controller\Frontend;
 
 /**
  *
@@ -350,10 +351,10 @@ class Curry_ModelView_List extends Curry_ModelView_Abstract {
 		if (count($action)) {
 			$nextAction = array_shift($action);
 			if ($nextAction === 'json') {
-				Curry_Application::returnJson($this->getJson($params));
+				Frontend::returnJson($this->getJson($params));
 			} else if ($nextAction === 'sort' && is_callable($this->options['sortable'])) {
 				call_user_func($this->options['sortable'], $params);
-				Curry_Application::returnJson(array('success' => 1));
+				Frontend::returnJson(array('success' => 1));
 			}
 			$a = $this->actions[$nextAction];
 			if(!isset($a))

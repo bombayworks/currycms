@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Controller\Frontend;
 
 /**
  * Base class for backend modules.
@@ -225,7 +226,7 @@ abstract class Curry_Backend {
 		$url = (string)$url;
 		$redirectJs = '<script type="text/javascript">window.location.href = '.json_encode($url).';</script>';
 		if(isAjax()) // we're in a dialog, use javascript to redirect
-			Curry_Application::returnPartial($dialogRedirect ? $redirectJs : '');
+			Frontend::returnPartial($dialogRedirect ? $redirectJs : '');
 		else
 			url($url)->redirect();
 	}
@@ -309,7 +310,7 @@ abstract class Curry_Backend {
 	protected function render()
 	{
 		if (isset($_GET['curry_context']) && $_GET['curry_context'] == 'main') {
-			Curry_Application::returnPartial($this->mainContent);
+			Frontend::returnPartial($this->mainContent);
 		}
 		$twig = Curry_Admin::getInstance()->getTwig();
 		$template = $twig->loadTemplate('backend.html');
@@ -474,22 +475,22 @@ abstract class Curry_Backend {
 	/**
 	 * Return json-data to browser and exit. Will set content-type header and encode the data.
 	 *
-	 * @deprecated Use Curry_Application::returnJson() instead.
+	 * @deprecated Use Curry\Controller\Frontend::returnJson() instead.
 	 * @param mixed $content	Data to encode with json_encode. Note that this must be utf-8 encoded. Strings will not be encoded.
 	 */
 	public function returnJson($content)
 	{
-		Curry_Application::returnJson($content);
+		Frontend::returnJson($content);
 	}
 	
 	/**
 	 * Return partial html-content to browser and exit. Will set content-type header and return the content.
 	 *
-	 * @deprecated Use Curry_Application::returnPartial() instead.
+	 * @deprecated Use Curry\Controller\Frontend::returnPartial() instead.
 	 * @param mixed $content
 	 */
 	public function returnPartial($content)
 	{
-		Curry_Application::returnPartial($content);
+		Frontend::returnPartial($content);
 	}
 }

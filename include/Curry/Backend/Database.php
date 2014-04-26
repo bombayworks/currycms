@@ -15,7 +15,8 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
- 
+use Curry\Controller\Frontend;
+
 /**
  * Manage the database.
  * 
@@ -149,7 +150,7 @@ class Curry_Backend_Database extends Curry_Backend
 			}
 			$packages[] = $p;
 		}
-		Curry_Application::returnJson($packages);
+		Frontend::returnJson($packages);
 	}
 	
 	/**
@@ -903,7 +904,7 @@ class Curry_Backend_Database extends Curry_Backend
 				Curry_Backend_DatabaseHelper::dumpDatabase($fp, $values['tables'], $this);
 				rewind($fp);
 				$name = Curry_String::getRewriteString(\Curry\App::getInstance()->config->curry->name).'-db.txt';
-				Curry_Application::returnData($fp, 'application/octet-stream', $name);
+				Frontend::returnData($fp, 'application/octet-stream', $name);
 			} else if($values['type'] == 'online') {
 				$filename = Curry_Backend_DatabaseHelper::createBackupName($values['name']);
 				$status = Curry_Backend_DatabaseHelper::dumpDatabase($filename, $values['tables'], $this);

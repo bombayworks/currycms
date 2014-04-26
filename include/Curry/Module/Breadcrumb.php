@@ -55,7 +55,7 @@ class Curry_Module_Breadcrumb extends Curry_Module {
 	/** {@inheritdoc} */
 	public function toTwig()
 	{
-		$page = $this->getPageGenerator()->getPage();
+		$page = \Curry\App::getInstance()->page;
 		$pages = array();
 		while($page) {
 			$pages[] = $page->toTwig();

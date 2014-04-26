@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Controller\Frontend;
 
 /**
  * HTML Tree View, implemented using dynatree javascript.
@@ -200,7 +201,7 @@ class Curry_Tree {
 	{
 		try {
 			if(isset($_GET['json']))
-				Curry_Application::returnJson($this->getJson());
+				Frontend::returnJson($this->getJson());
 			else
 				return $this->getHtml();
 		}

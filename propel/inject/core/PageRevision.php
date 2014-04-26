@@ -36,7 +36,7 @@ public function getInheritedProperty($name, $default = null, $cache = true, $for
 	// attempt to load value from cache
 	$value = false;
 	if ($cache && !$forceUpdate)
-		$value = Curry_Core::$cache->load($cacheName);
+		$value = \Curry\App::getInstance()->cache->load($cacheName);
 	
 	// if value is not set...
 	if($value === false) {
@@ -51,7 +51,7 @@ public function getInheritedProperty($name, $default = null, $cache = true, $for
 		}
         if($cache) {
         	if($value !== false) {
-        		Curry_Core::$cache->save($value, $cacheName);
+        		\Curry\App::getInstance()->cache->save($value, $cacheName);
         	} else {
         		trace_warning("Unable to store $name for $this->getUrl()");
         	}

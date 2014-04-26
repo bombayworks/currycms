@@ -14,7 +14,7 @@ protected static function buildPageCache()
 	if(self::$pageCache !== null)
 		return true;
 		
-	if(!Curry_Core::$config->curry->pageCache)
+	if(!\Curry\App::getInstance()->config->curry->pageCache)
 		return false;
 	
 	self::$pageCache = array();
@@ -122,7 +122,7 @@ public function createDefaultRevisions($basePage = null) {
 	$revision->setDescription("Initial (auto-created)");
 	$this->setActivePageRevision($revision);
 
-	if (Curry_Core::$config->curry->revisioning) {
+	if (\Curry\App::getInstance()->config->curry->revisioning) {
 		$revision2 = new PageRevision();
 		$revision2->setPage($this);
 		$revision2->setBasePage($basePage);
@@ -163,12 +163,13 @@ public function getPageRevision($revision = null)
 public function getInheritedProperty($name, $default = null, $cache = true, $forceUpdate = false)
 {
 	// generate a unique cache name
+	$app = \Curry\App::getInstance();
 	$cacheName = __CLASS__ . '_' . $this->getPageRevisionId() . '_' . $name;
-	
+
 	// attempt to load value from cache
 	$value = false;
 	if ($cache && !$forceUpdate) {
-		$value = Curry_Core::$cache->load($cacheName);
+		$value = $app->cache->load($cacheName);
 	}
 	
 	// if value is not set...
@@ -182,7 +183,7 @@ public function getInheritedProperty($name, $default = null, $cache = true, $for
     	}
         if($cache) {
         	if($value !== false) {
-        		Curry_Core::$cache->save($value, $cacheName);
+				$app->cache->save($value, $cacheName);
         	} else {
         		trace_warning("Unable to store $name for {$this->getUrl()}");
         	}
@@ -396,7 +397,7 @@ public function getPageAccess(User $user = null, UserRole $role = null)
 public function getMetadata()
 {
 	$cacheName = __CLASS__ . '_' . $this->getPageRevisionId() . '_Metadata';
-	if(($meta = Curry_Core::$cache->load($cacheName)) === false) {
+	if(($meta = \Curry\App::getInstance()->cache->load($cacheName)) === false) {
 		$meta = array('cascaded' => array(), 'inherited' => array());
 		$metadatas = MetadataQuery::create()->find();
 		
@@ -431,7 +432,7 @@ public function getMetadata()
 		$metadatas->clearIterator();
 		$pageMetadatas->clearIterator();
 		
-		Curry_Core::$cache->save($meta, $cacheName);
+		\Curry\App::getInstance()->cache->save($meta, $cacheName);
 	}
 	
 	return $meta;

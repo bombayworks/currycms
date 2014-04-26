@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Controller\Frontend;
 
 /**
  *
@@ -67,7 +68,7 @@ abstract class Curry_ModelView_Abstract {
 				Curry_URL::setPreventRedirect($pr);*/
 		}
 		catch (Curry_Exception_RedirectPrevented $e) {
-			Curry_Application::returnPartial('<script type="text/javascript">window.location.href = "'.addcslashes($e->getUrl(), '"').'";</script>');
+			Frontend::returnPartial('<script type="text/javascript">window.location.href = "'.addcslashes($e->getUrl(), '"').'";</script>');
 		}
 	}
 }

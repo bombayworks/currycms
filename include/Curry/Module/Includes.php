@@ -70,7 +70,7 @@ class Curry_Module_Includes extends Curry_Module {
 	/** {@inheritdoc} */
 	public function showFront(Curry_Twig_Template $template = null)
 	{
-		$pageGenerator = $this->getPageGenerator();
+		$pageGenerator = \Curry\App::getInstance()->generator;
 		if(!($pageGenerator instanceof Curry_PageGenerator_Html))
 			throw new Exception('Includes module only works on pages with PageGenerator set to Curry_PageGenerator_Html.');
 		$head = $pageGenerator->getHtmlHead();

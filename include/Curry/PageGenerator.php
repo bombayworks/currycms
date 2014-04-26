@@ -15,6 +15,8 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Controller\Frontend;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Base class for generating pages.
@@ -61,12 +63,11 @@ class Curry_PageGenerator
 	 * @param PageRevision $pageRevision
 	 * @param Curry_Request $request
 	 */
-	public function __construct(PageRevision $pageRevision, Curry_Request $request)
+	public function __construct(PageRevision $pageRevision)
 	{
 		$this->pageRevision = $pageRevision;
-		$this->request = $request;
 	}
-	
+
 	/**
 	 * Return the current Curry_Request object that belongs to the page being generated.
 	 *
@@ -76,7 +77,7 @@ class Curry_PageGenerator
 	{
 		return $this->request;
 	}
-	
+
 	/**
 	 * Return the Page that is being generated.
 	 *
@@ -122,7 +123,6 @@ class Curry_PageGenerator
 
 		$this->moduleCache = array();
 		$module = $pageModuleWrapper->createObject();
-		$module->setPageGenerator($this);
 
 		$cp = $module->getCacheProperties();
 		$cacheName = $this->getModuleCacheName($pageModuleWrapper, $module);
@@ -311,8 +311,9 @@ class Curry_PageGenerator
 	public function render(array $vars = array(), array $options = array())
 	{
 		$twig = Curry_Twig_Template::getSharedEnvironment();
+
 		// Todo: Rename curry to app?
-		$appVars = Curry_Application::getInstance()->getGlobalVariables();
+		$appVars = \Curry\App::getInstance()->globals;
 		if (isset($vars['curry']))
 			Curry_Array::extend($appVars, $vars['curry']);
 		$vars['curry'] = Curry_Array::extend($appVars, $this->getGlobals());
@@ -331,24 +332,12 @@ class Curry_PageGenerator
 			}
 		}
 		$template = $this->getTemplateObject();
-		return $this->renderTemplate($template, $moduleContent);
+		return new Response($this->renderTemplate($template, $moduleContent));
 	}
 
 	public function renderTemplate($template, $moduleContent)
 	{
 		return $template->render($moduleContent);
-	}
-	
-	/**
-	 * Render page and return content to browser (stdout).
-	 *
-	 * @param array $vars
-	 * @param array $options
-	 */
-	public function display(array $vars = array(), array $options = array())
-	{
-		$this->sendContentType();
-		$this->sendContent($this->render($vars, $options));
 	}
 	
 	/**

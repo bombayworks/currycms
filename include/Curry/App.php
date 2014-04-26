@@ -2,13 +2,35 @@
 
 namespace Curry;
 
+use Curry\Controller\Frontend;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use \Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use \Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Controller\ControllerResolver;
+use Symfony\Component\HttpKernel\EventListener\RouterListener;
+use Symfony\Component\HttpKernel\HttpKernel;
+use \Symfony\Component\HttpKernel\HttpKernelInterface;
+use \Symfony\Component\HttpKernel\TerminableInterface;
 use \Exception;
 use \Curry_Util;
 use \Curry_Array;
+use Symfony\Component\Routing\Matcher\UrlMatcher;
+use Symfony\Component\Routing\RequestContext;
+use Symfony\Component\Routing\Route;
+use Symfony\Component\Routing\RouteCollection;
 
-class App extends ServiceContainer {
+/**
+ * Class App
+ *
+ * @property \Symfony\Component\HttpFoundation\Request $request
+ *
+ * @package Curry
+ */
+class App extends ServiceContainer implements HttpKernelInterface, TerminableInterface {
+	/**
+	 * @var \Curry\App;
+	 */
 	protected static $instance;
 
 	/**
@@ -55,6 +77,64 @@ class App extends ServiceContainer {
 		$this->singleton('index', array($this, 'getIndex'));
 		$this->singleton('autoloader', array($this, 'getAutoloader'));
 
+		// some more
+		$app = $this;
+		$this->singleton('dispatcher', function () use ($app) {
+			$dispatcher = new EventDispatcher();
+
+
+
+			/*
+			$urlMatcher = new LazyUrlMatcher(function () use ($app) {
+				return $app['url_matcher'];
+			});
+
+			$dispatcher->addSubscriber(new LocaleListener($app, $urlMatcher, $app['request_stack']));
+			if (isset($app['exception_handler'])) {
+				$dispatcher->addSubscriber($app['exception_handler']);
+			}
+			$dispatcher->addSubscriber(new ResponseListener($app['charset']));
+			$dispatcher->addSubscriber(new MiddlewareListener($app));
+			$dispatcher->addSubscriber(new ConverterListener($app['routes'], $app['callback_resolver']));
+			$dispatcher->addSubscriber(new StringToResponseListener());
+			*/
+
+			return $dispatcher;
+		});
+		$this->singleton('requestContext', function () use ($app) {
+			$context = new RequestContext();
+
+			//$context->setHttpPort($app['request.http_port']);
+			//$context->setHttpsPort($app['request.https_port']);
+
+			return $context;
+		});
+		$this->singleton('routes', function () use ($app) {
+			return new RouteCollection();
+		});
+		$this->singleton('urlMatcher', function () use ($app) {
+			return new UrlMatcher($app->routes, $app->requestContext);
+		});
+		$this->singleton('resolver', function () use ($app) {
+			return new ControllerResolver($app->logger);
+		});
+		$this->singleton('kernel', function () use ($app) {
+			return new HttpKernel($app->dispatcher, $app->resolver, $app->requestStack);
+		});
+		$this->singleton('requestStack', function () use ($app) {
+			if (class_exists('Symfony\Component\HttpFoundation\RequestStack')) {
+				return new RequestStack();
+			}
+			return null;
+		});
+
+		// TODO: remove this!
+		$this->globals = (object)array(
+			'ProjectName' => $this->config->curry->name,
+			'BaseUrl' => $this->config->curry->baseUrl,
+			'DevelopmentMode' => $this->config->curry->developmentMode,
+		);
+
 		// Try to set utf-8 locale
 		setlocale(LC_ALL, 'en_US.UTF-8', 'en_US.UTF8', 'UTF-8', 'UTF8');
 
@@ -69,20 +149,37 @@ class App extends ServiceContainer {
 		\Curry_URL::setDefaultSecret($this->config->curry->secret);
 
 		register_shutdown_function(array($this, 'shutdown'));
+
+		//$frontend = new Frontend();
+		//$this->routes->add('curry', new Route('/start/', array('_controller' => array($frontend, 'index'))));
+		$this->dispatcher->addSubscriber(new Frontend());
 	}
 
-	public function run()
+	public function run(Request $request = null)
 	{
+		if (!$request)
+			$request = Request::createFromGlobals();
 		$this->boot();
-		$response = $this->handle(Request::createFromGlobals());
+		$response = $this->handle($request);
 		$response->send();
+		$this->terminate($request, $response);
 	}
 
-	public function handle(Request $request)
+	/**
+	 * {@inheritdoc}
+	 */
+	public function handle(Request $request, $type = HttpKernelInterface::MASTER_REQUEST, $catch = true)
 	{
-		//return new Response('Hello world');
-		\Curry_Application::getInstance()->run();
-		exit;
+		$current = isset($this->request) ? $this->request : null;
+		$this->request = $request;
+
+		if ($this->routes->count())
+			$this->dispatcher->addSubscriber(new RouterListener($this->urlMatcher, $this->requestContext, $this->logger, $this->requestStack));
+
+		$response = $this->kernel->handle($request, $type, $catch);
+		$this->request = $current;
+
+		return $response;
 	}
 
 	//////////////////////////////////////
@@ -134,7 +231,7 @@ class App extends ServiceContainer {
 				'divertOutMailToAdmin' => false,
 
 				'statistics' => false,
-				'applicationClass' => 'Curry_Application',
+				'applicationClass' => 'Curry\App',
 				'defaultGeneratorClass' => 'Curry_PageGenerator_Html',
 				'forceDomain' => false,
 				'revisioning' => false,
@@ -372,7 +469,7 @@ class App extends ServiceContainer {
 				$this->logger->info("Caching is not enabled");
 		}
 
-		return Zend_Cache::factory('Core', $backend, $frontendOptions, $backendOptions, false, false, true);
+		return \Zend_Cache::factory('Core', $backend, $frontendOptions, $backendOptions, false, false, true);
 	}
 
 	/**
@@ -460,5 +557,13 @@ class App extends ServiceContainer {
 			$this->logger->debug("Peak memory usage: ".Curry_Util::humanReadableBytes(memory_get_peak_usage()));
 			$this->logger->debug("SQL query count: ".($queryCount !== null ? $queryCount : 'n/a'));
 		}
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function terminate(Request $request, Response $response)
+	{
+		$this->kernel->terminate($request, $response);
 	}
 }

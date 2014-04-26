@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Controller\Frontend;
 
 /**
  * Manage users and user permissions.
@@ -401,7 +402,7 @@ class Curry_Backend_Users extends Curry_Backend
 			$this->createModelUpdateEvent(get_class($user), $user->getPrimaryKey(), $user->isNew() ? 'insert' : 'update');
 			$this->saveUser($user, $form);
 			if (isAjax())
-				Curry_Application::returnPartial('');
+				Frontend::returnPartial('');
 		}
 		
 		// Render

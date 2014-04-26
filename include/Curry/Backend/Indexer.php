@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Controller\Frontend;
 
 /**
  * Manage search index.
@@ -104,7 +105,7 @@ class Curry_Backend_Indexer extends Curry_Backend {
 	{
 		$ses = new \Zend\Session\Container(__CLASS__);
 		$index = Curry_Core::getSearchIndex();
-		$app = new Curry_Application();
+		$app = new Frontend();
 		Curry_URL::setReverseRouteCallback(array($app, 'reverseRoute'));
 
 		try {
@@ -148,7 +149,7 @@ class Curry_Backend_Indexer extends Curry_Backend {
 					// Return current status
 					$part = 1 / count($ses->models);
 					$progress = $ses->model * $part + ($ses->offset / $maxItems) * $part;
-					Curry_Application::returnJson(array(
+					Frontend::returnJson(array(
 						'progress' => round(100 * $progress),
 						'continue' => true,
 						'status' => "Indexing ".$ses->models[$ses->model]."...",
@@ -161,7 +162,7 @@ class Curry_Backend_Indexer extends Curry_Backend {
 				if ($ses->failed) {
 					$status .= ' '.$ses->failed.' items failed.';
 				}
-				Curry_Application::returnJson(array(
+				Frontend::returnJson(array(
 					'progress' => 100,
 					'continue' => false,
 					'status' => $status,
@@ -170,7 +171,7 @@ class Curry_Backend_Indexer extends Curry_Backend {
 		}
 		catch (Exception $e) {
 			if ($ajax)
-				Curry_Application::returnJson(array('continue' => false, 'status' => $e->getMessage()));
+				Frontend::returnJson(array('continue' => false, 'status' => $e->getMessage()));
 			else
 				throw $e;
 		}

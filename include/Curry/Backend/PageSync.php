@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Controller\Frontend;
 
 /**
  * Synchronize pages across sites.
@@ -52,7 +53,7 @@ HTML;
 		$localChecksum = sha1(serialize($code));
 
 		if (isPost('fetch')) {
-			Curry_Application::returnJson($code);
+			Frontend::returnJson($code);
 		}
 
 		$form = new Curry_Form(array(

@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Controller\Frontend;
 
 /**
  * The base class for all page-modules.
@@ -30,13 +31,6 @@ abstract class Curry_Module
 	 * @var int
 	 */
 	protected $moduleDataId;
-	
-	/**
-	 * The PageGenerator which is being used to generate this module.
-	 *
-	 * @var Curry_PageGenerator
-	 */
-	protected $pageGenerator;
 	
 	/**
 	 * An array of available modules.
@@ -278,33 +272,13 @@ abstract class Curry_Module
 	}
 	
 	/**
-	 * Associate a PageGenerator object with the module.
-	 *
-	 * @param Curry_PageGenerator $pageGenerator
-	 */
-	public function setPageGenerator($pageGenerator)
-	{
-		$this->pageGenerator = $pageGenerator;
-	}
-
-	/**
 	 * Get the page generator class used to generate the current page.
 	 *
-	 * @return Curry_PageGenerator
-	 */
-	public function getPageGenerator()
-	{
-		return $this->pageGenerator;
-	}
-	
-	/**
-	 * Get the page generator class used to generate the current page.
-	 *
-	 * @return Curry_Request
+	 * @return Request
 	 */
 	public function getRequest()
 	{
-		return $this->pageGenerator->getRequest();
+		return \Curry\App::getInstance()->request;
 	}
 	
 	/**
@@ -315,48 +289,5 @@ abstract class Curry_Module
 	public function getBackend()
 	{
 		return Curry_Admin::getInstance()->getBackend();
-	}
-	
-	/**
-	 * Return json-data to browser and exit. Will set content-type header and encode the data.
-	 * 
-	 * @deprecated Please use Curry_Application::returnJson() instead.
-	 *
-	 * @param mixed $content	Data to encode with json_encode. Note that this must be utf-8 encoded. Strings will not be encoded.
-	 */
-	public function returnJson($content)
-	{
-		trace_warning('DEPRECATED: '.__CLASS__.'::'.__METHOD__.'(), please use Curry_Application::'.__METHOD__.'() instead.');
-		Curry_Application::returnJson($content);
-	}
-	
-	/**
-	 * Return partial html-content to browser and exit. Will set content-type header and return the content.
-	 *
-	 * @deprecated Please use Curry_Application::returnPartial() instead.
-	 * 
-	 * @param string $content
-	 * @param string $contentType
-	 * @param string|null $charset
-	 */
-	public function returnPartial($content, $contentType = 'text/html', $charset = null)
-	{
-		trace_warning('DEPRECATED: '.__CLASS__.'::'.__METHOD__.'(), please use Curry_Application::'.__METHOD__.'() instead.');
-		Curry_Application::returnPartial($content, $contentType, $charset);
-	}
-
-	/**
-	 * Return partial a file to browser and exit. Will set appropriate headers and return the content.
-	 * 
-	 * @deprecated Please use Curry_Application::returnPartial() instead.
-	 *
-	 * @param string $file
-	 * @param string $contentType
-	 * @param string $filename
-	 */
-	public function returnFile($file, $contentType, $filename)
-	{
-		trace_warning('DEPRECATED: '.__CLASS__.'::'.__METHOD__.'(), please use Curry_Application::'.__METHOD__.'() instead.');
-		Curry_Application::returnFile($file, $contentType, $filename);
 	}
 }

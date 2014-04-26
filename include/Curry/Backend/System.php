@@ -16,6 +16,7 @@
  * @link       http://currycms.com
  */
 use Curry\Archive\Archive;
+use Curry\Controller\Frontend;
 
 /**
  * Change system settings.
@@ -660,7 +661,7 @@ class Curry_Backend_System extends Curry_Backend {
 
 		$contents = str_replace("{{INSTALL_CSS}}", file_get_contents(\Curry\App::getInstance()->config->curry->basePath.'/shared/backend/common/css/install.css'), $contents);
 
-		Curry_Application::returnData($contents, 'text/plain', 'install.php');
+		Frontend::returnData($contents, 'text/plain', 'install.php');
 	}
 	
 	/**
@@ -821,7 +822,7 @@ class Curry_Backend_System extends Curry_Backend {
 		if (isPost() && $form->isValid($_POST)) {
 			$values = $form->getValues(true);
 			$ret = $this->sendTestEmail($values);
-			Curry_Application::returnPartial('<pre>'.$ret.'</pre>');
+			Frontend::returnPartial('<pre>'.$ret.'</pre>');
 		}
 		$this->addMainContent($form);
 	}

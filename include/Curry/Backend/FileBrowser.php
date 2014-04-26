@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Controller\Frontend;
 
 /**
  * This module allows you to browse the filesystem.
@@ -205,7 +206,7 @@ class Curry_Backend_FileBrowser extends Curry_Backend
 				if(!method_exists($this, $method))
 					throw new Curry_Exception('Action does not exist.');
 				$contentType = isset($_GET['iframe']) ? 'text/html' : 'application/json';
-				Curry_Application::returnJson($this->$method($_REQUEST), "", $contentType);
+				Frontend::returnJson($this->$method($_REQUEST), "", $contentType);
 			}
 			catch(Exception $e) {
 				if(isAjax())
@@ -426,12 +427,12 @@ TPL
 				if(file_exists($tempfile))
 					@unlink($tempfile);
 			} else {
-				Curry_Application::returnFile($tempfile, 'application/octet-stream', $name, false);
+				Frontend::returnFile($tempfile, 'application/octet-stream', $name, false);
 				@unlink($tempfile);
 				exit;
 			}
 		} else {
-			Curry_Application::returnFile($physicals[0], 'application/octet-stream', $name);
+			Frontend::returnFile($physicals[0], 'application/octet-stream', $name);
 		}
 	}
 	

@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Controller\Frontend;
 
 /**
  * Manage pages.
@@ -45,7 +46,7 @@ class Curry_Backend_Page extends Curry_Backend
 	public static function updateIndex(Page $page)
 	{
 		if (\Curry\App::getInstance()->config->curry->autoUpdateIndex)
-			Curry_Application::registerBackgroundFunction(array(__CLASS__, 'doUpdateIndex'), $page);
+			Frontend::registerBackgroundFunction(array(__CLASS__, 'doUpdateIndex'), $page);
 	}
 
 	public static function doUpdateIndex(Page $page)
@@ -571,7 +572,7 @@ class Curry_Backend_Page extends Curry_Backend
 		$form = Curry_Backend_PageHelper::getNewMetadataForm();
 		if(isPost('pid_newmetadata') && $form->isValid($_POST)) {
 			Curry_Backend_PageHelper::saveNewMetadata($form->getValues());
-			Curry_Application::returnPartial('');
+			Frontend::returnPartial('');
 		}
 		$this->addMainContent($form);
 	}
@@ -915,7 +916,7 @@ class Curry_Backend_Page extends Curry_Backend
 				$page->getUrl(),
 			);
 		}
-		Curry_Application::returnPartial('var tinyMCELinkList = ' . json_encode($pages).';', "text/plain");
+		Frontend::returnPartial('var tinyMCELinkList = ' . json_encode($pages).';', "text/plain");
 	}
 
 	/**

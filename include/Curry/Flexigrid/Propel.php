@@ -410,6 +410,10 @@ class Curry_Flexigrid_Propel extends Curry_Flexigrid {
 	 */
 	protected function getRow($obj)
 	{
+		$columnToPhpName = array();
+		foreach ($this->tableMap->getColumns() as $name => $column) {
+			$columnToPhpName[strtolower($name)] = $column->getPhpName();
+		}
 		$celldata = array();
 		foreach($this->columns as $column => $opts) {
 			if(isset($this->callbacks[$column])) {
@@ -417,8 +421,8 @@ class Curry_Flexigrid_Propel extends Curry_Flexigrid {
 			}
 			else {
 				try {
-					if($this->tableMap->hasColumnByInsensitiveCase($column)) {
-						$phpName = $this->tableMap->getColumnByInsensitiveCase($column)->getPhpName();
+					if(isset($columnToPhpName[$column])) {
+						$phpName = $columnToPhpName[$column];
 					} else {
 						$tmp = $this->query->getAsColumns();
 						if(isset($tmp[$column])) {

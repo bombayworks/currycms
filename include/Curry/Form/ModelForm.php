@@ -146,13 +146,13 @@ class Curry_Form_ModelForm extends Curry_Form
 		foreach($this->getElementColumns() as $column) {
 			$name = strtolower($column->getName());
 			$element = $this->getElement($name);
-			if($element && array_key_exists($name, $values))
+			if($element && !$element->disabled && array_key_exists($name, $values))
 				$this->setColumnValue($instance, $column, $values[$name]);
 		}
 		foreach($this->modelMap->getRelations() as $relation) {
 			$name = 'relation__'.strtolower($relation->getName());
 			$element = $this->getElement($name);
-			if($element && array_key_exists($name, $values))
+			if($element && !$element->disabled && array_key_exists($name, $values))
 				$this->setRelationValue($instance, $relation, $values[$name]);
 		}
 		if (is_callable($this->onFillModel))

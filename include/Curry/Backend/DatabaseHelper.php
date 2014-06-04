@@ -134,15 +134,13 @@ class Curry_Backend_DatabaseHelper {
 			// Add null checkbox
 			if(!$column->isNotNull()) {
 				$isNull = $element->getValue() === null;
-				if($isNull)
-					$element->setAttrib("disabled", "disabled");
-				
 				if(!$column->isNotNull()) {
 					$name = $element->getName().'__null__';
 					$form->addElement('checkbox', $name, array(
 						'label' => 'Null',
 						'title' => 'Is Null?',
-						'onclick' => "document.getElementById('".$element->getId()."').disabled = this.checked;",
+						'class' => 'trigger-change',
+						'onchange' => "document.getElementById('".$element->getId()."').disabled = this.checked;",
 						'value' => $isNull,
 					));
 					$form->addDisplayGroup(array($element->getName(), $name), 'displayGroup'.($displayGroup++), array(

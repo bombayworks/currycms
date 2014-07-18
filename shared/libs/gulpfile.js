@@ -13,8 +13,6 @@ var files = [
   // jquery-ui
   'jquery-ui-1.8.17/js/jquery-ui-1.8.17.custom.min.js',
   'jquery-ui-1.8.17/css/curry/jquery-ui-1.8.17.custom.css',
-  // swfobject
-  'swfobject-2.2/swfobject.js',
   // flexigrid
   'flexigrid-1.0b3/flexigrid.js',
   'flexigrid-1.0b3/flexigrid.css',
@@ -40,9 +38,6 @@ var files = [
   'dynatree-1.2.2/src/jquery.dynatree.js',
   'dynatree-1.2.2/src/skin-vista/ui.dynatree.css',
   'dynatree-1.2.2/src/skin-vista/*.gif',
-  // colorpicker
-  'colorpicker-20090523/js/colorpicker.js',
-  'colorpicker-20090523/css/colorpicker.css',
   // chosen
   'chosen-0.9.12/chosen.jquery.js',
   'chosen-0.9.12/chosen.css',

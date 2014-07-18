@@ -23,11 +23,6 @@
  */
 class Curry_Flash {
 	/**
-	 * SWFObject path.
-	 */
-	const SWFOBJECT_PATH = 'shared/libs/swfobject-2.2/';
-	
-	/**
 	 * Embed using SWFObject static method.
 	 */
 	const SWFOBJECT_STATIC = "SWF_OBJECT_STATIC";

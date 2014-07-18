@@ -84,7 +84,7 @@ class Curry_Module_Flash extends Curry_Module {
 	 *
 	 * @var string
 	 */
-	protected $expressInstall = '';
+	protected $expressInstall = 'expressInstall.swf';
 	
 	/**
 	 * Add GET/POST/COOKIE to flashvars?
@@ -147,17 +147,7 @@ class Curry_Module_Flash extends Curry_Module {
 	 */
 	public function __construct()
 	{
-		$this->expressInstall = Curry_Flash::SWFOBJECT_PATH.'expressInstall.swf';
 		$this->target = 'flash-'.time();
-	}
-	
-	/** {@inheritdoc} */
-	public function showFront(Curry_Twig_Template $template = null)
-	{
-		$head = $this->getPageGenerator()->getHtmlHead();
-		$head->addScript(Curry_Flash::SWFOBJECT_PATH.'swfobject.js');
-		
-		return parent::showFront($template);
 	}
 	
 	/** {@inheritdoc} */

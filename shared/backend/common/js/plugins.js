@@ -383,12 +383,33 @@
 		return false;
 	});
 	
-	$(document).delegate('a.postback', 'click', function(e) {
+	$(document).delegate('.postback', 'click', function(e) {
 		if(!e.isDefaultPrevented()) {
 			var $a = $(this);
 			$.require('jquery-bw-url', function() {
-				var url = new $.bw.url($a.attr('href'));
-				url.doPost($a.data('postback'));
+				function createHiddenInput(obj, prefix) {
+					var inputs = [], input;
+					if(!prefix)
+						prefix = '';
+					for(var prop in obj) {
+						var name = prefix.length ? prefix + '[' + prop + ']' : prop;
+						if(typeof obj[prop] == "object")
+							inputs.concat(createHiddenInput(obj[prop], name));
+						else {
+							input = document.createElement('input');
+							input.setAttribute('type', 'hidden');
+							input.setAttribute('name', name);
+							input.setAttribute('value', obj[prop]);
+							inputs.push(input);
+						}
+					}
+					return inputs;
+				}
+				var $form = $('<form method="post" style="display: none"></form>')
+				  .attr('action', $a.attr('href'))
+				  .append(createHiddenInput($a.data('postback')));
+				$form.appendTo('body');
+				$form.submit();
 			});
 			return false;
 		}

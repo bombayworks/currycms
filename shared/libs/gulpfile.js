@@ -30,8 +30,6 @@ var files = [
   'tinymce-3.5.8-jquery/themes/advanced/langs/en.js',
   'tinymce-currypopups/editor_plugin_src.js',
   'tinymce-3.5.8-jquery/jquery.tinymce.js',
-  // jquery-bw-url
-  '../js/jquery.bw.url.js',
   // dynatree
   'bower_components/dynatree/jquery/jquery.cookie.js',
   'bower_components/dynatree/dist/jquery.dynatree.js',
@@ -40,14 +38,12 @@ var files = [
   // chosen
   'bower_components/chosen/chosen.jquery.js',
   'bower_components/chosen/chosen.css',
+  // URI.js
+  'bower_components/uri.js/src/URI.js',
   // modelview
   '../backend/common/js/modelview.js',
   '../backend/common/css/modelview.css',
-
   // Curry
-  '../css/icons.css',
-  '../js/URI.js',
-
   '../backend/common/js/core.js',
   '../backend/common/js/plugins.js',
   '../backend/common/js/main.js',

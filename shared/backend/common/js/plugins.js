@@ -249,6 +249,7 @@
         });
         $dialog.on('click', '.dialog-close', function() {
             $dialog.trigger('dialogclose');
+            return false;
         });
         $dialog.on('curry-init', function() {
             $dialog.hide();

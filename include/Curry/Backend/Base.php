@@ -103,7 +103,6 @@ class Base extends \Curry\View {
 	public function __construct()
 	{
 		$this->htmlHead = new \Curry_HtmlHead();
-		$this->registerDefaultLibraries();
 	}
 
 	/**
@@ -205,139 +204,6 @@ class Base extends \Curry\View {
 	}
 
 	/**
-	 * Registers the core libraries used with the backend.
-	 */
-	protected function registerDefaultLibraries()
-	{
-		$this->registerLibrary('jquery-ui', array(
-			'css' => 'shared/libs/jquery-ui-1.8.17/css/curry/jquery-ui-1.8.17.custom.css',
-			'js' => 'shared/libs/jquery-ui-1.8.17/js/jquery-ui-1.8.17.custom.min.js',
-			'init' => new \Zend_Json_Expr("function() {
-				$.datepicker.setDefaults( {dateFormat: 'yy-mm-dd'} );
-				$.extend($.ui.dialog.prototype.options, {
-					modal: true,
-					resizable: false,
-					width: 600
-				});
-				// Workaround for tinymce crashing when sorting sortables
-				$(document)
-					.on('sortstart', '.ui-sortable', function(event) {
-						$(this).data('curry-sortable-started', true);
-					})
-					.on('mouseup.sortable', '.ui-sortable', function(event) {
-						if ($(this).data('curry-sortable-started')) {
-							var item = $(this).data('sortable').currentItem;
-							$(item).find('.tinymce').each(function() {
-								var mce = $(this).tinymce();
-								$(this).data('curry-sortable-mce', mce.settings);
-								mce.remove();
-							});
-							$(this).data('curry-sortable-started', false);
-						}
-					})
-					.on('sortbeforestop', '.ui-sortable', function(event, ui) {
-						$(ui.item).find('.tinymce').each(function() {
-							$(this).tinymce($(this).data('curry-sortable-mce'));
-							$(this).removeData('curry-sortable-mce');
-						});
-					});
-			}"),
-			'preload' => true,
-		));
-		$this->registerLibrary('swfobject', array(
-			'js' => \Curry_Flash::SWFOBJECT_PATH . 'swfobject.js',
-		));
-		$this->registerLibrary('flexigrid', array(
-			'dep' => 'jquery-ui',
-			'css' => 'shared/libs/flexigrid-1.0b3/flexigrid.css',
-			'js' => 'shared/libs/flexigrid-1.0b3/flexigrid.js',
-		));
-		$this->registerLibrary('codemirror', array(
-			'js' => array(
-				'shared/libs/codemirror-3.02/lib/codemirror.js',
-				'shared/libs/codemirror-3.02/mode/xml/xml.js',
-				'shared/libs/codemirror-3.02/mode/javascript/javascript.js',
-				'shared/libs/codemirror-3.02/mode/css/css.js',
-			),
-			'css' => array(
-				'shared/libs/codemirror-3.02/lib/codemirror.css',
-			),
-			'sequential' => true,
-		));
-		$this->registerLibrary('tinymce', array(
-			//'dep' => 'jquery-ui', // need to include jquery-ui before tinymce for some reason O_o
-			'js' => 'shared/libs/tinymce-3.5.8-jquery/jquery.tinymce.js',
-			'init' => new \Zend_Json_Expr("function() {
-				if(!window.tinymceSettings)
-					window.tinymceSettings = {};
-				window.tinymceSettings = $.extend({
-					width: '100%',
-					script_url: 'shared/libs/tinymce-3.5.8-jquery/tiny_mce.js',
-					// General options
-					theme : 'advanced',
-					plugins : 'style,table,advimage,advlink,currypopups,media,contextmenu,paste,fullscreen,nonbreaking,xhtmlxtras,advlist',
-					// Theme options
-					theme_advanced_buttons1 : 'bold,italic,underline,strikethrough,|,justifyleft,justifycenter,justifyright,justifyfull,|,bullist,numlist,|,indent,outdent,|,undo,redo,styleselect,formatselect',
-					theme_advanced_buttons2 : 'link,unlink,anchor,|,image,media,table,hr,charmap,|,blockquote,cite,abbr,acronym,del,ins,sub,sup,|,removeformat,cleanup,code,|,fullscreen,help',
-					theme_advanced_buttons3 : '',//forecolor,backcolor,styleprops,attribs,|,nonbreaking,template,|,cut,copy,paste,pastetext,pasteword,|,search,replace'
-					theme_advanced_buttons4 : '',
-					theme_advanced_toolbar_location : 'top',
-					theme_advanced_toolbar_align : 'left',
-					theme_advanced_statusbar_location : 'bottom',
-					theme_advanced_resizing : true,
-					// Paste from word...
-					paste_remove_spans: true,
-					paste_remove_styles: true,
-					paste_strip_class_attributes: 'all',
-					// Example content CSS (should be your site CSS)
-					content_css : 'css/content.css',
-					// Drop lists for link/image/media/template dialogs
-					template_external_list_url : 'lists/template_list.js',
-					external_link_list_url : " . json_encode(url('', array('module' => '\Curry\Backend_Page', 'view' => 'TinyMceList'))->getAbsolute()) . ",
-					// Replace values for the template plugin
-					template_replace_values : {
-					},
-					file_browser_callback: function(fieldName, url, type, win) {
-						$.util.openFinder(win.document.getElementById(fieldName));
-					}
-				}, window.tinymceSettings);
-			}")
-		));
-		$this->registerLibrary('jquery-bw-url', array(
-			'js' => 'shared/js/jquery.bw.url.js',
-		));
-		$this->registerLibrary('dynatree', array(
-			'dep' => 'jquery-ui',
-			'js' => array('shared/libs/dynatree-1.2.2/jquery/jquery.cookie.js', 'shared/libs/dynatree-1.2.2/src/jquery.dynatree.js'),
-			'css' => 'shared/libs/dynatree-1.2.2/src/skin-vista/ui.dynatree.css',
-			'sequential' => true,
-		));
-		$this->registerLibrary('colorpicker', array(
-			'js' => 'shared/libs/colorpicker-20090523/js/colorpicker.js',
-			'css' => 'shared/libs/colorpicker-20090523/css/colorpicker.css',
-		));
-		$this->registerLibrary('chosen', array(
-			'js' => 'shared/libs/chosen-0.9.12/chosen.jquery.min.js',
-			'css' => 'shared/libs/chosen-0.9.12/chosen.css',
-		));
-		$this->registerLibrary('modelview', array(
-			'js' => 'shared/backend/common/js/modelview.js',
-			'css' => 'shared/backend/common/css/modelview.css',
-		));
-	}
-
-	/**
-	 * Register a javascript library.
-	 *
-	 * @param string $name
-	 * @param array $description
-	 */
-	public function registerLibrary($name, $description)
-	{
-		$this->libraries[$name] = $description;
-	}
-
-	/**
 	 * Get the twig environment used with the backend.
 	 *
 	 * @return \Twig_Environment
@@ -383,12 +249,8 @@ class Base extends \Curry\View {
 		$templateFile = 'backend.html';
 
 		$htmlHead = $this->getHtmlHead();
-		$htmlHead->addScript('shared/libs/jquery-ui-1.8.17/js/jquery-1.7.1.min.js');
-		$htmlHead->addScript('shared/backend/common/js/core.js');
-		$htmlHead->addScript('shared/backend/common/js/plugins.js');
-		$htmlHead->addScript('shared/backend/common/js/main.js');
-		$htmlHead->addScript('shared/backend/common/js/finder.js');
-		$htmlHead->addScript('shared/js/URI.js');
+		$htmlHead->addScript('shared/libs/build/all.min.js');
+		$htmlHead->addStylesheet('shared/libs/build/all.css');
 
 		// Globals
 		$encoding = \Curry\App::getInstance()->config->curry->outputEncoding;
@@ -408,7 +270,6 @@ class Base extends \Curry\View {
 			$templateFile = 'login.html';
 
 			// Finalize HtmlHead and add global
-			$htmlHead->addInlineScript('$.registerLibrary(' . \Zend_Json::encode($this->libraries, false, array('enableJsonExprFinder' => true)) . ');');
 			$twig->addGlobal('HtmlHead', $htmlHead->getContent());
 			$twig->addGlobal('BodyClass', $this->getBodyClass());
 
@@ -453,7 +314,6 @@ class Base extends \Curry\View {
 		$twig->addGlobal('moduleGroups', $backendGroups);
 
 		// Finalize HtmlHead and add global
-		$htmlHead->addInlineScript('$.registerLibrary(' . \Zend_Json::encode($this->libraries, false, array('enableJsonExprFinder' => true)) . ');');
 		$twig->addGlobal('HtmlHead', $htmlHead->getContent());
 		$twig->addGlobal('BodyClass', $this->getBodyClass());
 

@@ -11,7 +11,7 @@ var files = [
   // jquery
   'bower_components/jquery/dist/jquery.js',
   // jquery-ui
-  'bower_components/jquery-ui/jquery-ui.js',
+  'bower_components/jquery-ui/ui/{core,widget,mouse,position,draggable,droppable,resizable,selectable,sortable}.js',
   // flexigrid
   'flexigrid-1.0b3/flexigrid.js',
   'flexigrid-1.0b3/flexigrid.css',

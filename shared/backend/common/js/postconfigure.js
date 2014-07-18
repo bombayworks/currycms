@@ -16,13 +16,6 @@ tinymce.each([
   'themes/advanced/langs/en.js'
 ],function(f){tinymce.ScriptLoader.markDone(tinyMCE.baseURL+"/"+f);});
 
-$.datepicker.setDefaults( {dateFormat: 'yy-mm-dd'} );
-$.extend($.ui.dialog.prototype.options, {
-  modal: true,
-  resizable: false,
-  width: 600
-});
-
 // Workaround for tinymce crashing when sorting sortables
 $(document)
   .on('sortstart', '.ui-sortable', function(event) {

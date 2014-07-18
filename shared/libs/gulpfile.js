@@ -9,19 +9,18 @@ var minifyCSS = require('gulp-minify-css');
 var files = [
   '../backend/common/js/preconfigure.js',
   // jquery
-  'jquery-ui-1.8.17/js/jquery-1.7.1.min.js',
+  'bower_components/jquery/dist/jquery.js',
   // jquery-ui
-  'jquery-ui-1.8.17/js/jquery-ui-1.8.17.custom.min.js',
-  'jquery-ui-1.8.17/css/curry/jquery-ui-1.8.17.custom.css',
+  'bower_components/jquery-ui/jquery-ui.js',
   // flexigrid
   'flexigrid-1.0b3/flexigrid.js',
   'flexigrid-1.0b3/flexigrid.css',
   // codemirror
-  'codemirror-3.02/lib/codemirror.js',
-  'codemirror-3.02/mode/xml/xml.js',
-  'codemirror-3.02/mode/javascript/javascript.js',
-  'codemirror-3.02/mode/css/css.js',
-  'codemirror-3.02/lib/codemirror.css',
+  'bower_components/codemirror/lib/codemirror.js',
+  'bower_components/codemirror/lib/codemirror.css',
+  'bower_components/codemirror/mode/xml/xml.js',
+  'bower_components/codemirror/mode/javascript/javascript.js',
+  'bower_components/codemirror/mode/css/css.js',
   // tinymce
   'tinymce-3.5.8-jquery/tiny_mce_src.js',
   'tinymce-3.5.8-jquery/langs/en.js',
@@ -34,13 +33,13 @@ var files = [
   // jquery-bw-url
   '../js/jquery.bw.url.js',
   // dynatree
-  'dynatree-1.2.2/jquery/jquery.cookie.js',
-  'dynatree-1.2.2/src/jquery.dynatree.js',
-  'dynatree-1.2.2/src/skin-vista/ui.dynatree.css',
-  'dynatree-1.2.2/src/skin-vista/*.gif',
+  'bower_components/dynatree/jquery/jquery.cookie.js',
+  'bower_components/dynatree/dist/jquery.dynatree.js',
+  'bower_components/dynatree/dist/skin-vista/ui.dynatree.css',
+  'bower_components/dynatree/dist/skin-vista/*.gif',
   // chosen
-  'chosen-0.9.12/chosen.jquery.js',
-  'chosen-0.9.12/chosen.css',
+  'bower_components/chosen/chosen.jquery.js',
+  'bower_components/chosen/chosen.css',
   // modelview
   '../backend/common/js/modelview.js',
   '../backend/common/css/modelview.css',

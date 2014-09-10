@@ -311,7 +311,7 @@ class Curry_Archive implements IteratorAggregate {
 	public function getFile($path)
 	{
 		foreach($this as $entry) {
-			if($entry->getPathname() === $path)
+			if(trim($entry->getPathname()) === $path)
 				return $entry;
 		}
 		throw new Exception("File '$path' not found in archive.");

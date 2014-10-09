@@ -19,7 +19,7 @@ class ZendForm extends ContainerWidget {
 	}
 	public function renderNormal(Entity $entity)
 	{
-		$attr = array('id' => $entity->getId().'-label', 'class' => $entity->getContainerClass());
+		$attr = array('id' => $entity->getId().'-label', 'class' => $entity->getWrapperClass());
 		return Entity::html('dt', $attr, $entity->isLabelOutside() ? $entity->renderLabel() : '').
 		Entity::html('dd', array('id' => $entity->getId().'-element'), $entity->render().
 			$entity->renderDescription().

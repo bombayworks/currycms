@@ -15,7 +15,7 @@ class FormTable extends Form {
 
 	public function renderNormal(Entity $entity)
 	{
-		$attr = array('class' => $entity->getContainerClass());
+		$attr = array('class' => $entity->getWrapperClass());
 		return Entity::html('tr', $attr,
 			Entity::html('td', array(), ($entity->isLabelOutside() ? $entity->renderLabel() : '&nbsp;')).
 			Entity::html('td', array(), $entity->render().$entity->renderDescription().$entity->renderErrors())

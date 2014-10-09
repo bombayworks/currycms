@@ -30,23 +30,23 @@ class Collection extends Container {
 	{
 		$children = $this->children;
 		foreach((array)$data as $k => $v) {
-			if (!isset($this->$k)) {
-				$this->$k = clone $this->entity;
+			if (!$this->hasField($k)) {
+				$this->addField($k, clone $this->entity);
 			} else {
 				unset($children[$k]);
 			}
-			$this->$k->setInitial($v);
+			$this->getField($k)->setInitial($v);
 		}
 		// Deleted entries
 		foreach($children as $k => $child) {
-			unset($this->$k);
+			$this->removeField($k);
 		}
 		$this->addExtra();
 	}
 
-	public function getContainerClass()
+	public function getWrapperClass()
 	{
-		return parent::getContainerClass().' form-collection';
+		return parent::getWrapperClass().' form-collection';
 	}
 
 	public function populate($data)
@@ -54,14 +54,14 @@ class Collection extends Container {
 		$children = $this->children;
 		$unchanged = 0;
 		foreach((array)$data as $k => $v) {
-			if (!isset($this->$k)) {
-				$this->$k = clone $this->entity;
+			if (!$this->hasField($k)) {
+				$this->addField($k, clone $this->entity);
 			} else {
 				unset($children[$k]);
 			}
-			$entity = $this->$k;
-			$entity->populate($v);
-			if (!$entity->hasChanged()) {
+			$field = $this->getField($k);
+			$field->populate($v);
+			if (!$field->hasChanged()) {
 				++$unchanged;
 			} else {
 				$unchanged = 0;
@@ -70,7 +70,7 @@ class Collection extends Container {
 
 		// Deleted entries
 		foreach($children as $k => $child) {
-			unset($this->$k);
+			$this->removeField($k);
 		}
 
 		if (!$unchanged) {
@@ -83,11 +83,9 @@ class Collection extends Container {
 		// Add extra
 		$entity = clone $this->entity;
 		if ($name === null) {
-			$this->children[] = $entity;
-			$entity->parent = $this;
-		} else {
-			$this->$name = $entity;
+			$name = $this->getNextId();
 		}
+		$this->addField($name, $entity);
 	}
 
 	public function getNextId()

@@ -15,11 +15,6 @@ class Form extends Container {
 	 */
 	protected $method = 'POST';
 
-	public function getContainerClass()
-	{
-		return parent::getContainerClass().' form-formset';
-	}
-
 	/**
 	 * @param string $action
 	 */
@@ -50,28 +45,5 @@ class Form extends Container {
 	public function getMethod()
 	{
 		return $this->method;
-	}
-
-	public function setFields($value)
-	{
-		foreach($this as $k => $value) {
-			unset($this->$k);
-		}
-		return $this->addFields($value);
-	}
-
-	public function addField($name, $field)
-	{
-		// TODO: do not allow the following characters [. ]
-		$this->$name = self::createEntity($field);
-		return $this;
-	}
-
-	public function addFields($fields)
-	{
-		foreach($fields as $name => $field) {
-			$this->addField($name, $field);
-		}
-		return $this;
 	}
 }

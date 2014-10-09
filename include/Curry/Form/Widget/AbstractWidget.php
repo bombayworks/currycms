@@ -16,14 +16,14 @@ use Curry\Form\Entity;
 abstract class AbstractWidget extends \Curry\Configurable {
 	protected $attributes = array();
 
-	public function setOptionFallback($name, $value)
+	protected function setOptionFallback($name, $value)
 	{
 		$this->attributes[$name] = $value;
 	}
 
-	public function getOptionFallback($name)
+	protected function getOptionFallback($name)
 	{
-		return $this->attributes[$name];
+		return isset($this->attributes[$name]) ? $this->attributes[$name] : null;
 	}
 
 	abstract public function render(Entity $entity);

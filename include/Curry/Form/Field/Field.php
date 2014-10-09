@@ -28,16 +28,17 @@ class Field extends \Curry\Form\Entity {
 	 */
 	protected $isPopulated = false;
 
-	public function getContainerClass()
+	public function getWrapperClass()
 	{
 		$type = get_class($this);
 		$pos = strrpos($type, '\\');
 		if ($pos !== false)
 			$type = substr($type, $pos + 1);
-		return 'form-field'.
-			' form-field-'.strtolower($type).
-			($this->getRequired() ? ' form-required' : '').
-			($this->hasErrors() ? ' form-errors' : '');
+		return trim(
+			'form-entity form-field form-field-'.strtolower($type).' '.
+			($this->getRequired() ? 'form-required ' : '').
+			($this->hasErrors() ? 'form-errors ' : '').
+			parent::getWrapperClass());
 	}
 
 	public function getRawValue()
@@ -99,7 +100,11 @@ class Field extends \Curry\Form\Entity {
 	 */
 	public function setValue($value)
 	{
-		$this->value = $value;
+		$value = $this->clean($value);
+		if ($this->isPopulated)
+			$this->value = $value;
+		else
+			$this->initial = $value;
 	}
 
 	/**
@@ -108,5 +113,13 @@ class Field extends \Curry\Form\Entity {
 	public function getValue()
 	{
 		return $this->isPopulated ? $this->value : $this->initial;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isPopulated()
+	{
+		return $this->isPopulated;
 	}
 }

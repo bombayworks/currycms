@@ -3,14 +3,9 @@
 namespace Curry\Form;
 
 abstract class Entity extends \Curry\Configurable {
-	// COMPONENTS
-	// Label
-	// Widget "the element"
-	// Description
-	// Errors
-
 	protected static $classMap = array(
 		'form' => '\\Curry\\Form\\Form',
+		'container' => '\\Curry\\Form\\Container',
 		'collection' => '\\Curry\\Form\\Collection',
 		'text' => '\\Curry\\Form\\Field\\Text',
 		'statictext' => '\\Curry\\Form\\Field\\StaticText',
@@ -25,6 +20,7 @@ abstract class Entity extends \Curry\Configurable {
 		'time' => '\\Curry\\Form\\Field\\Time',
 		'datetime' => '\\Curry\\Form\\Field\\DateTime',
 		'color' => '\\Curry\\Form\\Field\\Color',
+		'number' => '\\Curry\\Form\\Field\\Number',
 	);
 
 	public static function createEntity($spec)
@@ -35,9 +31,13 @@ abstract class Entity extends \Curry\Configurable {
 			if (array_key_exists(strtolower($spec), self::$classMap))
 				$spec = self::$classMap[strtolower($spec)];
 			return new $spec;
-		} else if (is_array($spec) && isset($spec['type'])) {
-			$type = $spec['type'];
-			unset($spec['type']);
+		} else if (is_array($spec)) {
+			if (isset($spec['type'])) {
+				$type = $spec['type'];
+				unset($spec['type']);
+			} else {
+				$type = isset($spec['fields']) ? 'container' : 'text';
+			}
 			if (array_key_exists(strtolower($type), self::$classMap))
 				$type = self::$classMap[strtolower($type)];
 			return new $type($spec);
@@ -57,24 +57,19 @@ abstract class Entity extends \Curry\Configurable {
 	protected $widget;
 
 	/**
-	 * @var string
+	 * @var string|null
 	 */
-	protected $label;
+	protected $label = null;
 
 	/**
 	 * @var string
 	 */
-	protected $description;
+	protected $description = '';
 
 	/**
 	 * @var array
 	 */
 	protected $errors = array();
-
-	/**
-	 * @var array
-	 */
-	protected $attributes;
 
 	/**
 	 * @var Entity
@@ -85,6 +80,11 @@ abstract class Entity extends \Curry\Configurable {
 	 * @var int|null
 	 */
 	protected $order = null;
+
+	/**
+	 * @var string
+	 */
+	protected $wrapperClass = '';
 
 	/**
 	 * @param int|null $order
@@ -167,7 +167,8 @@ abstract class Entity extends \Curry\Configurable {
 
 	public function getId()
 	{
-		return 'id-'.strtolower(trim(strtr($this->getFullName(), '[]', '--'), '-'));
+		$id = $this->getWidget()->getOption('id');
+		return $id !== null ? $id : 'id-'.strtolower(trim(strtr($this->getFullName(), '[]', '--'), '-'));
 	}
 
 	public function getEntityName($entity)
@@ -182,13 +183,23 @@ abstract class Entity extends \Curry\Configurable {
 		return count($this->getErrors());
 	}
 
-	abstract public function setInitial($data);
+	abstract public function setInitial($initial);
 	abstract public function getInitial();
 	abstract public function getValue();
+	abstract public function setValue($value);
 	abstract public function getRawValue();
 	abstract public function hasChanged();
-	abstract public function getContainerClass();
 	abstract public function populate($data);
+
+	public function setWrapperClass($wrapperClass)
+	{
+		$this->wrapperClass = $wrapperClass;
+	}
+
+	public function getWrapperClass()
+	{
+		return $this->wrapperClass;
+	}
 
 	/**
 	 * @return \Curry\Form\Entity
@@ -196,22 +207,6 @@ abstract class Entity extends \Curry\Configurable {
 	public function getParent()
 	{
 		return $this->parent;
-	}
-
-	/**
-	 * @param array $attributes
-	 */
-	public function setAttributes($attributes)
-	{
-		$this->attributes = $attributes;
-	}
-
-	/**
-	 * @return array
-	 */
-	public function getAttributes()
-	{
-		return $this->attributes;
 	}
 
 	/**
@@ -257,7 +252,7 @@ abstract class Entity extends \Curry\Configurable {
 	}
 
 	/**
-	 * @param string $label
+	 * @param string|null $label
 	 */
 	public function setLabel($label)
 	{
@@ -269,7 +264,7 @@ abstract class Entity extends \Curry\Configurable {
 	 */
 	public function getLabel()
 	{
-		return $this->label !== null ? $this->label : ucfirst($this->getName());
+		return $this->label !== null ? $this->label : ucfirst(strtr($this->getName(), "-_", "  "));
 	}
 
 	/**
@@ -330,7 +325,7 @@ abstract class Entity extends \Curry\Configurable {
 	public function renderLabel($attributes = array())
 	{
 		$label = $this->getLabel();
-		if (!$label)
+		if ($label === '')
 			return '';
 		return self::html('label', $attributes + array('for' => $this->getId()), htmlspecialchars($label));
 	}
@@ -338,7 +333,7 @@ abstract class Entity extends \Curry\Configurable {
 	public function renderDescription($attributes = array())
 	{
 		$description = $this->getDescription();
-		if (!$description)
+		if ($description === '')
 			return '';
 		return self::html('p', $attributes + array('class' => 'form-description'), htmlspecialchars($description));
 	}

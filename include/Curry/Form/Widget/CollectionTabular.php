@@ -25,10 +25,10 @@ class CollectionTabular extends CollectionWidget {
 		foreach($entity as $columnEntity) {
 			if (!$entity instanceof \Curry\Form\Container)
 				throw new \Exception('CollectionTabular requires entities to be subclass of \\Curry\\Form\\Container');
-			$attr = array('class' => $columnEntity->getContainerClass());
+			$attr = array('class' => $columnEntity->getWrapperClass());
 			$markup .= Entity::html('td', $attr, $columnEntity->render());
 		}
-		$attr = $this->attributes + array('class' => $entity->getContainerClass());
+		$attr = array('class' => $entity->getWrapperClass());
 		return Entity::html('tr', $attr, $markup);
 	}
 

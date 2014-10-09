@@ -8,14 +8,16 @@ class Form extends ContainerWidget {
 	public function render(Entity $entity)
 	{
 		$attr = $this->attributes + array(
+				'class' => 'form',
 				'enctype' => $entity->isMultiPart() ? 'multipart/form-data' : null,
 				'action' => $entity->getAction(),
 				'method' => $entity->getMethod()
 			);
-		$markup = parent::render($entity);
-		return $entity->getParent() ?
-			$markup :
-			Entity::html('form', $attr, $markup);
+		$title = $entity->getLabel() !== '' ? Entity::html('label', array(), htmlspecialchars($entity->getLabel())) : '';
+		$markup = $title.
+			$entity->renderDescription().
+			$entity->renderErrors().
+			$this->renderChildren($entity);
+		return Entity::html('form', $attr, $markup);
 	}
-
 }

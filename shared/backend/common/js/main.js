@@ -43,7 +43,7 @@
 
 	// Show ajax loader
 	var numLoading = 0;
-	var $loader = $('<div id="loader"/>');
+	var $loader = $('<div id="loader"/>').toggle(false);
 	function startLoad() { $loader.toggle(!!++numLoading); }
 	function endLoad() { $loader.toggle(!!--numLoading); }
 	$(document)

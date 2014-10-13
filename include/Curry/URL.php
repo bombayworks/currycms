@@ -128,8 +128,10 @@ class Curry_URL {
 	 * @param string $url
 	 * @return Curry_URL
 	 */
-	public static function create($url = "") {
-		return new Curry_URL($url);
+	public static function create($url = "", array $vars = array()) {
+		$u = new Curry_URL($url);
+		$u->add($vars);
+		return $u;
 	}
 
 	/**

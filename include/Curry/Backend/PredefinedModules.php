@@ -21,7 +21,7 @@
  *
  * @package Curry\Controller\Backend
  */
-class Curry_Backend_PredefinedModules extends \Curry\Backend {
+class Curry_Backend_PredefinedModules extends \Curry\AbstractLegacyBackend {
 	/** {@inheritdoc} */
 	public function getName()
 	{
@@ -62,6 +62,6 @@ class Curry_Backend_PredefinedModules extends \Curry\Backend {
 		$list = new Curry_ModelView_List('Module', array(
 			'modelForm' => $form,
 		));
-		$list->show($this);
+		$this->addMainContent($list);
 	}
 }

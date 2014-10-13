@@ -22,7 +22,7 @@ use Curry\Controller\Frontend;
  *
  * @package Curry\Controller\Backend
  */
-class Curry_Backend_PageSync extends \Curry\Backend
+class Curry_Backend_PageSync extends \Curry\AbstractLegacyBackend
 {
 	const INTRO = <<<HTML
 <p>This module allows you to synchronize pages with a remote source. It will compare the published revisions. If you
@@ -53,7 +53,7 @@ HTML;
 		$localChecksum = sha1(serialize($code));
 
 		if (isPost('fetch')) {
-			Frontend::returnJson($code);
+			self::returnJson($code);
 		}
 
 		$form = new Curry_Form(array(

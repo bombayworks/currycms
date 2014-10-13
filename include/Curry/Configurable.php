@@ -44,12 +44,12 @@ abstract class Configurable {
 		return $this;
 	}
 
-	public function getOptionFallback($name)
+	protected function getOptionFallback($name)
 	{
 		throw new \Exception('Unable to get unknown option "'.$name.'".');
 	}
 
-	public function setOptionFallback($name, $value)
+	protected function setOptionFallback($name, $value)
 	{
 		throw new \Exception('Unable to set unknown option "'.$name.'".');
 	}

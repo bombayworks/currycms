@@ -56,7 +56,7 @@ class Curry_Backend_DatabaseHelper {
 	 */
 	public static function createBackupName($format)
 	{
-		$basepath = \Curry\App::getInstance()->config->curry->projectPath . '/data/backup/';
+		$basepath = $this->app->config->curry->projectPath . '/data/backup/';
 		if(!file_exists($basepath))
 			mkdir($basepath, 0777, true);
 		
@@ -162,10 +162,10 @@ class Curry_Backend_DatabaseHelper {
 	 *
 	 * @param string|resource $file
 	 * @param array|null $tables
-	 * @param \Curry\Backend|null $backend
+	 * @param \Curry\AbstractLegacyBackend|null $backend
 	 * @return bool	True on success
 	 */
-	public static function dumpDatabase($file, $tables = null, \Curry\Backend $backend = null)
+	public static function dumpDatabase($file, $tables = null, \Curry\AbstractLegacyBackend $backend = null)
 	{
 		$fp = is_string($file) ? fopen($file, "w") : $file;
 		$totalRows = 0;
@@ -175,7 +175,7 @@ class Curry_Backend_DatabaseHelper {
 		$data = json_encode(array(
 			'header' => array(
 				'version' => Curry_Backend_DatabaseHelper::VERSION,
-				'name' => \Curry\App::getInstance()->config->curry->name,
+				'name' => $this->app->config->curry->name,
 				'curry-version' => Curry_Core::VERSION,
 				'page-version' => defined('Page::VERSION') ? Page::VERSION : 0,
 				'date' => date(DATE_RFC822),
@@ -207,10 +207,10 @@ class Curry_Backend_DatabaseHelper {
 	 * @param string $table
 	 * @param resource $fp
 	 * @param bool $error
-	 * @param \Curry\Backend|null $backend
+	 * @param \Curry\AbstractLegacyBackend|null $backend
 	 * @return int Number of rows dumped.
 	 */
-	public static function dumpTable($table, $fp, &$error, \Curry\Backend $backend = null)
+	public static function dumpTable($table, $fp, &$error, \Curry\AbstractLegacyBackend $backend = null)
 	{
 		$goodRows = 0;
 		$totalRows = 0;
@@ -233,16 +233,16 @@ class Curry_Backend_DatabaseHelper {
 				}
 				catch (Exception $e) {
 					if($backend)
-						$backend->addMessage('Unable to dump row: '.$e->getMessage(), \Curry\Backend::MSG_ERROR);
+						$backend->addMessage('Unable to dump row: '.$e->getMessage(), \Curry\AbstractLegacyBackend::MSG_ERROR);
 					$error = true;
 				}
 			}
 			if($backend)
-				$backend->addMessage("Dumped $goodRows / $totalRows rows in table $table", $goodRows == $totalRows ? \Curry\Backend::MSG_SUCCESS : \Curry\Backend::MSG_ERROR);
+				$backend->addMessage("Dumped $goodRows / $totalRows rows in table $table", $goodRows == $totalRows ? \Curry\AbstractLegacyBackend::MSG_SUCCESS : \Curry\AbstractLegacyBackend::MSG_ERROR);
 		}
 		catch (Exception $e) {
 			if($backend)
-				$backend->addMessage('Unable to dump table: '.$e->getMessage(), \Curry\Backend::MSG_ERROR);
+				$backend->addMessage('Unable to dump table: '.$e->getMessage(), \Curry\AbstractLegacyBackend::MSG_ERROR);
 			$error = true;
 		}
 		return $goodRows;
@@ -254,7 +254,7 @@ class Curry_Backend_DatabaseHelper {
 	 * @param string $table
 	 * @param bool $fix
 	 * @param bool $delete
-	 * @param \Curry\Backend|null $backend
+	 * @param \Curry\AbstractLegacyBackend|null $backend
 	 * @return int Number of invalid rows.
 	 */
 	public static function scanTable($table, $fix, $delete, $backend = null)
@@ -290,7 +290,7 @@ class Curry_Backend_DatabaseHelper {
 						if($column->isNotNull()) {
 							if($delete) {
 								if($backend)
-									$backend->addMessage("Deleting $objName (required $columnName was invalid).", \Curry\Backend::MSG_WARNING);
+									$backend->addMessage("Deleting $objName (required $columnName was invalid).", \Curry\AbstractLegacyBackend::MSG_WARNING);
 								$obj->delete();
 								$error = array();
 								break; // dont have to check the other columns
@@ -301,7 +301,7 @@ class Curry_Backend_DatabaseHelper {
 							if($fix) {
 								// attempt to fix
 								if($backend)
-									$backend->addMessage("Fixing $objName (invalid $columnName will be set to null).", \Curry\Backend::MSG_WARNING);
+									$backend->addMessage("Fixing $objName (invalid $columnName will be set to null).", \Curry\AbstractLegacyBackend::MSG_WARNING);
 								$obj->{'set'.$column->getPhpName()}(null);
 								$obj->save();
 							} else {
@@ -318,7 +318,7 @@ class Curry_Backend_DatabaseHelper {
 					// Add message with link to edit row
 					$url = (string)url('', array('module' => 'Curry_Backend_Database', 'view' => 'Row', 'table' => $table, 'pk' => self::getObjectPk($obj)));
 					$link = Curry_Html::createTag('a', array('href' => $url, 'title' => 'Edit '.$objName, 'class' => 'dialog'), $objName);
-					$backend->addMessage("$link: ".join(', ', $error).'.', \Curry\Backend::MSG_WARNING, false);
+					$backend->addMessage("$link: ".join(', ', $error).'.', \Curry\AbstractLegacyBackend::MSG_WARNING, false);
 				}
 			}
 		}
@@ -489,10 +489,10 @@ class Curry_Backend_DatabaseHelper {
 	 * @param array|null $tables
 	 * @param float $maxExecutionTime
 	 * @param int $continueLine
-	 * @param \Curry\Backend|null $backend
+	 * @param \Curry\AbstractLegacyBackend|null $backend
 	 * @return bool	True on success, false otherwise.
 	 */
-	public static function restoreFromFile($file, $tables = null, $maxExecutionTime = 0, $continueLine = 0, \Curry\Backend $backend = null)
+	public static function restoreFromFile($file, $tables = null, $maxExecutionTime = 0, $continueLine = 0, \Curry\AbstractLegacyBackend $backend = null)
 	{
 		global $CURRY_DATABASE_RESTORE;
 		$CURRY_DATABASE_RESTORE = true;
@@ -529,7 +529,7 @@ class Curry_Backend_DatabaseHelper {
 				$backend->addMessage("Restoring from ".$header['date']);
 			if ($pageVersion !== Page::VERSION) {
 				if ($backend)
-					$backend->addMessage("Migrating data from version $pageVersion to ".Page::VERSION, \Curry\Backend::MSG_WARNING);
+					$backend->addMessage("Migrating data from version $pageVersion to ".Page::VERSION, \Curry\AbstractLegacyBackend::MSG_WARNING);
 				Page::preMigrate($pageVersion);
 			}
 		} else {
@@ -545,7 +545,7 @@ class Curry_Backend_DatabaseHelper {
 							continue;
 						if(!method_exists($table, 'delete')) {
 							if($backend)
-								$backend->addMessage("Skipping read-only table: $table", \Curry\Backend::MSG_WARNING);
+								$backend->addMessage("Skipping read-only table: $table", \Curry\AbstractLegacyBackend::MSG_WARNING);
 							continue;
 						}
 						
@@ -591,9 +591,9 @@ class Curry_Backend_DatabaseHelper {
 					$added = array_diff($columns, array_keys($data['values']));
 					$removed = array_diff(array_keys($data['values']), $columns);
 					if(count($added))
-						$backend->addMessage('New column(s): '.join(', ', $added), \Curry\Backend::MSG_WARNING);
+						$backend->addMessage('New column(s): '.join(', ', $added), \Curry\AbstractLegacyBackend::MSG_WARNING);
 					if(count($removed))
-						$backend->addMessage('Removed column(s): '.join(', ', $removed), \Curry\Backend::MSG_WARNING);
+						$backend->addMessage('Removed column(s): '.join(', ', $removed), \Curry\AbstractLegacyBackend::MSG_WARNING);
 				}
 				// Flush buffer when changing tables
 				if($data['table'] !== $currentTable || count($buffer) >= self::MULTIINSERT_MAXBUFFER) {
@@ -611,7 +611,7 @@ class Curry_Backend_DatabaseHelper {
 				$buffer[] = $data['values'];
 			} else {
 				if($backend)
-					$backend->addMessage('Unable to read data on line '.$total, \Curry\Backend::MSG_ERROR);
+					$backend->addMessage('Unable to read data on line '.$total, \Curry\AbstractLegacyBackend::MSG_ERROR);
 				++$failed;
 			}
 			// check execution time
@@ -651,8 +651,8 @@ class Curry_Backend_DatabaseHelper {
 			if($skipped)
 				$backend->addMessage("Skipped $skipped rows");
 			if($failed)
-				$backend->addMessage("Failed to add $failed rows", \Curry\Backend::MSG_ERROR);
-			$backend->addMessage("Added " . ($total - $skipped - $failed) . " / $total rows in ".round(microtime(true) - $t, 2)."s", !$failed ? \Curry\Backend::MSG_SUCCESS : \Curry\Backend::MSG_ERROR);
+				$backend->addMessage("Failed to add $failed rows", \Curry\AbstractLegacyBackend::MSG_ERROR);
+			$backend->addMessage("Added " . ($total - $skipped - $failed) . " / $total rows in ".round(microtime(true) - $t, 2)."s", !$failed ? \Curry\AbstractLegacyBackend::MSG_SUCCESS : \Curry\AbstractLegacyBackend::MSG_ERROR);
 		}
 		
 		if(is_string($file))

@@ -20,6 +20,7 @@ namespace Curry\Controller;
 use Curry\App;
 use Curry\Exception;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
@@ -30,7 +31,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
  *
  * @package Curry\Controller\Backend
  */
-class Backend extends \Curry\Backend\Base implements EventSubscriberInterface {
+class Backend extends \Curry\Backend\AbstractBackend implements EventSubscriberInterface {
 	public function initialize()
 	{
 		$app = \Curry\App::getInstance();
@@ -39,13 +40,11 @@ class Backend extends \Curry\Backend\Base implements EventSubscriberInterface {
 		$backendClasses = $app->cache->load($cacheName);
 		if ($backendClasses === false) {
 			$backendClasses = array();
-			$classes = \Curry\ClassEnumerator::findClasses('../curry/include');
+			$classes = \Curry\ClassEnumerator::findClasses(__DIR__.'/../Backend');
 			foreach($classes as $className) {
-				if (class_exists($className)
-						&& $className !== 'Curry\\Backend\\Base'
-						&& $className !== __CLASS__) {
+				if (class_exists($className) && $className !== __CLASS__) {
 					$r = new \ReflectionClass($className);
-					if ($r->isSubclassOf('Curry\\Backend\\Base') && !$r->isAbstract())
+					if ($r->isSubclassOf('Curry\\Backend\\AbstractBackend') && !$r->isAbstract())
 						$backendClasses[strtolower($r->getShortName())] = $className;
 				}
 			}
@@ -53,7 +52,7 @@ class Backend extends \Curry\Backend\Base implements EventSubscriberInterface {
 		}
 
 		foreach($backendClasses as $viewName => $className) {
-			$this->addView($viewName, new $className);
+			$this->addView($viewName, new $className($this->app));
 		}
 	}
 
@@ -66,7 +65,6 @@ class Backend extends \Curry\Backend\Base implements EventSubscriberInterface {
 	{
 		return array(
 			KernelEvents::REQUEST => 'onKernelRequest',
-			//KernelEvents::FINISH_REQUEST => array(array('onKernelFinishRequest', 0)),
 		);
 	}
 
@@ -88,7 +86,7 @@ class Backend extends \Curry\Backend\Base implements EventSubscriberInterface {
 		$view = $app->request->attributes->get('_view');
 		$response = $view->show($app->request);
 		if (!$response instanceof Response)
-			$response = new Response($response);
+			$response = new Response(\Curry_Util::stringify($response));
 		return $response;
 	}
 

@@ -19,7 +19,9 @@
 namespace Curry\Controller;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
@@ -58,6 +60,7 @@ class Frontend implements EventSubscriberInterface {
 	{
 		return array(
 			KernelEvents::REQUEST => 'onKernelRequest',
+			KernelEvents::EXCEPTION => 'onKernelException',
 			//KernelEvents::FINISH_REQUEST => array(array('onKernelFinishRequest', 0)),
 		);
 	}
@@ -70,6 +73,34 @@ class Frontend implements EventSubscriberInterface {
 			$request->attributes->set('_page', $page);
 			$request->attributes->set('_controller', array($this, 'index'));
 		}
+	}
+
+	public function onKernelException(GetResponseForExceptionEvent $event)
+	{
+		// You get the exception object from the received event
+		$exception = $event->getException();
+		$message = sprintf(
+			'Error: %s %s (code: %s)',
+			$exception->getMessage(),
+			"<pre>".$exception->getTraceAsString()."</pre>",
+			$exception->getCode()
+		);
+
+		// Customize your response object to display the exception details
+		$response = new Response();
+		$response->setContent($message);
+
+		// HttpExceptionInterface is a special type of exception that
+		// holds status code and header details
+		if ($exception instanceof HttpExceptionInterface) {
+			$response->setStatusCode($exception->getStatusCode());
+			$response->headers->replace($exception->getHeaders());
+		} else {
+			$response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
+		}
+
+		// Send the modified response object to the event
+		$event->setResponse($response);
 	}
 	
 	/**

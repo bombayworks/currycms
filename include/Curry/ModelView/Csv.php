@@ -50,7 +50,7 @@ class Curry_ModelView_Csv extends Curry_ModelView_Abstract {
 		return $this->includeHeaders;
 	}
 
-	public function render(\Curry\Backend $backend, array $params)
+	public function render(\Curry\AbstractLegacyBackend $backend, array $params)
 	{
 		$view = $this->view ? $this->view : $this->parentView;
 		if (!($view instanceof \Curry_ModelView_List))

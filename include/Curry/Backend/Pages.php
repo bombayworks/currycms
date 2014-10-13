@@ -4,7 +4,7 @@ namespace Curry\Backend;
 
 use Symfony\Component\HttpFoundation\Request;
 
-class Pages extends Base {
+class Pages extends AbstractBackend {
 	public function initialize()
 	{
 		$this->addView('menu', $this->getMenu());

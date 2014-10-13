@@ -21,7 +21,7 @@
  *
  * @package Curry\Controller\Backend
  */
-class Curry_Backend_Setup extends \Curry\Backend {
+class Curry_Backend_Setup extends \Curry\AbstractLegacyBackend {
 	
 	public function getGroup()
 	{
@@ -37,9 +37,9 @@ class Curry_Backend_Setup extends \Curry\Backend {
 	{
 		$isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
 		if ($isWindows) {
-			$projectPath = \Curry\App::getInstance()->config->curry->projectPath;
-			$curryPath = \Curry\App::getInstance()->config->curry->basePath;
-			$wwwPath = \Curry\App::getInstance()->config->curry->wwwPath;
+			$projectPath = $this->app->config->curry->projectPath;
+			$curryPath = $this->app->config->curry->basePath;
+			$wwwPath = $this->app->config->curry->wwwPath;
 			$symlinks = array(
 				Curry_Util::path($projectPath,'propel','inject','core') => 'propel/inject/core',
 				Curry_Util::path($projectPath,'propel','core.schema.xml') => 'propel/core.schema.xml',
@@ -66,8 +66,8 @@ class Curry_Backend_Setup extends \Curry\Backend {
 	{
 		$this->addMainContent('<h2>Checking file permissions</h2>');
 		$error = false;
-		$projectPath = \Curry\App::getInstance()->config->curry->projectPath;
-		$wwwPath = \Curry\App::getInstance()->config->curry->wwwPath;
+		$projectPath = $this->app->config->curry->projectPath;
+		$wwwPath = $this->app->config->curry->wwwPath;
 		$paths = array(
 			Curry_Util::path($projectPath,'data'),
 			Curry_Util::path($projectPath,'templates'),
@@ -122,7 +122,7 @@ class Curry_Backend_Setup extends \Curry\Backend {
 		$url = url('', array('module', 'view'=>'CreateDatabase'));
 		$this->addCommand('Create database', $url, 'icon-plus-sign', array('class' => 'dialog'));
 
-		$cmsPath = \Curry\App::getInstance()->config->curry->projectPath;
+		$cmsPath = $this->app->config->curry->projectPath;
 		$propelConfig = Curry_Util::path($cmsPath,'config','propel.xml');
 		if(!is_writable($propelConfig))
 			$this->addMessage("Configuration file $propelConfig doesn't seem to be writable.", self::MSG_ERROR);
@@ -232,7 +232,7 @@ class Curry_Backend_Setup extends \Curry\Backend {
 		} else {
 			$this->addMainContent('<h2>Basic configuration</h2>');
 
-			$configFile = \Curry\App::getInstance()->config->curry->configPath;
+			$configFile = $this->app->config->curry->configPath;
 			if(!$configFile)
 				$this->addMessage("Configuration file not set.", self::MSG_ERROR);
 			else if(!is_writable($configFile))
@@ -445,7 +445,7 @@ HTML
 		}
 
 		// Initialize propel
-		Propel::init(\Curry\App::getInstance()->config->curry->propel->conf);
+		Propel::init($this->app->config->curry->propel->conf);
 
 		// Set database charset
 		if($params['set_charset']) {
@@ -494,11 +494,11 @@ HTML
 			'elements' => array(
 				'name' => array('text', array(
 					'label' => 'Project name',
-					'value' => \Curry\App::getInstance()->config->curry->name,
+					'value' => $this->app->config->curry->name,
 				)),
 				'email' => array('text', array(
 					'label' => 'Webmaster email',
-					'value' => \Curry\App::getInstance()->config->curry->adminEmail,
+					'value' => $this->app->config->curry->adminEmail,
 				)),
 				'base_url' => array('text', array(
 					'label' => 'Base URL',
@@ -511,7 +511,7 @@ HTML
 				)),
 				'development_mode' => array('checkbox', array(
 					'label' => 'Development mode',
-					'value' => \Curry\App::getInstance()->config->curry->developmentMode,
+					'value' => $this->app->config->curry->developmentMode,
 				)),
 				'save' => array('submit', array(
 					'label' => 'Save',
@@ -646,14 +646,14 @@ HTML
 		}
 
 		// Create template root
-		$templateRoot = \Curry\App::getInstance()->config->curry->template->root;
+		$templateRoot = $this->app->config->curry->template->root;
 		if(!file_exists($templateRoot))
 			@mkdir($templateRoot, 0777, true);
 
 		switch($values['template']) {
 			case 'empty':
 			case 'curry':
-				$source = Curry_Util::path(\Curry\App::getInstance()->config->curry->wwwPath, 'shared', 'backend', 'common', 'templates', 'project-empty.html');
+				$source = Curry_Util::path($this->app->config->curry->wwwPath, 'shared', 'backend', 'common', 'templates', 'project-empty.html');
 				$templateFile = Curry_Util::path($templateRoot, 'Root.html');
 				if(!file_exists($templateFile))
 					@copy($source, $templateFile);
@@ -663,7 +663,7 @@ HTML
 			case 'html5boilerplate':
 		}
 
-		if (file_exists(\Curry\App::getInstance()->config->curry->configPath)) {
+		if (file_exists($this->app->config->curry->configPath)) {
 			$config = Curry_Core::openConfiguration();
 			$config->curry->name = $values['name'];
 			$config->curry->adminEmail = $values['email'];

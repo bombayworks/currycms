@@ -22,7 +22,7 @@ use Curry\Controller\Frontend;
  * 
  * @package Curry\Controller\Backend
  */
-class Curry_Backend_Database extends \Curry\Backend
+class Curry_Backend_Database extends \Curry\AbstractLegacyBackend
 {
 	/**#@+
 	 * Propel-gen method constants.
@@ -59,9 +59,9 @@ class Curry_Backend_Database extends \Curry\Backend
 	/**
 	 * Constructor.
 	 */
-	public function __construct()
+	public function __construct(\Curry\App $app)
 	{
-		parent::__construct();
+		parent::__construct($app);
 
 		// Override and increase max execution time if set
 		$timeLimit = ini_get('max_execution_time');
@@ -187,7 +187,7 @@ class Curry_Backend_Database extends \Curry\Backend
 				}
 			}
 		}
-		$this->returnJson( $this->getTableGrid()->getJSON() );
+		self::returnJson( $this->getTableGrid()->getJSON() );
 	}
 	
 	/**
@@ -254,10 +254,10 @@ class Curry_Backend_Database extends \Curry\Backend
 		$form = Curry_Backend_DatabaseHelper::getRowForm($row);
 		if (isPost() && $form->isValid($_POST)) {
 			Curry_Backend_DatabaseHelper::saveRow($row, $form);
-			$this->returnPartial('');
+			self::returnPartial('');
 		}
 		
-		$this->returnPartial($form);
+		self::returnPartial($form);
 	}
 
 	/**
@@ -572,7 +572,7 @@ class Curry_Backend_Database extends \Curry\Backend
 	 */
 	public function doAutoRebuild()
 	{
-		if(!is_writable(\Curry\App::getInstance()->config->curry->configPath)) {
+		if(!is_writable($this->app->config->curry->configPath)) {
 			$this->addMessage("Configuration file doesn't seem to be writable.", self::MSG_ERROR);
 			return;
 		}
@@ -903,8 +903,8 @@ class Curry_Backend_Database extends \Curry\Backend
 				$fp = fopen("php://temp", 'r+');
 				Curry_Backend_DatabaseHelper::dumpDatabase($fp, $values['tables'], $this);
 				rewind($fp);
-				$name = Curry_String::getRewriteString(\Curry\App::getInstance()->config->curry->name).'-db.txt';
-				Frontend::returnData($fp, 'application/octet-stream', $name);
+				$name = Curry_String::getRewriteString($this->app->config->curry->name).'-db.txt';
+				self::returnData($fp, 'application/octet-stream', $name);
 			} else if($values['type'] == 'online') {
 				$filename = Curry_Backend_DatabaseHelper::createBackupName($values['name']);
 				$status = Curry_Backend_DatabaseHelper::dumpDatabase($filename, $values['tables'], $this);

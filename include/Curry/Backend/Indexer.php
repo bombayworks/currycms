@@ -22,7 +22,7 @@ use Curry\Controller\Frontend;
  * 
  * @package Curry\Controller\Backend
  */
-class Curry_Backend_Indexer extends \Curry\Backend {
+class Curry_Backend_Indexer extends \Curry\AbstractLegacyBackend {
 	/** {@inheritdoc} */
 	public function getGroup()
 	{
@@ -149,7 +149,7 @@ class Curry_Backend_Indexer extends \Curry\Backend {
 					// Return current status
 					$part = 1 / count($ses->models);
 					$progress = $ses->model * $part + ($ses->offset / $maxItems) * $part;
-					Frontend::returnJson(array(
+					self::returnJson(array(
 						'progress' => round(100 * $progress),
 						'continue' => true,
 						'status' => "Indexing ".$ses->models[$ses->model]."...",
@@ -162,7 +162,7 @@ class Curry_Backend_Indexer extends \Curry\Backend {
 				if ($ses->failed) {
 					$status .= ' '.$ses->failed.' items failed.';
 				}
-				Frontend::returnJson(array(
+				self::returnJson(array(
 					'progress' => 100,
 					'continue' => false,
 					'status' => $status,
@@ -171,7 +171,7 @@ class Curry_Backend_Indexer extends \Curry\Backend {
 		}
 		catch (Exception $e) {
 			if ($ajax)
-				Frontend::returnJson(array('continue' => false, 'status' => $e->getMessage()));
+				self::returnJson(array('continue' => false, 'status' => $e->getMessage()));
 			else
 				throw $e;
 		}

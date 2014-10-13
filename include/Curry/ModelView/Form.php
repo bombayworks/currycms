@@ -31,8 +31,8 @@ class Curry_ModelView_Form extends \Curry\View {
 	public function __construct($modelOrModelForm, $options = array())
 	{
 		if (is_string($modelOrModelForm)) {
-			$this->modelForm = new Curry_Form_ModelForm($modelOrModelForm, $options);
-		} else if ($modelOrModelForm instanceof Curry_Form_ModelForm) {
+			$this->modelForm = new Curry\Form\ModelForm($modelOrModelForm, $options);
+		} else if ($modelOrModelForm instanceof Curry\Form\ModelForm) {
 			$this->modelForm = $modelOrModelForm;
 		} else {
 			throw new Exception('Expected string or Curry_Form_ModelForm');
@@ -89,24 +89,21 @@ class Curry_ModelView_Form extends \Curry\View {
 		*/
 
 		$form = clone $this->modelForm;
-		$form->setOptions(array(
-			'method' => 'post',
-			'action' => (string)url('', $params),
-		));
 		$buttons = array('save');
-		$form->addElement('submit', 'save', array('label' => 'Save'));
+		$form->addField('save', array('type' => 'submit', 'label' => 'Save'));
 		if(!$item->isNew() && ($this->parent instanceof Curry_ModelView_List) && $this->parent->hasAction('delete')) {
-			$form->addElement('submit', 'delete', array(
+			$form->addField('delete', array(
+				'type' => 'submit',
 				'label' => 'Delete',
 				'class' => 'btn btn-danger',
 				'onclick' => "return confirm('Do you really want to delete this item? This cannot be undone.');",
 			));
 			$buttons[] = 'delete';
 		}
-		$form->addDisplayGroup($buttons, 'save_group', array('class' => 'horizontal-group'));
+		//$form->addDisplayGroup($buttons, 'save_group', array('class' => 'horizontal-group'));
 		$form->fillForm($item);
 
-		if(isPost() && $form->isValid($_POST)) {
+		if($request->isMethod('POST') && $form->isValid($_POST)) {
 			if($form->delete && $form->delete->isChecked()) {
 				//$backend->createModelUpdateEvent($modelClass, $item->getPrimaryKey(), 'delete');
 				$item->delete();

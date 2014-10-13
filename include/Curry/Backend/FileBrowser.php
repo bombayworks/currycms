@@ -22,7 +22,7 @@ use Curry\Controller\Frontend;
  *
  * @package Curry\Controller\Backend
  */
-class Curry_Backend_FileBrowser extends \Curry\Backend
+class Curry_Backend_FileBrowser extends \Curry\AbstractLegacyBackend
 {
 	/** {@inheritdoc} */
 	public function getName()
@@ -33,10 +33,10 @@ class Curry_Backend_FileBrowser extends \Curry\Backend
 	/**
 	 * Constructor
 	 */
-	public function __construct()
+	public function __construct(\Curry\App $app)
 	{
-		parent::__construct();
-		$this->rootPath = \Curry\App::getInstance()->config->curry->wwwPath.DIRECTORY_SEPARATOR;
+		parent::__construct($app);
+		$this->rootPath = $this->app->config->curry->wwwPath.DIRECTORY_SEPARATOR;
 	}
 	
 	/**
@@ -206,11 +206,11 @@ class Curry_Backend_FileBrowser extends \Curry\Backend
 				if(!method_exists($this, $method))
 					throw new Curry_Exception('Action does not exist.');
 				$contentType = isset($_GET['iframe']) ? 'text/html' : 'application/json';
-				Frontend::returnJson($this->$method($_REQUEST), "", $contentType);
+				self::returnJson($this->$method($_REQUEST), "", $contentType);
 			}
 			catch(Exception $e) {
 				if(isAjax())
-					$this->returnJson( array('status'=>0, 'error'=>$e->getMessage()) );
+					self::returnJson( array('status'=>0, 'error'=>$e->getMessage()) );
 				else
 					$this->addMessage($e->getMessage(), self::MSG_ERROR);
 			}
@@ -329,7 +329,7 @@ TPL
 		$vars['paths'] = self::getPaths($selected);
 		$content = $template->render($vars);
 		if(isAjax()) {
-			$this->returnJson(array(
+			self::returnJson(array(
 				'content' => $content,
 				'maxUploadSize' => Curry_Util::computerReadableBytes(get_cfg_var('upload_max_filesize')),
 				'path' => $selected,
@@ -420,19 +420,19 @@ TPL
 		
 		if($zip) {
 			require_once 'pclzip/pclzip.lib.php';
-			$tempfile = tempnam(\Curry\App::getInstance()->config->curry->tempPath, "curry-download");
+			$tempfile = tempnam($this->app->config->curry->tempPath, "curry-download");
 			$archive = new PclZip($tempfile);
 			if(!$archive->create($physicals, PCLZIP_OPT_REMOVE_PATH, dirname($physicals[0]))) {
 				$this->addMessage('Unable to create zip.');
 				if(file_exists($tempfile))
 					@unlink($tempfile);
 			} else {
-				Frontend::returnFile($tempfile, 'application/octet-stream', $name, false);
+				self::returnFile($tempfile, 'application/octet-stream', $name, false);
 				@unlink($tempfile);
 				exit;
 			}
 		} else {
-			Frontend::returnFile($physicals[0], 'application/octet-stream', $name);
+			self::returnFile($physicals[0], 'application/octet-stream', $name);
 		}
 	}
 	
@@ -546,7 +546,7 @@ TPL
 						'target' => $target,
 						'temp' => $sourceHash,
 					);
-					$target = \Curry\App::getInstance()->config->curry->tempPath . DIRECTORY_SEPARATOR . $sourceHash;
+					$target = $this->app->config->curry->tempPath . DIRECTORY_SEPARATOR . $sourceHash;
 					move_uploaded_file($source, $target);
 					continue;
 				}
@@ -576,7 +576,7 @@ TPL
 			if(!isset($sessionFiles[$name]))
 				throw new Exception('File to overwrite not found in session');
 			$sessionFile = $sessionFiles[$name];
-			$tempFile = \Curry\App::getInstance()->config->curry->tempPath . DIRECTORY_SEPARATOR . $sessionFile['temp'];
+			$tempFile = $this->app->config->curry->tempPath . DIRECTORY_SEPARATOR . $sessionFile['temp'];
 			if($overwrite === 'true') {
 				if(file_exists($sessionFile['target']))
 					self::trashFile($sessionFile['target']);
@@ -628,7 +628,7 @@ TPL
 		$current = '';
 		while(1) {
 			$currentPath = $rootPath . $current;
-			if(!is_dir(\Curry\App::getInstance()->config->curry->wwwPath . DIRECTORY_SEPARATOR . $currentPath))
+			if(!is_dir($this->app->config->curry->wwwPath . DIRECTORY_SEPARATOR . $currentPath))
 				break;
 			$next = count($parts) ? $parts[0] : '';
 			$paths[] = $this->getPathInfo($currentPath, $root . $current, $next, $selected);
@@ -658,7 +658,7 @@ TPL
 			'files' => array(),
 		);
 		
-		$realpath = realpath(\Curry\App::getInstance()->config->curry->wwwPath .DIRECTORY_SEPARATOR. $path);
+		$realpath = realpath($this->app->config->curry->wwwPath .DIRECTORY_SEPARATOR. $path);
 		
 		$dit = new DirectoryIterator($realpath);
 		foreach($dit as $entry) {
@@ -812,7 +812,7 @@ TPL
 	 */
 	protected function trashFile($file)
 	{
-		$trashPath = \Curry\App::getInstance()->config->curry->trashPath . DIRECTORY_SEPARATOR;
+		$trashPath = $this->app->config->curry->trashPath . DIRECTORY_SEPARATOR;
 		if($trashPath) {
 			if(!file_exists($trashPath))
 				mkdir($trashPath, 0777, true);
@@ -866,7 +866,7 @@ TPL
 			'exit' => $exitUrl,
 			'method' => 'get',
 			'image' => $imageUrl,
-			'referrer' => \Curry\App::getInstance()->config->curry->name,
+			'referrer' => $this->app->config->curry->name,
 			'title' => basename($image),
 		));
 		

@@ -22,7 +22,7 @@ use Curry\Controller\Frontend;
  * 
  * @package Curry\Controller\Backend
  */
-class Curry_Backend_Users extends \Curry\Backend
+class Curry_Backend_Users extends \Curry\AbstractLegacyBackend
 {
 	const PERMISSION_USERS = 'Users';
 	const PERMISSION_ROLES = 'Roles';
@@ -109,7 +109,7 @@ class Curry_Backend_Users extends \Curry\Backend
 				'single' => true,
 			));
 		}
-		$list->show($this);
+		$this->addMainContent($list);
 	}
 
 	public function showRoles()
@@ -120,7 +120,7 @@ class Curry_Backend_Users extends \Curry\Backend
 		$this->addMenu();
 
 		$user = User::getUser();
-		$backendModules = \Curry\Backend::getBackendList();
+		$backendModules = \Curry\AbstractLegacyBackend::getBackendList();
 
 		$disable = array();
 		$backend = array("*" => "All");
@@ -201,7 +201,7 @@ class Curry_Backend_Users extends \Curry\Backend
 			'class' => 'inline',
 			'single' => true,
 		));
-		$list->show($this);
+		$this->addMainContent($list);
 	}
 
 	public function showFileAccess()
@@ -265,7 +265,7 @@ class Curry_Backend_Users extends \Curry\Backend
 			),
 		);
 		$list = $this->getFileAccessList($q, $formOptions, $listOptions);
-		$list->show($this);
+		$this->addMainContent($list);
 	}
 
 	protected function getValidRoles()
@@ -402,7 +402,7 @@ class Curry_Backend_Users extends \Curry\Backend
 			$this->createModelUpdateEvent(get_class($user), $user->getPrimaryKey(), $user->isNew() ? 'insert' : 'update');
 			$this->saveUser($user, $form);
 			if (isAjax())
-				Frontend::returnPartial('');
+				self::returnPartial('');
 		}
 		
 		// Render
@@ -512,7 +512,7 @@ class Curry_Backend_Users extends \Curry\Backend
 
 		$home = self::getUserHome($user, true);
 		if($values['create_home_folder']) {
-			$folder = \Curry\App::getInstance()->config->curry->wwwPath . DIRECTORY_SEPARATOR;
+			$folder = $this->app->config->curry->wwwPath . DIRECTORY_SEPARATOR;
 			$folder .= str_replace('/', DIRECTORY_SEPARATOR, rtrim($home->getPath(), '/'));
 			if (!file_exists($folder))
 				@mkdir($folder, 0777, true);

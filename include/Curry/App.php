@@ -126,8 +126,8 @@ class App extends ServiceContainer implements HttpKernelInterface, TerminableInt
 
 		register_shutdown_function(array($this, 'shutdown'));
 
-		$this->singleton('backend', function() {
-			return new Backend();
+		$this->singleton('backend', function() use($app) {
+			return new Backend($app);
 		});
 
 		//$frontend = new Frontend();
@@ -141,6 +141,7 @@ class App extends ServiceContainer implements HttpKernelInterface, TerminableInt
 			$request = Request::createFromGlobals();
 		$this->boot();
 		$response = $this->handle($request);
+		$response->prepare($request);
 		$response->send();
 		$this->terminate($request, $response);
 	}
@@ -367,7 +368,8 @@ class App extends ServiceContainer implements HttpKernelInterface, TerminableInt
 
 			case 'none':
 			default:
-				return new \Curry\NullProxy();
+				$logger->pushHandler(new \Monolog\Handler\NullHandler());
+				break;
 		}
 		
 		$logger->debug("Logging initialized");

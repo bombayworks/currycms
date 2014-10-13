@@ -5,7 +5,7 @@ namespace Curry\Backend;
 use Curry\App;
 use Symfony\Component\HttpFoundation\Request;
 
-class Base extends \Curry\View {
+abstract class AbstractBackend extends \Curry\View {
 	/**
 	 * Path to shared jQuery library.
 	 *
@@ -100,8 +100,14 @@ class Base extends \Curry\View {
 	 */
 	protected $menuContent = '';
 
-	public function __construct()
+	/**
+	 * @var App
+	 */
+	protected $app;
+
+	public function __construct(\Curry\App $app)
 	{
+		$this->app = $app;
 		$this->htmlHead = new \Curry_HtmlHead();
 	}
 
@@ -143,7 +149,10 @@ class Base extends \Curry\View {
 	public function getName()
 	{
 		$rc = new \ReflectionClass($this);
-		return $rc->getShortName();
+		$name = $rc->getShortName();
+		if (($pos = strrpos($name, '_')) !== false)
+			$name = substr($name, $pos + 1);
+		return $name;
 	}
 
 	/**
@@ -211,14 +220,11 @@ class Base extends \Curry\View {
 	public function getTwig()
 	{
 		if (!$this->twig) {
-			$path = \Curry_Util::path('shared', 'backend');
-			$backendPath = \Curry_Util::path(true, \Curry\App::getInstance()->config->curry->wwwPath, $path);
-			if (!$backendPath)
-				$backendPath = \Curry_Util::path(true, \Curry\App::getInstance()->config->curry->basePath, $path);
+			$backendPath = \Curry_Util::path(true, $this->app->config->curry->basePath, 'shared', 'backend');
 			if (!$backendPath)
 				throw new \Exception('Curry\Controller\Backend path (shared/backend) not found.');
 			$templatePaths = array(
-				\Curry_Util::path($backendPath, \Curry\App::getInstance()->config->curry->backend->theme, 'templates'),
+				\Curry_Util::path($backendPath, $this->app->config->curry->backend->theme, 'templates'),
 				\Curry_Util::path($backendPath, 'common', 'templates'),
 			);
 			$templatePaths = array_filter($templatePaths, 'is_dir');
@@ -238,11 +244,6 @@ class Base extends \Curry\View {
 		return $this->twig;
 	}
 
-	public function show(Request $request)
-	{
-		return $this->render();
-	}
-
 	public function render()
 	{
 		$twig = $this->getTwig();
@@ -253,8 +254,8 @@ class Base extends \Curry\View {
 		$htmlHead->addStylesheet('shared/libs/build/all.css');
 
 		// Globals
-		$encoding = \Curry\App::getInstance()->config->curry->outputEncoding;
-		$twig->addGlobal('ProjectName', \Curry\App::getInstance()->config->curry->name);
+		$encoding = $this->app->config->curry->outputEncoding;
+		$twig->addGlobal('ProjectName', $this->app->config->curry->name);
 		$twig->addGlobal('Encoding', $encoding);
 		$twig->addGlobal('Version', \Curry_Core::VERSION);
 
@@ -396,13 +397,7 @@ class Base extends \Curry\View {
 	 */
 	public function addMainContent($content)
 	{
-		if (!is_string($content)) {
-			if (is_object($content) && method_exists($content, '__toString'))
-				$content = $content->__toString();
-			else
-				$content = (string)$content;
-		}
-		$this->mainContent .= $content;
+		$this->mainContent .= \Curry_Util::stringify($content);
 	}
 
 	/**
@@ -412,12 +407,6 @@ class Base extends \Curry\View {
 	 */
 	public function addMenuContent($content)
 	{
-		if (!is_string($content)) {
-			if (is_object($content) && method_exists($content, '__toString'))
-				$content = $content->__toString();
-			else
-				$content = (string)$content;
-		}
-		$this->menuContent .= $content;
+		$this->menuContent .= \Curry_Util::stringify($content);
 	}
 }

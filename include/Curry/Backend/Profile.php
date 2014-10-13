@@ -22,7 +22,7 @@
  * @package Curry\Controller\Backend
  *
  */
-class Curry_Backend_Profile extends \Curry\Backend
+class Curry_Backend_Profile extends \Curry\AbstractLegacyBackend
 {
 	/** {@inheritdoc} */
 	public function getGroup()

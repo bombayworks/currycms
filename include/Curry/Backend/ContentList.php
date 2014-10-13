@@ -308,11 +308,11 @@ class Curry_Backend_ContentList extends Curry_ModelView_List {
 	public function showDelete(Curry_PageModuleWrapper $wrapper, $backend)
 	{
 		if ($wrapper->isInherited() && !$this->pagePermission[PageAccessPeer::PERM_MODULES]) {
-			$backend->addMessage('You do not have permission to delete inherited modules.', \Curry\Backend::MSG_ERROR);
+			$backend->addMessage('You do not have permission to delete inherited modules.', \Curry\AbstractLegacyBackend::MSG_ERROR);
 			return;
 		}
 		if (!$this->pagePermission[PageAccessPeer::PERM_CREATE_MODULE]) {
-			$backend->addMessage('You do not have permission to delete modules.', \Curry\Backend::MSG_ERROR);
+			$backend->addMessage('You do not have permission to delete modules.', \Curry\AbstractLegacyBackend::MSG_ERROR);
 			return;
 		}
 		$form = new Curry_Form(array(
@@ -331,7 +331,7 @@ class Curry_Backend_ContentList extends Curry_ModelView_List {
 			if (!$revisionModule)
 				throw new Exception('Unable to find RevisionModule to delete.');
 			$revisionModule->delete();
-			$backend->addMessage('The module has been deleted!', \Curry\Backend::MSG_SUCCESS);
+			$backend->addMessage('The module has been deleted!', \Curry\AbstractLegacyBackend::MSG_SUCCESS);
 			$backend->createModelUpdateEvent('PageModule', $pk, 'delete');
 			$backend->addBodyClass('live-edit-close');
 		} else {
@@ -341,11 +341,11 @@ class Curry_Backend_ContentList extends Curry_ModelView_List {
 			if ($wrapper->isInherited()) {
 				$backend->addMessage('This module is inherited and will be removed from '.$originPage.
 					'. It will also be removed from the following subpages: '.
-					join(", ", $dependencies), \Curry\Backend::MSG_WARNING);
+					join(", ", $dependencies), \Curry\AbstractLegacyBackend::MSG_WARNING);
 			} else if(count($dependencies)) {
 				$backend->addMessage('This module is inherited to subpages and will '.
 					'also be removed from the following subpages: '.
-					join(", ", $dependencies), \Curry\Backend::MSG_WARNING);
+					join(", ", $dependencies), \Curry\AbstractLegacyBackend::MSG_WARNING);
 			}
 			$backend->addMessage($msg);
 			$backend->addMainContent($form);

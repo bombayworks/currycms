@@ -315,6 +315,11 @@ abstract class Entity extends \Curry\Configurable {
 		return $this->widget;
 	}
 
+	public function __toString()
+	{
+		return $this->render();
+	}
+
 	public function render(Widget\AbstractWidget $widget = null)
 	{
 		if ($widget === null)

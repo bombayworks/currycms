@@ -23,7 +23,7 @@ use Curry\Controller\Frontend;
  * 
  * @package Curry\Controller\Backend
  */
-class Curry_Backend_Page extends \Curry\Backend
+class Curry_Backend_Page extends \Curry\AbstractLegacyBackend
 {
 	/** {@inheritdoc} */
 	public function getGroup()
@@ -46,7 +46,7 @@ class Curry_Backend_Page extends \Curry\Backend
 
 	public static function updateIndex(Page $page)
 	{
-		if (\Curry\App::getInstance()->config->curry->autoUpdateIndex)
+		if ($this->app->config->curry->autoUpdateIndex)
 			\Curry\BackgroundFunctions::register(array(__CLASS__, 'doUpdateIndex'), $page);
 	}
 
@@ -513,7 +513,7 @@ class Curry_Backend_Page extends \Curry\Backend
 			}
 			
 			// Live edit
-			if(\Curry\App::getInstance()->config->curry->liveEdit)
+			if($this->app->config->curry->liveEdit)
 				$this->addCommand('Live edit', url($page->getUrl(), array('curry_inline_admin'=>'true')), 'icon-cogs');
 
 			// Delete
@@ -573,7 +573,7 @@ class Curry_Backend_Page extends \Curry\Backend
 		$form = Curry_Backend_PageHelper::getNewMetadataForm();
 		if(isPost('pid_newmetadata') && $form->isValid($_POST)) {
 			Curry_Backend_PageHelper::saveNewMetadata($form->getValues());
-			Frontend::returnPartial('');
+			self::returnPartial('');
 		}
 		$this->addMainContent($form);
 	}
@@ -646,7 +646,7 @@ class Curry_Backend_Page extends \Curry\Backend
 				},
 			));
 		}
-		$list->show($this);
+		$this->addMainContent($list);
 	}
 
 	/**
@@ -680,7 +680,7 @@ class Curry_Backend_Page extends \Curry\Backend
 		if(!self::getPagePermission($pageRevision->getPage(), PageAccessPeer::PERM_PUBLISH))
 			throw new Exception('You do not have permission to publish this page.');
 			
-		if(!\Curry\App::getInstance()->config->curry->autoPublish)
+		if(!$this->app->config->curry->autoPublish)
 			$this->addMessage('Auto publishing is not enabled, for this functionality to work you must enable it in <a href="'.url('', array('module'=>'Curry_Backend_System')).'">System</a>.', self::MSG_WARNING, false);
 			
 		$form = Curry_Backend_PageHelper::getPublishDateForm($pageRevision);
@@ -839,7 +839,7 @@ class Curry_Backend_Page extends \Curry\Backend
 		}
 
 		$list = new Curry_Backend_ContentList($this, $pageRevision, $langcode);
-		$list->show($this);
+		$this->addMainContent($list);
 	}
 	
 	/**
@@ -917,7 +917,7 @@ class Curry_Backend_Page extends \Curry\Backend
 				$page->getUrl(),
 			);
 		}
-		Frontend::returnPartial('var tinyMCELinkList = ' . json_encode($pages).';', "text/plain");
+		self::returnPartial('var tinyMCELinkList = ' . json_encode($pages).';', "text/plain");
 	}
 
 	/**

@@ -23,7 +23,7 @@ use Curry\Controller\Backend;
  * @package Curry\Controller\Backend
  *
  */
-class Curry_Backend_InlineAdmin extends \Curry\Backend
+class Curry_Backend_InlineAdmin extends \Curry\AbstractLegacyBackend
 {
 	/** {@inheritdoc} */
 	public function getGroup()
@@ -40,7 +40,7 @@ class Curry_Backend_InlineAdmin extends \Curry\Backend
 	/** {@inheritdoc} */
 	public function showMain()
 	{
-		if(!\Curry\App::getInstance()->config->curry->liveEdit) {
+		if(!$this->app->config->curry->liveEdit) {
 			$this->addMessage('Live edit is not enabled, go to <a href="'.url('', array('module' => 'Curry_Backend_System')).'">System Settings</a> to enable it.', self::MSG_WARNING, false);
 			return;
 		}

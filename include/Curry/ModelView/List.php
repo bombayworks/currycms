@@ -284,7 +284,7 @@ class Curry_ModelView_List extends \Curry\View {
 	protected function addDefaultActions()
 	{
 		$modelForm = isset($this->options['modelForm']) ? $this->options['modelForm'] : new Curry_ModelView_Form($this->query->getModelName());
-		if($modelForm instanceof Curry_Form_ModelForm)
+		if($modelForm instanceof \Curry\Form\ModelForm)
 			$modelForm = new Curry_ModelView_Form($modelForm);
 		$actions = array(
 			'edit' => array(
@@ -386,6 +386,7 @@ class Curry_ModelView_List extends \Curry\View {
 		}
 
 		$options['actions'] = array();
+		$this->initialize();
 		foreach($this->actions as $name => $action) {
 			if (isset($action['action']) && !isset($action['href'])) {
 				if (!$action['action'] instanceof \Curry\View)

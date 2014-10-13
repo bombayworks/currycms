@@ -18,15 +18,16 @@
 namespace Curry;
 use Curry\Controller\Frontend;
 use Curry\Exception\ResponseException;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Base class for backend modules.
- * 
+ *
  * @package Curry\Controller\Backend
  */
-abstract class Backend extends \Curry\Backend\Base {
+abstract class AbstractLegacyBackend extends \Curry\Backend\AbstractBackend {
 	/**
 	 * Redirect to URL or close dialog.
 	 *
@@ -38,20 +39,11 @@ abstract class Backend extends \Curry\Backend\Base {
 		$url = (string)$url;
 		$redirectJs = '<script type="text/javascript">window.location.href = '.json_encode($url).';</script>';
 		if(isAjax()) // we're in a dialog, use javascript to redirect
-			Frontend::returnPartial($dialogRedirect ? $redirectJs : '');
+			self::returnPartial($dialogRedirect ? $redirectJs : '');
 		else
 			url($url)->redirect();
 	}
 
-	protected static function stringify($value)
-	{
-		if (is_string($value))
-			return $value;
-		if (is_object($value) && method_exists($value, '__toString'))
-			return $value->__toString();
-		return (string)$value;
-	}
-	
 	/**
 	 * This function will be called before the view (by default showMain) function.
 	 * 
@@ -168,46 +160,96 @@ abstract class Backend extends \Curry\Backend\Base {
 			$dialogTitle = $name;
 		$this->addCommand($name, $url, $bclass, array('title' => $dialogTitle, 'class' => 'dialog', 'data-dialog' => json_encode($dialogOptions)));
 	}
-
-	/**
-	 * Add HTML content to the main template.
-	 *
-	 * @param mixed $content
-	 */
-	public function addMainContent($content)
-	{
-		$this->mainContent .= self::stringify($content);
-	}
-	
-	/**
-	 * Add HTML content to menu.
-	 *
-	 * @param mixed $content
-	 */
-	public function addMenuContent($content)
-	{
-		$this->menuContent .= self::stringify($content);
-	}
 	
 	/**
 	 * Return json-data to browser and exit. Will set content-type header and encode the data.
 	 *
-	 * @deprecated Use Curry\Controller\Frontend::returnJson() instead.
 	 * @param mixed $content	Data to encode with json_encode. Note that this must be utf-8 encoded. Strings will not be encoded.
 	 */
-	public function returnJson($content)
+	public static function returnJson($content)
 	{
-		Frontend::returnJson($content);
+		throw new ResponseException(new JsonResponse($content));
 	}
 	
 	/**
 	 * Return partial html-content to browser and exit. Will set content-type header and return the content.
 	 *
-	 * @deprecated Use Curry\Controller\Frontend::returnPartial() instead.
 	 * @param mixed $content
 	 */
-	public function returnPartial($content)
+	public static function returnPartial($content)
 	{
-		Frontend::returnPartial($content);
+		throw new ResponseException($content);
+	}
+
+	/**
+	 * Return data as file attachment.
+	 *
+	 * @param resource|string $data	A string or resource containing the data to send.
+	 * @param string $contentType	The content-type header to send.
+	 * @param string $filename		Filename to send to browser.
+	 * @param bool $exit			Terminate the script after sending the data.
+	 */
+	public static function returnData($data, $contentType = 'application/octet-stream', $filename = 'file.dat', $exit = true)
+	{
+		header('Content-Description: File Transfer');
+		header('Content-Transfer-Encoding: binary');
+		header("Content-Disposition: attachment; filename=".\Curry_String::escapeQuotedString($filename));
+		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+		header('Pragma: public');
+		header("Content-type: $contentType");
+		if(is_string($data)) {
+			header('Content-Length: ' . strlen($data));
+			echo $data;
+		} else if(is_resource($data) && (get_resource_type($data) === 'stream' || get_resource_type($data) === 'file')) {
+			// save current
+			$current = ftell($data);
+
+			//Seek to the end
+			fseek($data, 0, SEEK_END);
+
+			//Get the size value
+			$size = ftell($data) - $current;
+
+			fseek($data, $current, SEEK_SET);
+			header('Content-Length: ' . $size);
+			fpassthru($data);
+			if ($exit)
+				fclose($data);
+		} else
+			throw new \Curry_Exception('Data is of unknown type.');
+		if($exit)
+			exit;
+	}
+
+	/**
+	 * Return a file to browser and exit. Will set appropriate headers and return the content.
+	 *
+	 * @param string $file			Path to file
+	 * @param string $contentType	The content-type header to send.
+	 * @param string $filename		Filename to send to browser, uses the basename of $file if not specified.
+	 * @param bool $exit			Terminate the script after sending the data.
+	 * @param bool $disableOutputBuffering	Disable output buffering.
+	 */
+	public static function returnFile($file, $contentType = 'application/octet-stream', $filename = '', $exit = true, $disableOutputBuffering = true)
+	{
+		if(!$filename)
+			$filename = basename($file);
+		header('Content-Description: File Transfer');
+		header('Content-Transfer-Encoding: binary');
+		header('Content-Disposition: attachment; filename='.\Curry_String::escapeQuotedString($filename));
+		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+		header('Pragma: public');
+		header('Content-type: '.$contentType);
+		header('Content-Length: '.filesize($file));
+
+		if($disableOutputBuffering) {
+			while(@ob_end_flush())
+				;
+		}
+
+		readfile($file);
+
+		if($exit)
+			exit;
 	}
 }

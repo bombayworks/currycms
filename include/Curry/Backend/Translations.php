@@ -21,7 +21,7 @@
  * 
  * @package Curry\Controller\Backend
  */
-class Curry_Backend_Translations extends \Curry\Backend {
+class Curry_Backend_Translations extends \Curry\AbstractLegacyBackend {
 	const PERMISSION_TRANSLATIONS = 'Translations';
 	const PERMISSION_LANGUAGES = 'Languages';
 	const PERMISSION_FIELDS = 'Fields';
@@ -42,7 +42,7 @@ class Curry_Backend_Translations extends \Curry\Backend {
 		);
 	}
 
-	public static function addLanguageForm(\Curry\Backend $backend, $user = null)
+	public static function addLanguageForm(\Curry\AbstractLegacyBackend $backend, $user = null)
 	{
 		if (!$user)
 			$user = User::getUser();
@@ -192,7 +192,7 @@ class Curry_Backend_Translations extends \Curry\Backend {
 			'modelForm' => $form,
 			'maxPerPage' => 0,
 		));
-		$list->show($this);
+		$this->addMainContent($list);
 	}
 
 	/**
@@ -217,7 +217,7 @@ class Curry_Backend_Translations extends \Curry\Backend {
 				),
 			),
 		));
-		$list->show($this);
+		$this->addMainContent($list);
 	}
 
 	/**

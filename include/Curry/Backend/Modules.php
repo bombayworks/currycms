@@ -3,7 +3,7 @@ namespace Curry\Backend;
 
 use Symfony\Component\HttpFoundation\Request;
 
-class Modules extends Base {
+class Modules extends AbstractBackend {
 	public function getName()
 	{
 		return 'Predefined modules';
@@ -25,8 +25,8 @@ class Modules extends Base {
 
 		$templates = array('' => "[ None ]") + \Curry_Backend_Template::getTemplateSelect();
 
-		$form = new \Curry_Form_ModelForm('Module', array(
-			'columnElements' => array(
+		$form = new \Curry\Form\ModelForm('Module', array(
+			'columnFields' => array(
 				'module_class' => array('select', array(
 					'multiOptions' => $modules,
 				)),

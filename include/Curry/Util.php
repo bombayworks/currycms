@@ -431,4 +431,21 @@ class Curry_Util {
 		$d = getrusage($who);
 		return (double)$d['ru_'.$type.'time.tv_sec'] + ($d['ru_'.$type.'time.tv_usec'] / 1000000.0);
 	}
+
+	/**
+	 * Cast provided value to string.
+	 *
+	 * Note: Explicitly call __toString() of objects to allow exceptions.
+	 *
+	 * @param $value
+	 * @return string
+	 */
+	public static function stringify($value)
+	{
+		if (is_string($value))
+			return $value;
+		if (is_object($value) && method_exists($value, '__toString'))
+			return $value->__toString();
+		return (string)$value;
+	}
 }

@@ -21,7 +21,7 @@
  * 
  * @package Curry\Controller\Backend
  */
-abstract class Curry_ModelBackend extends \Curry\Backend {
+abstract class Curry_ModelBackend extends \Curry\AbstractLegacyBackend {
 	/**
 	 * Array of allowed model classes.
 	 *
@@ -91,7 +91,7 @@ abstract class Curry_ModelBackend extends \Curry\Backend {
 	 * @param string $modelClass
 	 */
 	public function showGridJson($modelClass) {
-		$this->returnJson($this->getGrid($modelClass)->getJson());
+		self::returnJson($this->getGrid($modelClass)->getJson());
 	}
 	
 	/**
@@ -152,17 +152,17 @@ abstract class Curry_ModelBackend extends \Curry\Backend {
 				$this->fillObjectFromForm($form, $instance);
 				$instance->save();
 				if(isAjax())
-					$this->returnPartial('');
+					self::returnPartial('');
 			}
 			catch(PropelException $e) {
-				$this->returnPartial(
+				self::returnPartial(
 					$form->render().
 					'<p>'.$e->getMessage().'</p>'
 				);
 			}
 		}
 		if(isAjax())
-			$this->returnPartial($form);
+			self::returnPartial($form);
 		else
 			$this->addMainContent($form);
 	}

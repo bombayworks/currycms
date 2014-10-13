@@ -4,7 +4,7 @@ namespace Curry;
 
 use Symfony\Component\HttpFoundation\Request;
 
-abstract class View implements \ArrayAccess {
+abstract class View extends Configurable implements \ArrayAccess {
 	protected $parent = null;
 	protected $subviews = null;
 	protected $params = array();

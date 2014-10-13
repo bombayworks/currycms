@@ -8,7 +8,7 @@ class ServiceContainer implements \ArrayAccess {
 
 	public function singleton($name, $value)
 	{
-		$this->services[$name] = function($app) use($value) {
+		$this->services[$name] = function(ServiceContainer $app) use($value) {
 			static $object = null;
 			if ($object === null)
 				$object = $app->_create($value);

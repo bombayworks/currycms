@@ -21,7 +21,7 @@ use Curry\Controller\Frontend;
 /**
  * Simple backend to create and edit files.
  */
-abstract class Curry_Backend_FileEditor extends \Curry\Backend {
+abstract class Curry_Backend_FileEditor extends \Curry\AbstractLegacyBackend {
 	/**
 	 * Directory to edit files in.
 	 * @var string
@@ -150,7 +150,7 @@ abstract class Curry_Backend_FileEditor extends \Curry\Backend {
 			if ($_POST['_ajaxsubmit']) {
 				$form->render(); // fixes issue with csrf-token
 				$ajax['values'] = $form->getValues();
-				Frontend::returnJson($ajax);
+				self::returnJson($ajax);
 			}
 		}
 

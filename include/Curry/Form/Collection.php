@@ -3,9 +3,8 @@
 namespace Curry\Form;
 
 class Collection extends Container {
-	protected $defaultWidget = '\\Curry\\Form\\CollectionWidget';
-
-	public $entity;
+	protected $defaultWidget = '\\Curry\\Form\\Widget\\CollectionWidget';
+	protected $entity = null;
 
 	/**
 	 * @param mixed $entity
@@ -29,15 +28,20 @@ class Collection extends Container {
 
 	public function setInitial($data)
 	{
-		$entities = array();
+		$children = $this->children;
 		foreach((array)$data as $k => $v) {
-			$entities[$k] = clone $this->entity;
-			$entities[$k]->setParent($this);
-			$entities[$k]->setInitial($v);
+			if (!isset($this->$k)) {
+				$this->$k = clone $this->entity;
+			} else {
+				unset($children[$k]);
+			}
+			$this->$k->setInitial($v);
 		}
-		$entities[] = $entity = clone $this->entity;
-		$entity->setParent($this);
-		$this->children = $entities;
+		// Deleted entries
+		foreach($children as $k => $child) {
+			unset($this->$k);
+		}
+		$this->addExtra();
 	}
 
 	public function getContainerClass()
@@ -45,23 +49,49 @@ class Collection extends Container {
 		return parent::getContainerClass().' form-collection';
 	}
 
-	function populate($data)
+	public function populate($data)
 	{
+		$children = $this->children;
 		$unchanged = 0;
-		$entities = array();
 		foreach((array)$data as $k => $v) {
-			$entities[$k] = clone $this->entity;
-			$entities[$k]->setParent($this);
-			$entities[$k]->populate($v);
-			if (!$entities[$k]->hasChanged())
+			if (!isset($this->$k)) {
+				$this->$k = clone $this->entity;
+			} else {
+				unset($children[$k]);
+			}
+			$entity = $this->$k;
+			$entity->populate($v);
+			if (!$entity->hasChanged()) {
 				++$unchanged;
-			else
+			} else {
 				$unchanged = 0;
+			}
 		}
+
+		// Deleted entries
+		foreach($children as $k => $child) {
+			unset($this->$k);
+		}
+
 		if (!$unchanged) {
-			$entities[] = $entity = clone $this->entity;
-			$entity->setParent($this);
+			$this->addExtra();
 		}
-		$this->children = $entities;
+	}
+
+	public function addExtra($name = null)
+	{
+		// Add extra
+		$entity = clone $this->entity;
+		if ($name === null) {
+			$this->children[] = $entity;
+			$entity->parent = $this;
+		} else {
+			$this->$name = $entity;
+		}
+	}
+
+	public function getNextId()
+	{
+		return count($this->children) ? max(array_keys($this->children)) + 1 : 0;
 	}
 }

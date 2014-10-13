@@ -2,7 +2,7 @@
 
 namespace Curry\Form\Widget;
 
-use \Curry\Form\Entity;
+use Curry\Form\Entity;
 
 class RadioSelect extends AbstractWidget {
 	public function render(Entity $entity) {

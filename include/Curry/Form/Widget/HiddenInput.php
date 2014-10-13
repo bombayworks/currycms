@@ -2,7 +2,7 @@
 
 namespace Curry\Form\Widget;
 
-use \Curry\Form\Entity;
+use Curry\Form\Entity;
 
 class HiddenInput extends Input {
 	protected $type = 'hidden';

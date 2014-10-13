@@ -9,9 +9,4 @@ class Button extends Field {
 	{
 		return $this->isPopulated && $this->getValue() !== null;
 	}
-
-	public function renderLabel()
-	{
-		return '';
-	}
 }

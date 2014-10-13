@@ -6,27 +6,27 @@ class Field extends \Curry\Form\Entity {
 	/**
 	 * @var bool
 	 */
-	public $required = false;
+	protected $required = false;
 
 	/**
 	 * @var mixed
 	 */
-	public $initial; // default/initial/value
+	protected $initial; // default/initial/value
 
 	/**
 	 * @var mixed
 	 */
-	public $rawValue;
+	protected $rawValue;
 
 	/**
 	 * @var mixed
 	 */
-	public $value;
+	protected $value;
 
 	/**
 	 * @var bool
 	 */
-	public $isPopulated = false;
+	protected $isPopulated = false;
 
 	public function getContainerClass()
 	{
@@ -35,9 +35,9 @@ class Field extends \Curry\Form\Entity {
 		if ($pos !== false)
 			$type = substr($type, $pos + 1);
 		return 'form-field'.
-		' form-field-'.strtolower($type).
-		($this->getRequired() ? ' form-required' : '').
-		($this->hasErrors() ? ' form-errors' : '');
+			' form-field-'.strtolower($type).
+			($this->getRequired() ? ' form-required' : '').
+			($this->hasErrors() ? ' form-errors' : '');
 	}
 
 	public function getRawValue()

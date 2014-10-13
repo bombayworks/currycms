@@ -2,7 +2,7 @@
 
 namespace Curry\Form\Widget;
 
-use \Curry\Form\Entity;
+use Curry\Form\Entity;
 
 /**
  * Class Widget
@@ -21,10 +21,21 @@ abstract class AbstractWidget extends \Curry\Configurable {
 		$this->attributes[$name] = $value;
 	}
 
+	public function getOptionFallback($name)
+	{
+		return $this->attributes[$name];
+	}
+
 	abstract public function render(Entity $entity);
 
-	public function isHidden() {
+	public function isHidden()
+	{
 		return false;
+	}
+
+	public function isLabelOutside()
+	{
+		return true;
 	}
 
 	public function needsMultiPart()

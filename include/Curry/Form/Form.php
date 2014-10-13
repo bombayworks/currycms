@@ -8,12 +8,12 @@ class Form extends Container {
 	/**
 	 * @var string
 	 */
-	public $action = '';
+	protected $action = null;
 
 	/**
 	 * @var string
 	 */
-	public $method = 'POST';
+	protected $method = 'POST';
 
 	public function getContainerClass()
 	{
@@ -54,16 +54,16 @@ class Form extends Container {
 
 	public function setFields($value)
 	{
-		$this->children = array();
-		$this->addFields($value);
+		foreach($this as $k => $value) {
+			unset($this->$k);
+		}
+		return $this->addFields($value);
 	}
 
 	public function addField($name, $field)
 	{
 		// TODO: do not allow the following characters [. ]
-		$instance = self::createEntity($field);
-		$this->children[$name] = $instance;
-		$instance->setParent($this);
+		$this->$name = self::createEntity($field);
 		return $this;
 	}
 

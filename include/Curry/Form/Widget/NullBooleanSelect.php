@@ -2,7 +2,7 @@
 
 namespace Curry\Form\Widget;
 
-use \Curry\Form\Entity;
+use Curry\Form\Entity;
 
 class NullBooleanSelect extends Select {
 	public function render(Entity $entity) {

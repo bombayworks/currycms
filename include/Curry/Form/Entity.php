@@ -20,6 +20,11 @@ abstract class Entity extends \Curry\Configurable {
 		'multiplechoice' => '\\Curry\\Form\\Field\\MultipleChoice',
 		'button' => '\\Curry\\Form\\Field\\Button',
 		'submit' => '\\Curry\\Form\\Field\\Submit',
+		'file' => '\\Curry\\Form\\Field\\File',
+		'date' => '\\Curry\\Form\\Field\\Date',
+		'time' => '\\Curry\\Form\\Field\\Time',
+		'datetime' => '\\Curry\\Form\\Field\\DateTime',
+		'color' => '\\Curry\\Form\\Field\\Color',
 	);
 
 	public static function createEntity($spec)
@@ -47,34 +52,55 @@ abstract class Entity extends \Curry\Configurable {
 	protected $defaultWidget = '\\Curry\\Form\\Widget\\HiddenInput';
 
 	/**
-	 * @var Widget
+	 * @var \Curry\Form\Widget\AbstractWidget
 	 */
-	public $widget;
+	protected $widget;
 
 	/**
 	 * @var string
 	 */
-	public $label;
+	protected $label;
 
 	/**
 	 * @var string
 	 */
-	public $description; // aka help-text
+	protected $description;
 
 	/**
 	 * @var array
 	 */
-	public $errors = array();
+	protected $errors = array();
 
 	/**
 	 * @var array
 	 */
-	public $attributes;
+	protected $attributes;
 
 	/**
 	 * @var Entity
 	 */
-	public $parent = null;
+	protected $parent = null;
+
+	/**
+	 * @var int|null
+	 */
+	protected $order = null;
+
+	/**
+	 * @param int|null $order
+	 */
+	public function setOrder($order)
+	{
+		$this->order = $order;
+	}
+
+	/**
+	 * @return int|null
+	 */
+	public function getOrder()
+	{
+		return $this->order;
+	}
 
 	/**
 	 * @return boolean
@@ -89,8 +115,15 @@ abstract class Entity extends \Curry\Configurable {
 	 */
 	public function isMultiPart()
 	{
-		$widget = $this->getWidget();
-		return $widget ? $widget->needsMultiPart() : null;
+		return $this->getWidget()->needsMultiPart();
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function isLabelOutside()
+	{
+		return $this->getWidget()->isLabelOutside();
 	}
 
 	/**
@@ -98,8 +131,7 @@ abstract class Entity extends \Curry\Configurable {
 	 */
 	public function isHidden()
 	{
-		$widget = $this->getWidget();
-		return $widget ? $widget->isHidden() : null;
+		return $this->getWidget()->isHidden();
 	}
 
 	public function getName()
@@ -147,7 +179,7 @@ abstract class Entity extends \Curry\Configurable {
 	{
 		if ($data !== null)
 			$this->populate($data);
-		return count($this->getAllErrors());
+		return count($this->getErrors());
 	}
 
 	abstract public function setInitial($data);
@@ -156,16 +188,7 @@ abstract class Entity extends \Curry\Configurable {
 	abstract public function getRawValue();
 	abstract public function hasChanged();
 	abstract public function getContainerClass();
-
-	abstract function populate($data);
-
-	/**
-	 * @param \Curry\Form\Entity $parent
-	 */
-	public function setParent($parent)
-	{
-		$this->parent = $parent;
-	}
+	abstract public function populate($data);
 
 	/**
 	 * @return \Curry\Form\Entity
@@ -250,6 +273,15 @@ abstract class Entity extends \Curry\Configurable {
 	}
 
 	/**
+	 * @param Entity $entity
+	 * @return string|null
+	 */
+	public function getDefaultWidgetForEntity(Entity $entity)
+	{
+		return $this->parent ? $this->parent->getDefaultWidgetForEntity($entity) : null;
+	}
+
+	/**
 	 * @param \Curry\Form\Widget\AbstractWidget $widget
 	 */
 	public function setWidget($widget)
@@ -277,7 +309,13 @@ abstract class Entity extends \Curry\Configurable {
 	public function getWidget()
 	{
 		if (!$this->widget) {
-			$this->widget = new $this->defaultWidget;
+			$widgetClass = $this->getDefaultWidgetForEntity($this);
+			if (!$widgetClass)
+				$widgetClass = $this->defaultWidget;
+			$this->widget = new $widgetClass;
+		}
+		if (!$this->widget instanceof \Curry\Form\Widget\AbstractWidget) {
+			throw new \Exception('Widget is not of type \Curry\Form\Widget\AbstractWidget');
 		}
 		return $this->widget;
 	}
@@ -289,36 +327,28 @@ abstract class Entity extends \Curry\Configurable {
 		return $widget->render($this);
 	}
 
-	public function renderRow(Widget\AbstractWidget $widget = null)
-	{
-		if (!$widget && $this->getParent())
-			$widget = $this->getParent()->getWidget();
-		if (!$widget)
-			throw new \Exception('Unable to render row - widget not set.');
-		return $widget->renderNormal($this);
-	}
-
-	public function renderLabel()
+	public function renderLabel($attributes = array())
 	{
 		$label = $this->getLabel();
 		if (!$label)
 			return '';
-		return self::html('label', array('for' => $this->getId()), htmlspecialchars($label));
+		return self::html('label', $attributes + array('for' => $this->getId()), htmlspecialchars($label));
 	}
 
-	public function renderDescription()
+	public function renderDescription($attributes = array())
 	{
 		$description = $this->getDescription();
 		if (!$description)
 			return '';
-		return self::html('p', array('class' => 'form-description'), htmlspecialchars($description));
+		return self::html('p', $attributes + array('class' => 'form-description'), htmlspecialchars($description));
 	}
 
-	public function renderErrors()
+	public function renderErrors($attributes = array())
 	{
 		if (!count($this->errors))
 			return '';
-		return self::html('ul', array('class' => 'form-errors'), '<li>'.\join("</li><li>",\array_map('htmlspecialchars', $this->errors)).'</li>');
+		$listItems = '<li>'.\join("</li><li>",\array_map('htmlspecialchars', $this->errors)).'</li>';
+		return self::html('ul', $attributes + array('class' => 'form-errors'), $listItems);
 	}
 
 	public static function html($tagName, array $attributes = array(), $content = '')
@@ -329,6 +359,8 @@ abstract class Entity extends \Curry\Configurable {
 				if ($v) {
 					$tag .= ' '.$k;
 				}
+			} else if ($v === null) {
+				continue;
 			} else {
 				$tag .= ' '.$k.'="'.htmlspecialchars((string)$v).'"';
 			}

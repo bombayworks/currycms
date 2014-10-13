@@ -4,7 +4,7 @@ namespace Curry\Form\Field;
 
 class StaticText extends Field {
 	protected $defaultWidget = '\\Curry\\Form\\Widget\\StaticText';
-	public $initial = '';
+	protected $initial = '';
 
 	public function getId()
 	{

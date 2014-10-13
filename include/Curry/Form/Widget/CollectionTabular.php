@@ -2,7 +2,7 @@
 
 namespace Curry\Form\Widget;
 
-use \Curry\Form\Entity;
+use Curry\Form\Entity;
 
 class CollectionTabular extends CollectionWidget {
 	public function renderContainer(Entity $entity, $normal, $hidden)
@@ -17,26 +17,23 @@ class CollectionTabular extends CollectionWidget {
 			break;
 		}
 		$markup .= Entity::html('tbody', array(), join("\n", $normal));
-		return Entity::html('table', array(), $markup);
+		return join("\n", $hidden).Entity::html('table', $this->attributes, $markup);
 	}
-
-	/*
-	public function render(Entity $entity)
-	{
-		return $entity->renderLabel().
-			$entity->renderDescription().
-			$entity->renderErrors().
-			$entity->renderWidget($this);
-	}
-	*/
 
 	public function renderNormal(Entity $entity) {
 		$markup = "";
 		foreach($entity as $columnEntity) {
+			if (!$entity instanceof \Curry\Form\Container)
+				throw new \Exception('CollectionTabular requires entities to be subclass of \\Curry\\Form\\Container');
 			$attr = array('class' => $columnEntity->getContainerClass());
 			$markup .= Entity::html('td', $attr, $columnEntity->render());
 		}
 		$attr = $this->attributes + array('class' => $entity->getContainerClass());
 		return Entity::html('tr', $attr, $markup);
+	}
+
+	public function isLabelOutside()
+	{
+		return true;
 	}
 }

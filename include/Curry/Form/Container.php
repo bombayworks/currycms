@@ -6,12 +6,7 @@ class Container extends Entity implements \IteratorAggregate, \Countable {
 	/**
 	 * @var array
 	 */
-	public $children = array();
-
-	public function renderLabel()
-	{
-		return '';
-	}
+	protected $children = array();
 
 	public function getInitial()
 	{
@@ -63,6 +58,15 @@ class Container extends Entity implements \IteratorAggregate, \Countable {
 		return $changed;
 	}
 
+	public function isMultiPart()
+	{
+		foreach($this->children as $child) {
+			if ($child->isMultiPart())
+				return true;
+		}
+		return false;
+	}
+
 	public function getContainerClass()
 	{
 		return 'form-container';
@@ -83,7 +87,25 @@ class Container extends Entity implements \IteratorAggregate, \Countable {
 
 	public function getIterator()
 	{
-		return new \ArrayIterator($this->children);
+		$index = 1;
+		$names = array();
+		$orders = array();
+		$positions = array();
+		foreach($this->children as $name => $child) {
+			$order = $child->getOrder();
+			if ($order === null)
+				$order = $index;
+			$names[] = $name;
+			$orders[] = $order;
+			$positions[] = $index++;
+		}
+
+		$sorted = array();
+		array_multisort($orders, $positions, $names);
+		foreach($names as $name) {
+			$sorted[$name] = $this->children[$name];
+		}
+		return new \ArrayIterator($sorted);
 	}
 
 	public function count()
@@ -95,9 +117,17 @@ class Container extends Entity implements \IteratorAggregate, \Countable {
 	{
 		return isset($this->children[$name]) ? $this->children[$name] : null;
 	}
-	public function __set($name, $value)
+	public function __set($name, Entity $value)
 	{
+		if ($value->parent) {
+			$otherName = $value->getName();
+			unset($value->parent->$otherName);
+		}
+		if (isset($this->$name)) {
+			unset($this->$name);
+		}
 		$this->children[$name] = $value;
+		$value->parent = $this;
 	}
 	public function __isset($name)
 	{
@@ -105,15 +135,19 @@ class Container extends Entity implements \IteratorAggregate, \Countable {
 	}
 	public function __unset($name)
 	{
+		if (!isset($this->children[$name]))
+			throw new \Exception('Field "'.$name.'" not found');
+		$this->children[$name]->parent = null;
 		unset($this->children[$name]);
 	}
 
 	public function __clone()
 	{
 		parent::__clone();
-		foreach($this->children as $k => $v) {
-			$this->children[$k] = clone $v;
-			$this->children[$k]->setParent($this);
+		$children = $this->children;
+		$this->children = array();
+		foreach($children as $name => $child) {
+			$this->$name = clone $child;
 		}
 	}
 }

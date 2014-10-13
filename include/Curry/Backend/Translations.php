@@ -17,23 +17,23 @@
  */
 
 /**
- * Backend module for managing languages and translation-strings.
+ * Curry\Controller\Backend module for managing languages and translation-strings.
  * 
- * @package Curry\Backend
+ * @package Curry\Controller\Backend
  */
-class Curry_Backend_Translations extends Curry_Backend {
+class Curry_Backend_Translations extends \Curry\Backend {
 	const PERMISSION_TRANSLATIONS = 'Translations';
 	const PERMISSION_LANGUAGES = 'Languages';
 	const PERMISSION_FIELDS = 'Fields';
 
 	/** {@inheritdoc} */
-	public static function getGroup()
+	public function getGroup()
 	{
 		return "Content";
 	}
 
 	/** {@inheritdoc} */
-	public static function getPermissions()
+	public function getPermissions()
 	{
 		return array(
 			self::PERMISSION_TRANSLATIONS,
@@ -42,7 +42,7 @@ class Curry_Backend_Translations extends Curry_Backend {
 		);
 	}
 
-	public static function addLanguageForm(Curry_Backend $backend, $user = null)
+	public static function addLanguageForm(\Curry\Backend $backend, $user = null)
 	{
 		if (!$user)
 			$user = User::getUser();

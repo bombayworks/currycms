@@ -19,17 +19,17 @@
 /**
  * Creates mapping between domains and pages.
  * 
- * @package Curry\Backend
+ * @package Curry\Controller\Backend
  */
-class Curry_Backend_DomainMapping extends Curry_Backend {
+class Curry_Backend_DomainMapping extends \Curry\Backend {
 	/** {@inheritdoc} */
-	public static function getName()
+	public function getName()
 	{
 		return "Domain mapping";
 	}
 
 	/** {@inheritdoc} */
-	public static function getGroup()
+	public function getGroup()
 	{
 		return "System";
 	}

@@ -50,11 +50,11 @@ class Curry_ModelView_Csv extends Curry_ModelView_Abstract {
 		return $this->includeHeaders;
 	}
 
-	public function render(Curry_Backend $backend, array $params)
+	public function render(\Curry\Backend $backend, array $params)
 	{
 		$view = $this->view ? $this->view : $this->parentView;
-		if (!($view instanceof Curry_ModelView_List))
-			throw new Exception('Expected view to be of type Curry_ModelView_List, got '.get_class($view));
+		if (!($view instanceof \Curry_ModelView_List))
+			throw new \Exception('Expected view to be of type Curry_ModelView_List, got '.get_class($view));
 		$view = clone $view;
 
 		// Send response headers to the browser

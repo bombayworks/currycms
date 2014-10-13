@@ -19,12 +19,12 @@
 /**
  * Create and update templates.
  * 
- * @package Curry\Backend
+ * @package Curry\Controller\Backend
  */
 class Curry_Backend_Template extends Curry_Backend_FileEditor
 {
 	/** {@inheritdoc} */
-	public static function getGroup()
+	public function getGroup()
 	{
 		return "Appearance";
 	}

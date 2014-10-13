@@ -107,7 +107,7 @@ class CmsTest extends \PHPUnit_Framework_TestCase {
 	{
 		ob_start();
 		self::setupRequest('post', '/admin.php', array(), array('login_username' => 'admin', 'login_password' => 'admin'));
-		$admin = \Curry_Admin::getInstance();
+		$admin = \Curry\Controller\Backend::getInstance();
 		$admin->show();
 		$content = ob_get_clean();
 		$this->assertNotEmpty($content);

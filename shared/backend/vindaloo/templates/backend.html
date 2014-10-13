@@ -1,3 +1,6 @@
+{% extends 'main.html' %}
+
+{% block content %}
 <header class="content-header">
   <h1>{{module.Name}}</h1>
   {% if menuItems %}
@@ -40,3 +43,4 @@
   {% endif %}
   {{mainContent|raw}}
 </section>
+{% endblock %}

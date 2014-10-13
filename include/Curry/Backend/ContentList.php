@@ -15,12 +15,13 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Controller\Backend;
 
 /**
  * Page content list view.
  * Manage module content for a specific PageRevision.
  *
- * @package Curry\Backend
+ * @package Curry\Controller\Backend
  */
 class Curry_Backend_ContentList extends Curry_ModelView_List {
 	/**
@@ -307,11 +308,11 @@ class Curry_Backend_ContentList extends Curry_ModelView_List {
 	public function showDelete(Curry_PageModuleWrapper $wrapper, $backend)
 	{
 		if ($wrapper->isInherited() && !$this->pagePermission[PageAccessPeer::PERM_MODULES]) {
-			$backend->addMessage('You do not have permission to delete inherited modules.', Curry_Backend::MSG_ERROR);
+			$backend->addMessage('You do not have permission to delete inherited modules.', \Curry\Backend::MSG_ERROR);
 			return;
 		}
 		if (!$this->pagePermission[PageAccessPeer::PERM_CREATE_MODULE]) {
-			$backend->addMessage('You do not have permission to delete modules.', Curry_Backend::MSG_ERROR);
+			$backend->addMessage('You do not have permission to delete modules.', \Curry\Backend::MSG_ERROR);
 			return;
 		}
 		$form = new Curry_Form(array(
@@ -330,9 +331,9 @@ class Curry_Backend_ContentList extends Curry_ModelView_List {
 			if (!$revisionModule)
 				throw new Exception('Unable to find RevisionModule to delete.');
 			$revisionModule->delete();
-			$backend->addMessage('The module has been deleted!', Curry_Backend::MSG_SUCCESS);
+			$backend->addMessage('The module has been deleted!', \Curry\Backend::MSG_SUCCESS);
 			$backend->createModelUpdateEvent('PageModule', $pk, 'delete');
-			Curry_Admin::getInstance()->addBodyClass('live-edit-close');
+			$backend->addBodyClass('live-edit-close');
 		} else {
 			$msg = 'Do you really want to delete this module?';
 			$originPage = $wrapper->getOriginPage();
@@ -340,11 +341,11 @@ class Curry_Backend_ContentList extends Curry_ModelView_List {
 			if ($wrapper->isInherited()) {
 				$backend->addMessage('This module is inherited and will be removed from '.$originPage.
 					'. It will also be removed from the following subpages: '.
-					join(", ", $dependencies), Curry_Backend::MSG_WARNING);
+					join(", ", $dependencies), \Curry\Backend::MSG_WARNING);
 			} else if(count($dependencies)) {
 				$backend->addMessage('This module is inherited to subpages and will '.
 					'also be removed from the following subpages: '.
-					join(", ", $dependencies), Curry_Backend::MSG_WARNING);
+					join(", ", $dependencies), \Curry\Backend::MSG_WARNING);
 			}
 			$backend->addMessage($msg);
 			$backend->addMainContent($form);
@@ -363,7 +364,7 @@ class Curry_Backend_ContentList extends Curry_ModelView_List {
 			if (isAjax())
 				return;
 			else
-				Curry_Admin::getInstance()->addBodyClass('live-edit-close');
+				$backend->addBodyClass('live-edit-close');
 		}
 		$backend->addMainContent($form);
 	}
@@ -384,7 +385,7 @@ class Curry_Backend_ContentList extends Curry_ModelView_List {
 				if($module->saveBack($moduleForm) !== false)
 					$modified = $module->saveModule();
 				$backend->createModelUpdateEvent('PageModule', $wrapper->getPageModuleId(), 'update');
-				Curry_Admin::getInstance()->addBodyClass('live-edit-close');
+				$backend->addBodyClass('live-edit-close');
 			}
 
 			if($form->delete && $form->delete->isChecked()) {

@@ -1,63 +1,11 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
+        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "This file is @generated automatically"
     ],
-    "hash": "38d9210a40248ea3319d4cc163b3527e",
+    "hash": "c9c7b3da3877415e8648c03573cb546f",
     "packages": [
-        {
-            "name": "bombayworks/zendframework1",
-            "version": "v1.12.6",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/bombayworks/zendframework1.git",
-                "reference": "f83796e2fcaf18bea1480988ab61de02a8168535"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/bombayworks/zendframework1/zipball/f83796e2fcaf18bea1480988ab61de02a8168535",
-                "reference": "f83796e2fcaf18bea1480988ab61de02a8168535",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.2.11"
-            },
-            "require-dev": {
-                "phpunit/dbunit": "1.3.*",
-                "phpunit/phpunit": "3.7.*"
-            },
-            "bin": [
-                "bin/zf.sh",
-                "bin/zf.php"
-            ],
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "1.12.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-0": {
-                    "Zend_": "library/",
-                    "ZendX_": "extras/library/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "include-path": [
-                "library/",
-                "extras/library/"
-            ],
-            "license": [
-                "BSD-3-Clause"
-            ],
-            "description": "Zend Framework 1",
-            "homepage": "http://framework.zend.com/",
-            "keywords": [
-                "ZF1",
-                "framework"
-            ],
-            "time": "2014-04-15 17:01:21"
-        },
         {
             "name": "ircmaxell/password-compat",
             "version": "1.0.3",
@@ -98,6 +46,74 @@
             "time": "2013-04-30 19:58:08"
         },
         {
+            "name": "monolog/monolog",
+            "version": "1.10.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Seldaek/monolog.git",
+                "reference": "25b16e801979098cb2f120e697bfce454b18bf23"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/25b16e801979098cb2f120e697bfce454b18bf23",
+                "reference": "25b16e801979098cb2f120e697bfce454b18bf23",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0",
+                "psr/log": "~1.0"
+            },
+            "require-dev": {
+                "aws/aws-sdk-php": "~2.4, >2.4.8",
+                "doctrine/couchdb": "~1.0@dev",
+                "graylog2/gelf-php": "~1.0",
+                "phpunit/phpunit": "~3.7.0",
+                "raven/raven": "~0.5",
+                "ruflin/elastica": "0.90.*"
+            },
+            "suggest": {
+                "aws/aws-sdk-php": "Allow sending log messages to AWS services like DynamoDB",
+                "doctrine/couchdb": "Allow sending log messages to a CouchDB server",
+                "ext-amqp": "Allow sending log messages to an AMQP server (1.0+ required)",
+                "ext-mongo": "Allow sending log messages to a MongoDB server",
+                "graylog2/gelf-php": "Allow sending log messages to a GrayLog2 server",
+                "raven/raven": "Allow sending log messages to a Sentry server",
+                "rollbar/rollbar": "Allow sending log messages to Rollbar",
+                "ruflin/elastica": "Allow sending log messages to an Elastic Search server"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.10.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Monolog\\": "src/Monolog"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jordi Boggiano",
+                    "email": "j.boggiano@seld.be",
+                    "homepage": "http://seld.be",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Sends your logs to files, sockets, inboxes, databases and various web services",
+            "homepage": "http://github.com/Seldaek/monolog",
+            "keywords": [
+                "log",
+                "logging",
+                "psr-3"
+            ],
+            "time": "2014-06-04 16:30:04"
+        },
+        {
             "name": "oyatel/minify",
             "version": "dev-master",
             "source": {
@@ -128,20 +144,37 @@
         },
         {
             "name": "phing/phing",
-            "version": "2.5.0",
+            "version": "2.8.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phingofficial/phing.git",
-                "reference": "2.5.0"
+                "reference": "1e06b42fa8f4c5119eda8e9dd39c412250435e24"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phingofficial/phing/zipball/2.5.0",
-                "reference": "2.5.0",
+                "url": "https://api.github.com/repos/phingofficial/phing/zipball/1e06b42fa8f4c5119eda8e9dd39c412250435e24",
+                "reference": "1e06b42fa8f4c5119eda8e9dd39c412250435e24",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.2.0"
+            },
+            "require-dev": {
+                "phpdocumentor/phpdocumentor": "2.x",
+                "phpunit/phpunit": ">=3.7"
+            },
+            "suggest": {
+                "pdepend/pdepend": "PHP version of JDepend",
+                "pear/archive_tar": "Tar file management class",
+                "pear/versioncontrol_git": "A library that provides OO interface to handle Git repository",
+                "pear/versioncontrol_svn": "A simple OO-style interface for Subversion, the free/open-source version control system",
+                "phpdocumentor/phpdocumentor": "Documentation Generator for PHP",
+                "phploc/phploc": "A tool for quickly measuring the size of a PHP project",
+                "phpmd/phpmd": "PHP version of PMD tool",
+                "phpunit/php-code-coverage": "Library that provides collection, processing, and rendering functionality for PHP code coverage information",
+                "phpunit/phpunit": "The PHP Unit Testing Framework",
+                "sebastian/phpcpd": "Copy/Paste Detector (CPD) for PHP code",
+                "tedivm/jshrink": "Javascript Minifier built in PHP"
             },
             "bin": [
                 "bin/phing"
@@ -157,12 +190,13 @@
                 "classes"
             ],
             "license": [
-                "LGPL3"
+                "LGPL-3.0"
             ],
             "authors": [
                 {
                     "name": "Michiel Rook",
-                    "email": "mrook@php.net"
+                    "email": "mrook@php.net",
+                    "role": "Lead"
                 },
                 {
                     "name": "Phing Community",
@@ -173,28 +207,32 @@
             "homepage": "http://www.phing.info/",
             "keywords": [
                 "build",
+                "phing",
                 "task",
                 "tool"
             ],
-            "time": "2013-02-16 14:23:57"
+            "time": "2014-07-01 14:18:47"
         },
         {
             "name": "propel/propel1",
-            "version": "1.6.9",
+            "version": "1.7.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/propelorm/Propel.git",
-                "reference": "1.6.9"
+                "reference": "af527736586388c21a5a0a5f97914e7264fe580c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/propelorm/Propel/zipball/1.6.9",
-                "reference": "1.6.9",
+                "url": "https://api.github.com/repos/propelorm/Propel/zipball/af527736586388c21a5a0a5f97914e7264fe580c",
+                "reference": "af527736586388c21a5a0a5f97914e7264fe580c",
                 "shasum": ""
             },
             "require": {
-                "phing/phing": ">=2.4,<3.0",
+                "phing/phing": "~2.4",
                 "php": ">=5.2.4"
+            },
+            "require-dev": {
+                "pear-pear.php.net/pear_packagefilemanager2": "@stable"
             },
             "bin": [
                 "generator/bin/propel-gen",
@@ -203,7 +241,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.6-dev"
+                    "dev-master": "1.7-dev"
                 }
             },
             "autoload": {
@@ -236,20 +274,302 @@
                 "orm",
                 "persistence"
             ],
-            "time": "2013-03-31 17:20:51"
+            "time": "2014-02-25 09:13:58"
         },
         {
-            "name": "twig/twig",
-            "version": "v1.12.3",
+            "name": "psr/log",
+            "version": "1.0.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/fabpot/Twig.git",
-                "reference": "v1.12.3"
+                "url": "https://github.com/php-fig/log.git",
+                "reference": "fe0936ee26643249e916849d48e3a51d5f5e278b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fabpot/Twig/zipball/v1.12.3",
-                "reference": "v1.12.3",
+                "url": "https://api.github.com/repos/php-fig/log/zipball/fe0936ee26643249e916849d48e3a51d5f5e278b",
+                "reference": "fe0936ee26643249e916849d48e3a51d5f5e278b",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Psr\\Log\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "http://www.php-fig.org/"
+                }
+            ],
+            "description": "Common interface for logging libraries",
+            "keywords": [
+                "log",
+                "psr",
+                "psr-3"
+            ],
+            "time": "2012-12-21 11:40:51"
+        },
+        {
+            "name": "symfony/debug",
+            "version": "v2.5.0",
+            "target-dir": "Symfony/Component/Debug",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/Debug.git",
+                "reference": "7fd8006e4604ef99c95050ca2b5c7c5b41f5c704"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/Debug/zipball/7fd8006e4604ef99c95050ca2b5c7c5b41f5c704",
+                "reference": "7fd8006e4604ef99c95050ca2b5c7c5b41f5c704",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3"
+            },
+            "require-dev": {
+                "symfony/http-foundation": "~2.1",
+                "symfony/http-kernel": "~2.1"
+            },
+            "suggest": {
+                "symfony/http-foundation": "",
+                "symfony/http-kernel": ""
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.5-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Symfony\\Component\\Debug\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com",
+                    "homepage": "http://fabien.potencier.org",
+                    "role": "Lead Developer"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "http://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony Debug Component",
+            "homepage": "http://symfony.com",
+            "time": "2014-05-25 14:44:21"
+        },
+        {
+            "name": "symfony/event-dispatcher",
+            "version": "v2.5.0",
+            "target-dir": "Symfony/Component/EventDispatcher",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/EventDispatcher.git",
+                "reference": "cb62ec8dd05893fc8e4f0e6e21e326e1fc731fe8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/EventDispatcher/zipball/cb62ec8dd05893fc8e4f0e6e21e326e1fc731fe8",
+                "reference": "cb62ec8dd05893fc8e4f0e6e21e326e1fc731fe8",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3"
+            },
+            "require-dev": {
+                "psr/log": "~1.0",
+                "symfony/config": "~2.0",
+                "symfony/dependency-injection": "~2.0",
+                "symfony/stopwatch": "~2.2"
+            },
+            "suggest": {
+                "symfony/dependency-injection": "",
+                "symfony/http-kernel": ""
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.5-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Symfony\\Component\\EventDispatcher\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com",
+                    "homepage": "http://fabien.potencier.org",
+                    "role": "Lead Developer"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "http://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony EventDispatcher Component",
+            "homepage": "http://symfony.com",
+            "time": "2014-04-29 10:13:57"
+        },
+        {
+            "name": "symfony/http-foundation",
+            "version": "v2.5.0",
+            "target-dir": "Symfony/Component/HttpFoundation",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/HttpFoundation.git",
+                "reference": "044085422005aa3258fb3f710a7bf0202011f259"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/HttpFoundation/zipball/044085422005aa3258fb3f710a7bf0202011f259",
+                "reference": "044085422005aa3258fb3f710a7bf0202011f259",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3"
+            },
+            "require-dev": {
+                "symfony/expression-language": "~2.4"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.5-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Symfony\\Component\\HttpFoundation\\": ""
+                },
+                "classmap": [
+                    "Symfony/Component/HttpFoundation/Resources/stubs"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com",
+                    "homepage": "http://fabien.potencier.org",
+                    "role": "Lead Developer"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "http://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony HttpFoundation Component",
+            "homepage": "http://symfony.com",
+            "time": "2014-05-26 19:02:40"
+        },
+        {
+            "name": "symfony/http-kernel",
+            "version": "v2.5.0",
+            "target-dir": "Symfony/Component/HttpKernel",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/HttpKernel.git",
+                "reference": "432a828e796a575d4a325a0fdf14132a615d2c53"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/HttpKernel/zipball/432a828e796a575d4a325a0fdf14132a615d2c53",
+                "reference": "432a828e796a575d4a325a0fdf14132a615d2c53",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3",
+                "psr/log": "~1.0",
+                "symfony/debug": "~2.5",
+                "symfony/event-dispatcher": "~2.1",
+                "symfony/http-foundation": "~2.4"
+            },
+            "require-dev": {
+                "symfony/browser-kit": "~2.2",
+                "symfony/class-loader": "~2.1",
+                "symfony/config": "~2.0",
+                "symfony/console": "~2.2",
+                "symfony/dependency-injection": "~2.0",
+                "symfony/finder": "~2.0",
+                "symfony/process": "~2.0",
+                "symfony/routing": "~2.2",
+                "symfony/stopwatch": "~2.2",
+                "symfony/templating": "~2.2"
+            },
+            "suggest": {
+                "symfony/browser-kit": "",
+                "symfony/class-loader": "",
+                "symfony/config": "",
+                "symfony/console": "",
+                "symfony/dependency-injection": "",
+                "symfony/finder": ""
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.5-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Symfony\\Component\\HttpKernel\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com",
+                    "homepage": "http://fabien.potencier.org",
+                    "role": "Lead Developer"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "http://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony HttpKernel Component",
+            "homepage": "http://symfony.com",
+            "time": "2014-05-31 18:45:50"
+        },
+        {
+            "name": "twig/twig",
+            "version": "v1.15.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/fabpot/Twig.git",
+                "reference": "1fb5784662f438d7d96a541e305e28b812e2eeed"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/fabpot/Twig/zipball/1fb5784662f438d7d96a541e305e28b812e2eeed",
+                "reference": "1fb5784662f438d7d96a541e305e28b812e2eeed",
                 "shasum": ""
             },
             "require": {
@@ -258,7 +578,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.12-dev"
+                    "dev-master": "1.15-dev"
                 }
             },
             "autoload": {
@@ -268,16 +588,24 @@
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "BSD-3"
+                "BSD-3-Clause"
             ],
             "authors": [
                 {
                     "name": "Fabien Potencier",
-                    "email": "fabien@symfony.com"
+                    "email": "fabien@symfony.com",
+                    "homepage": "http://fabien.potencier.org",
+                    "role": "Lead Developer"
                 },
                 {
                     "name": "Armin Ronacher",
-                    "email": "armin.ronacher@active-4.com"
+                    "email": "armin.ronacher@active-4.com",
+                    "role": "Project Founder"
+                },
+                {
+                    "name": "Twig Team",
+                    "homepage": "https://github.com/fabpot/Twig/graphs/contributors",
+                    "role": "Contributors"
                 }
             ],
             "description": "Twig, the flexible, fast, and secure template language for PHP",
@@ -285,38 +613,1175 @@
             "keywords": [
                 "templating"
             ],
-            "time": "2013-04-08 12:40:11"
+            "time": "2014-02-13 10:19:29"
+        },
+        {
+            "name": "zendframework/zend-config",
+            "version": "2.2.6",
+            "target-dir": "Zend/Config",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zendframework/Component_ZendConfig.git",
+                "reference": "a31c3980cf7ec88418a931e9cf4ba21079f47a08"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zendframework/Component_ZendConfig/zipball/a31c3980cf7ec88418a931e9cf4ba21079f47a08",
+                "reference": "a31c3980cf7ec88418a931e9cf4ba21079f47a08",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3",
+                "zendframework/zend-stdlib": "self.version"
+            },
+            "suggest": {
+                "zendframework/zend-json": "Zend\\Json to use the Json reader or writer classes",
+                "zendframework/zend-servicemanager": "Zend\\ServiceManager for use with the Config Factory to retrieve reader and writer instances"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.2-dev",
+                    "dev-develop": "2.3-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Zend\\Config\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "provides a nested object property based user interface for accessing this configuration data within application code",
+            "keywords": [
+                "config",
+                "zf2"
+            ],
+            "time": "2014-01-02 18:00:10"
+        },
+        {
+            "name": "zendframework/zend-eventmanager",
+            "version": "2.2.6",
+            "target-dir": "Zend/EventManager",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zendframework/Component_ZendEventManager.git",
+                "reference": "89368704bb37303fba64c3ddd6bce0506aa7187c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zendframework/Component_ZendEventManager/zipball/89368704bb37303fba64c3ddd6bce0506aa7187c",
+                "reference": "89368704bb37303fba64c3ddd6bce0506aa7187c",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3",
+                "zendframework/zend-stdlib": "self.version"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.2-dev",
+                    "dev-develop": "2.3-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Zend\\EventManager\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "keywords": [
+                "eventmanager",
+                "zf2"
+            ],
+            "time": "2014-01-04 13:00:14"
+        },
+        {
+            "name": "zendframework/zend-session",
+            "version": "2.2.6",
+            "target-dir": "Zend/Session",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zendframework/Component_ZendSession.git",
+                "reference": "39fbad1f3b72f9ba86a218bc7b6e04dc72d800bf"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zendframework/Component_ZendSession/zipball/39fbad1f3b72f9ba86a218bc7b6e04dc72d800bf",
+                "reference": "39fbad1f3b72f9ba86a218bc7b6e04dc72d800bf",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3",
+                "zendframework/zend-stdlib": "self.version"
+            },
+            "suggest": {
+                "zendframework/zend-eventmanager": "Zend\\EventManager component",
+                "zendframework/zend-servicemanager": "Zend\\ServiceManager component",
+                "zendframework/zend-validator": "Zend\\Validator component"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.2-dev",
+                    "dev-develop": "2.3-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Zend\\Session\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "manage and preserve session data, a logical complement of cookie data, across multiple page requests by the same client",
+            "keywords": [
+                "session",
+                "zf2"
+            ],
+            "time": "2014-01-04 13:00:26"
+        },
+        {
+            "name": "zendframework/zend-stdlib",
+            "version": "2.2.6",
+            "target-dir": "Zend/Stdlib",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zendframework/Component_ZendStdlib.git",
+                "reference": "e646729f2274f4552b6a92e38d8e458efe08ebc5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zendframework/Component_ZendStdlib/zipball/e646729f2274f4552b6a92e38d8e458efe08ebc5",
+                "reference": "e646729f2274f4552b6a92e38d8e458efe08ebc5",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3"
+            },
+            "suggest": {
+                "zendframework/zend-eventmanager": "To support aggregate hydrator usage",
+                "zendframework/zend-servicemanager": "To support hydrator plugin manager usage"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.2-dev",
+                    "dev-develop": "2.3-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Zend\\Stdlib\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "keywords": [
+                "stdlib",
+                "zf2"
+            ],
+            "time": "2014-01-04 13:00:28"
+        },
+        {
+            "name": "zf1/zend-cache",
+            "version": "1.12.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zf1/zend-cache.git",
+                "reference": "466c3e48b559f3b3c6475170e84ad93bb79dad74"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zf1/zend-cache/zipball/466c3e48b559f3b3c6475170e84ad93bb79dad74",
+                "reference": "466c3e48b559f3b3c6475170e84ad93bb79dad74",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.11",
+                "zf1/zend-exception": "self.version"
+            },
+            "suggest": {
+                "zf1/zend-log": "Used in special situations or with special adapters"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Zend_Cache": "library/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Zend Framework 1 Cache package",
+            "homepage": "http://framework.zend.com/",
+            "keywords": [
+                "ZF1",
+                "cache",
+                "framework",
+                "zend"
+            ],
+            "time": "2014-05-21 16:06:11"
+        },
+        {
+            "name": "zf1/zend-config",
+            "version": "1.12.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zf1/zend-config.git",
+                "reference": "e80333e2ddc92de3e6e5a389ad1303e3fa76b439"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zf1/zend-config/zipball/e80333e2ddc92de3e6e5a389ad1303e3fa76b439",
+                "reference": "e80333e2ddc92de3e6e5a389ad1303e3fa76b439",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.11",
+                "zf1/zend-exception": "self.version",
+                "zf1/zend-xml": "self.version"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Zend_Config": "library/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Zend Framework 1 Config package",
+            "homepage": "http://framework.zend.com/",
+            "keywords": [
+                "ZF1",
+                "config",
+                "framework",
+                "zend"
+            ],
+            "time": "2014-05-21 15:17:51"
+        },
+        {
+            "name": "zf1/zend-controller",
+            "version": "1.12.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zf1/zend-controller.git",
+                "reference": "e40a245c7545a0d4291e713e08d3f531177b7960"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zf1/zend-controller/zipball/e40a245c7545a0d4291e713e08d3f531177b7960",
+                "reference": "e40a245c7545a0d4291e713e08d3f531177b7960",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.11",
+                "zf1/zend-config": "self.version",
+                "zf1/zend-exception": "self.version",
+                "zf1/zend-loader": "self.version",
+                "zf1/zend-registry": "self.version",
+                "zf1/zend-uri": "self.version",
+                "zf1/zend-view": "self.version",
+                "zf1/zend-xml": "self.version"
+            },
+            "suggest": {
+                "zf1/zend-dojo": "Used in special situations or with special adapters",
+                "zf1/zend-filter": "Used in special situations or with special adapters",
+                "zf1/zend-json": "Used in special situations or with special adapters",
+                "zf1/zend-layout": "Used in special situations or with special adapters"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Zend_Controller": "library/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Zend Framework 1 Controller package",
+            "homepage": "http://framework.zend.com/",
+            "keywords": [
+                "ZF1",
+                "controller",
+                "framework",
+                "zend"
+            ],
+            "time": "2014-05-21 15:18:01"
+        },
+        {
+            "name": "zf1/zend-exception",
+            "version": "1.12.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zf1/zend-exception.git",
+                "reference": "ee61f139d1ad7070c1ff4d0f4bd7ccd441172f11"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zf1/zend-exception/zipball/ee61f139d1ad7070c1ff4d0f4bd7ccd441172f11",
+                "reference": "ee61f139d1ad7070c1ff4d0f4bd7ccd441172f11",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.11"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Zend_Exception": "library/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Zend Framework 1 Exception package",
+            "homepage": "http://framework.zend.com/",
+            "keywords": [
+                "ZF1",
+                "exception",
+                "framework",
+                "zend"
+            ],
+            "time": "2014-05-21 15:17:51"
+        },
+        {
+            "name": "zf1/zend-file-transfer",
+            "version": "1.12.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zf1/zend-file-transfer.git",
+                "reference": "5b3b421c880fa7502b1f8dec460626350be32655"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zf1/zend-file-transfer/zipball/5b3b421c880fa7502b1f8dec460626350be32655",
+                "reference": "5b3b421c880fa7502b1f8dec460626350be32655",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.11",
+                "zf1/zend-exception": "self.version"
+            },
+            "suggest": {
+                "zf1/zend-loader": "Used in special situations or with special adapters"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Zend_File_Transfer": "library/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Zend Framework 1 File Transfer package",
+            "homepage": "http://framework.zend.com/",
+            "keywords": [
+                "ZF1",
+                "file",
+                "framework",
+                "transfer",
+                "zend"
+            ],
+            "time": "2014-05-21 15:17:49"
+        },
+        {
+            "name": "zf1/zend-filter",
+            "version": "1.12.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zf1/zend-filter.git",
+                "reference": "d950051d3a11f725b0d85de99e2fd91071dd50ae"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zf1/zend-filter/zipball/d950051d3a11f725b0d85de99e2fd91071dd50ae",
+                "reference": "d950051d3a11f725b0d85de99e2fd91071dd50ae",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.11",
+                "zf1/zend-exception": "self.version",
+                "zf1/zend-loader": "self.version",
+                "zf1/zend-validate": "self.version"
+            },
+            "suggest": {
+                "zf1/zend-locale": "Used in special situations or with special adapters"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Zend_Filter": "library/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Zend Framework 1 Filter package",
+            "homepage": "http://framework.zend.com/",
+            "keywords": [
+                "ZF1",
+                "filter",
+                "framework",
+                "zend"
+            ],
+            "time": "2014-05-21 15:17:50"
+        },
+        {
+            "name": "zf1/zend-form",
+            "version": "1.12.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zf1/zend-form.git",
+                "reference": "0b9d2c8b5ae472679a11fc8cf466403363ab600c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zf1/zend-form/zipball/0b9d2c8b5ae472679a11fc8cf466403363ab600c",
+                "reference": "0b9d2c8b5ae472679a11fc8cf466403363ab600c",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.11",
+                "zf1/zend-exception": "self.version",
+                "zf1/zend-filter": "self.version",
+                "zf1/zend-validate": "self.version"
+            },
+            "suggest": {
+                "zf1/zend-captcha": "Used in special situations or with special adapters",
+                "zf1/zend-controller": "Used in special situations or with special adapters",
+                "zf1/zend-json": "Used in special situations or with special adapters",
+                "zf1/zend-loader": "Used in special situations or with special adapters",
+                "zf1/zend-registry": "Used in special situations or with special adapters",
+                "zf1/zend-session": "Used in special situations or with special adapters"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Zend_Form": "library/",
+                    "Zend_Dojo_Form": "library/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Zend Framework 1 Form package",
+            "homepage": "http://framework.zend.com/",
+            "keywords": [
+                "ZF1",
+                "form",
+                "framework",
+                "zend"
+            ],
+            "time": "2014-05-21 16:06:12"
+        },
+        {
+            "name": "zf1/zend-json",
+            "version": "1.12.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zf1/zend-json.git",
+                "reference": "ffa9552000001125cbb22a3221ca41ebb654043a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zf1/zend-json/zipball/ffa9552000001125cbb22a3221ca41ebb654043a",
+                "reference": "ffa9552000001125cbb22a3221ca41ebb654043a",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.11",
+                "zf1/zend-exception": "self.version",
+                "zf1/zend-loader": "self.version",
+                "zf1/zend-server": "self.version",
+                "zf1/zend-xml": "self.version"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Zend_Json": "library/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Zend Framework 1 Json package",
+            "homepage": "http://framework.zend.com/",
+            "keywords": [
+                "ZF1",
+                "framework",
+                "json",
+                "zend"
+            ],
+            "time": "2014-05-21 15:17:57"
+        },
+        {
+            "name": "zf1/zend-loader",
+            "version": "1.12.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zf1/zend-loader.git",
+                "reference": "433adcc69b7c6517495d137f7733983bb2399301"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zf1/zend-loader/zipball/433adcc69b7c6517495d137f7733983bb2399301",
+                "reference": "433adcc69b7c6517495d137f7733983bb2399301",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.11",
+                "zf1/zend-exception": "self.version"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Zend_Loader": "library/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Zend Framework 1 Loader package",
+            "homepage": "http://framework.zend.com/",
+            "keywords": [
+                "ZF1",
+                "framework",
+                "loader",
+                "zend"
+            ],
+            "time": "2014-05-21 16:06:11"
+        },
+        {
+            "name": "zf1/zend-locale",
+            "version": "1.12.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zf1/zend-locale.git",
+                "reference": "e09d6768b56136bb724b130274bcd5fd8a902176"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zf1/zend-locale/zipball/e09d6768b56136bb724b130274bcd5fd8a902176",
+                "reference": "e09d6768b56136bb724b130274bcd5fd8a902176",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.11",
+                "zf1/zend-cache": "self.version",
+                "zf1/zend-exception": "self.version",
+                "zf1/zend-xml": "self.version"
+            },
+            "suggest": {
+                "zf1/zend-registry": "Used in special situations or with special adapters"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Zend_Locale": "library/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Zend Framework 1 Locale package",
+            "homepage": "http://framework.zend.com/",
+            "keywords": [
+                "ZF1",
+                "framework",
+                "locale",
+                "zend"
+            ],
+            "time": "2014-05-21 16:06:13"
+        },
+        {
+            "name": "zf1/zend-log",
+            "version": "1.12.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zf1/zend-log.git",
+                "reference": "4c39db541f1372b8732ec41585274c7882a37116"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zf1/zend-log/zipball/4c39db541f1372b8732ec41585274c7882a37116",
+                "reference": "4c39db541f1372b8732ec41585274c7882a37116",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.11",
+                "zf1/zend-exception": "self.version"
+            },
+            "suggest": {
+                "zf1/zend-wildfire": "Used in special situations or with special adapters"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Zend_Log": "library/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Zend Framework 1 Log package",
+            "homepage": "http://framework.zend.com/",
+            "keywords": [
+                "ZF1",
+                "framework",
+                "log",
+                "zend"
+            ],
+            "time": "2014-05-21 15:17:58"
+        },
+        {
+            "name": "zf1/zend-mail",
+            "version": "1.12.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zf1/zend-mail.git",
+                "reference": "a4782ec0185f3998abdada146a8c373e839cb110"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zf1/zend-mail/zipball/a4782ec0185f3998abdada146a8c373e839cb110",
+                "reference": "a4782ec0185f3998abdada146a8c373e839cb110",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.11",
+                "zf1/zend-exception": "self.version",
+                "zf1/zend-loader": "self.version",
+                "zf1/zend-mime": "self.version",
+                "zf1/zend-validate": "self.version"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Zend_Mail": "library/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Zend Framework 1 Mail package",
+            "homepage": "http://framework.zend.com/",
+            "keywords": [
+                "ZF1",
+                "framework",
+                "mail",
+                "zend"
+            ],
+            "time": "2014-05-21 15:17:58"
+        },
+        {
+            "name": "zf1/zend-mime",
+            "version": "1.12.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zf1/zend-mime.git",
+                "reference": "0a1894ef0d4fedc9d895e6c46ae3713198916b1b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zf1/zend-mime/zipball/0a1894ef0d4fedc9d895e6c46ae3713198916b1b",
+                "reference": "0a1894ef0d4fedc9d895e6c46ae3713198916b1b",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.11",
+                "zf1/zend-exception": "self.version"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Zend_Mime": "library/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Zend Framework 1 Mime package",
+            "homepage": "http://framework.zend.com/",
+            "keywords": [
+                "ZF1",
+                "framework",
+                "mime",
+                "zend"
+            ],
+            "time": "2014-05-21 15:17:49"
+        },
+        {
+            "name": "zf1/zend-registry",
+            "version": "1.12.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zf1/zend-registry.git",
+                "reference": "aafc0b8a46d54623e43dd1bb139959b86b15d9da"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zf1/zend-registry/zipball/aafc0b8a46d54623e43dd1bb139959b86b15d9da",
+                "reference": "aafc0b8a46d54623e43dd1bb139959b86b15d9da",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.11",
+                "zf1/zend-exception": "self.version"
+            },
+            "suggest": {
+                "zf1/zend-loader": "Used in special situations or with special adapters"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Zend_Registry": "library/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Zend Framework 1 Registry package",
+            "homepage": "http://framework.zend.com/",
+            "keywords": [
+                "ZF1",
+                "framework",
+                "registry",
+                "zend"
+            ],
+            "time": "2014-05-21 15:18:00"
+        },
+        {
+            "name": "zf1/zend-search",
+            "version": "1.12.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zf1/zend-search.git",
+                "reference": "0a9f471d0611694ccc82a6d8c963bcf58aef9842"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zf1/zend-search/zipball/0a9f471d0611694ccc82a6d8c963bcf58aef9842",
+                "reference": "0a9f471d0611694ccc82a6d8c963bcf58aef9842",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.11",
+                "zf1/zend-exception": "self.version"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Zend_Search": "library/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Zend Framework 1 Search package",
+            "homepage": "http://framework.zend.com/",
+            "keywords": [
+                "ZF1",
+                "framework",
+                "search",
+                "zend"
+            ],
+            "time": "2014-05-21 15:17:49"
+        },
+        {
+            "name": "zf1/zend-search-lucene",
+            "version": "1.12.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zf1/zend-search-lucene.git",
+                "reference": "aceee80a4b7c197f7fa573a77e84cd55e7f30a43"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zf1/zend-search-lucene/zipball/aceee80a4b7c197f7fa573a77e84cd55e7f30a43",
+                "reference": "aceee80a4b7c197f7fa573a77e84cd55e7f30a43",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.11",
+                "zf1/zend-exception": "self.version",
+                "zf1/zend-search": "self.version",
+                "zf1/zend-xml": "self.version"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Zend_Search_Lucene": "library/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Zend Framework 1 Search Lucene package",
+            "homepage": "http://framework.zend.com/",
+            "keywords": [
+                "ZF1",
+                "framework",
+                "lucene",
+                "search",
+                "zend"
+            ],
+            "time": "2014-05-21 15:17:49"
+        },
+        {
+            "name": "zf1/zend-server",
+            "version": "1.12.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zf1/zend-server.git",
+                "reference": "d928d69b97ea4a5facc8a91594eeb2a5862237d2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zf1/zend-server/zipball/d928d69b97ea4a5facc8a91594eeb2a5862237d2",
+                "reference": "d928d69b97ea4a5facc8a91594eeb2a5862237d2",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.11",
+                "zf1/zend-exception": "self.version"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Zend_Server": "library/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Zend Framework 1 Server package",
+            "homepage": "http://framework.zend.com/",
+            "keywords": [
+                "ZF1",
+                "framework",
+                "server",
+                "zend"
+            ],
+            "time": "2014-05-21 15:17:58"
+        },
+        {
+            "name": "zf1/zend-uri",
+            "version": "1.12.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zf1/zend-uri.git",
+                "reference": "b599198e8bb3c26355ee96aee60462b4e0b15082"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zf1/zend-uri/zipball/b599198e8bb3c26355ee96aee60462b4e0b15082",
+                "reference": "b599198e8bb3c26355ee96aee60462b4e0b15082",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.11",
+                "zf1/zend-exception": "self.version",
+                "zf1/zend-loader": "self.version",
+                "zf1/zend-locale": "self.version",
+                "zf1/zend-validate": "self.version"
+            },
+            "suggest": {
+                "zf1/zend-date": "Used in special situations or with special adapters",
+                "zf1/zend-filter": "Used in special situations or with special adapters",
+                "zf1/zend-registry": "Used in special situations or with special adapters"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Zend_Uri": "library/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Zend Framework 1 Uri package",
+            "homepage": "http://framework.zend.com/",
+            "keywords": [
+                "ZF1",
+                "framework",
+                "uri",
+                "zend"
+            ],
+            "time": "2014-05-21 15:17:50"
+        },
+        {
+            "name": "zf1/zend-validate",
+            "version": "1.12.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zf1/zend-validate.git",
+                "reference": "7ba6a6b33d49b75424fa79a73d45d8f12fd3081d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zf1/zend-validate/zipball/7ba6a6b33d49b75424fa79a73d45d8f12fd3081d",
+                "reference": "7ba6a6b33d49b75424fa79a73d45d8f12fd3081d",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.11",
+                "zf1/zend-exception": "self.version",
+                "zf1/zend-loader": "self.version",
+                "zf1/zend-locale": "self.version"
+            },
+            "suggest": {
+                "zf1/zend-date": "Used in special situations or with special adapters",
+                "zf1/zend-filter": "Used in special situations or with special adapters",
+                "zf1/zend-registry": "Used in special situations or with special adapters"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Zend_Validate": "library/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Zend Framework 1 Validate package",
+            "homepage": "http://framework.zend.com/",
+            "keywords": [
+                "ZF1",
+                "framework",
+                "validate",
+                "zend"
+            ],
+            "time": "2014-05-21 15:52:57"
+        },
+        {
+            "name": "zf1/zend-version",
+            "version": "1.12.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zf1/zend-version.git",
+                "reference": "3d6730b593369c92667d20589369d6464d80de82"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zf1/zend-version/zipball/3d6730b593369c92667d20589369d6464d80de82",
+                "reference": "3d6730b593369c92667d20589369d6464d80de82",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.11"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Zend_Version": "library/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Zend Framework 1 Version package",
+            "homepage": "http://framework.zend.com/",
+            "keywords": [
+                "ZF1",
+                "framework",
+                "version",
+                "zend"
+            ],
+            "time": "2014-05-21 16:06:12"
+        },
+        {
+            "name": "zf1/zend-view",
+            "version": "1.12.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zf1/zend-view.git",
+                "reference": "4f470b2dc67878d4b246481f8fd0694569686f55"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zf1/zend-view/zipball/4f470b2dc67878d4b246481f8fd0694569686f55",
+                "reference": "4f470b2dc67878d4b246481f8fd0694569686f55",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.11",
+                "zf1/zend-controller": "self.version",
+                "zf1/zend-exception": "self.version",
+                "zf1/zend-loader": "self.version",
+                "zf1/zend-locale": "self.version",
+                "zf1/zend-registry": "self.version"
+            },
+            "suggest": {
+                "zf1/zend-json": "Used in special situations or with special adapters",
+                "zf1/zend-layout": "Used in special situations or with special adapters"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Zend_View": "library/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Zend Framework 1 View package",
+            "homepage": "http://framework.zend.com/",
+            "keywords": [
+                "ZF1",
+                "framework",
+                "view",
+                "zend"
+            ],
+            "time": "2014-05-21 15:17:50"
+        },
+        {
+            "name": "zf1/zend-wildfire",
+            "version": "1.12.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zf1/zend-wildfire.git",
+                "reference": "345ab08f58debcfa93377cd52711f2150844b2db"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zf1/zend-wildfire/zipball/345ab08f58debcfa93377cd52711f2150844b2db",
+                "reference": "345ab08f58debcfa93377cd52711f2150844b2db",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.11",
+                "zf1/zend-controller": "self.version",
+                "zf1/zend-exception": "self.version",
+                "zf1/zend-json": "self.version",
+                "zf1/zend-loader": "self.version"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Zend_Wildfire": "library/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Zend Framework 1 Wildfire package",
+            "homepage": "http://framework.zend.com/",
+            "keywords": [
+                "ZF1",
+                "framework",
+                "wildfire",
+                "zend"
+            ],
+            "time": "2014-05-21 15:17:58"
+        },
+        {
+            "name": "zf1/zend-xml",
+            "version": "1.12.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zf1/zend-xml.git",
+                "reference": "f24c8b2e53c9bd67177d77c3e976f01fe806a079"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zf1/zend-xml/zipball/f24c8b2e53c9bd67177d77c3e976f01fe806a079",
+                "reference": "f24c8b2e53c9bd67177d77c3e976f01fe806a079",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.11",
+                "zf1/zend-exception": "self.version"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Zend_Xml": "library/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Zend Framework 1 Xml package",
+            "homepage": "http://framework.zend.com/",
+            "keywords": [
+                "ZF1",
+                "framework",
+                "xml",
+                "zend"
+            ],
+            "time": "2014-05-21 15:52:59"
         }
     ],
     "packages-dev": [
         {
             "name": "phpunit/php-code-coverage",
-            "version": "1.2.11",
+            "version": "1.2.17",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "1.2.11"
+                "reference": "6ef2bf3a1c47eca07ea95f0d8a902a6340390b34"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/1.2.11",
-                "reference": "1.2.11",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/6ef2bf3a1c47eca07ea95f0d8a902a6340390b34",
+                "reference": "6ef2bf3a1c47eca07ea95f0d8a902a6340390b34",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3.3",
                 "phpunit/php-file-iterator": ">=1.3.0@stable",
-                "phpunit/php-text-template": ">=1.1.1@stable",
+                "phpunit/php-text-template": ">=1.2.0@stable",
                 "phpunit/php-token-stream": ">=1.1.3@stable"
             },
             "require-dev": {
-                "phpunit/phpunit": "3.7.*"
+                "phpunit/phpunit": "3.7.*@dev"
             },
             "suggest": {
                 "ext-dom": "*",
                 "ext-xdebug": ">=2.0.5"
             },
             "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.2.x-dev"
+                }
+            },
             "autoload": {
                 "classmap": [
                     "PHP/"
@@ -343,20 +1808,20 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2013-05-23 18:23:24"
+            "time": "2014-03-28 10:53:45"
         },
         {
             "name": "phpunit/php-file-iterator",
-            "version": "1.3.3",
+            "version": "1.3.4",
             "source": {
                 "type": "git",
-                "url": "git://github.com/sebastianbergmann/php-file-iterator.git",
-                "reference": "1.3.3"
+                "url": "https://github.com/sebastianbergmann/php-file-iterator.git",
+                "reference": "acd690379117b042d1c8af1fafd61bde001bf6bb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/sebastianbergmann/php-file-iterator/zipball/1.3.3",
-                "reference": "1.3.3",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-file-iterator/zipball/acd690379117b042d1c8af1fafd61bde001bf6bb",
+                "reference": "acd690379117b042d1c8af1fafd61bde001bf6bb",
                 "shasum": ""
             },
             "require": {
@@ -383,25 +1848,25 @@
                 }
             ],
             "description": "FilterIterator implementation that filters files based on a list of suffixes.",
-            "homepage": "http://www.phpunit.de/",
+            "homepage": "https://github.com/sebastianbergmann/php-file-iterator/",
             "keywords": [
                 "filesystem",
                 "iterator"
             ],
-            "time": "2012-10-11 04:44:38"
+            "time": "2013-10-10 15:34:57"
         },
         {
             "name": "phpunit/php-text-template",
-            "version": "1.1.4",
+            "version": "1.2.0",
             "source": {
                 "type": "git",
-                "url": "git://github.com/sebastianbergmann/php-text-template.git",
-                "reference": "1.1.4"
+                "url": "https://github.com/sebastianbergmann/php-text-template.git",
+                "reference": "206dfefc0ffe9cebf65c413e3d0e809c82fbf00a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/sebastianbergmann/php-text-template/zipball/1.1.4",
-                "reference": "1.1.4",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-text-template/zipball/206dfefc0ffe9cebf65c413e3d0e809c82fbf00a",
+                "reference": "206dfefc0ffe9cebf65c413e3d0e809c82fbf00a",
                 "shasum": ""
             },
             "require": {
@@ -432,20 +1897,20 @@
             "keywords": [
                 "template"
             ],
-            "time": "2012-10-31 11:15:28"
+            "time": "2014-01-30 17:20:04"
         },
         {
             "name": "phpunit/php-timer",
-            "version": "1.0.4",
+            "version": "1.0.5",
             "source": {
                 "type": "git",
-                "url": "git://github.com/sebastianbergmann/php-timer.git",
-                "reference": "1.0.4"
+                "url": "https://github.com/sebastianbergmann/php-timer.git",
+                "reference": "19689d4354b295ee3d8c54b4f42c3efb69cbc17c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/sebastianbergmann/php-timer/zipball/1.0.4",
-                "reference": "1.0.4",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-timer/zipball/19689d4354b295ee3d8c54b4f42c3efb69cbc17c",
+                "reference": "19689d4354b295ee3d8c54b4f42c3efb69cbc17c",
                 "shasum": ""
             },
             "require": {
@@ -472,24 +1937,24 @@
                 }
             ],
             "description": "Utility class for timing",
-            "homepage": "http://www.phpunit.de/",
+            "homepage": "https://github.com/sebastianbergmann/php-timer/",
             "keywords": [
                 "timer"
             ],
-            "time": "2012-10-11 04:45:58"
+            "time": "2013-08-02 07:42:54"
         },
         {
             "name": "phpunit/php-token-stream",
-            "version": "1.1.5",
+            "version": "1.2.2",
             "source": {
                 "type": "git",
-                "url": "git://github.com/sebastianbergmann/php-token-stream.git",
-                "reference": "1.1.5"
+                "url": "https://github.com/sebastianbergmann/php-token-stream.git",
+                "reference": "ad4e1e23ae01b483c16f600ff1bebec184588e32"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/sebastianbergmann/php-token-stream/zipball/1.1.5",
-                "reference": "1.1.5",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-token-stream/zipball/ad4e1e23ae01b483c16f600ff1bebec184588e32",
+                "reference": "ad4e1e23ae01b483c16f600ff1bebec184588e32",
                 "shasum": ""
             },
             "require": {
@@ -497,6 +1962,11 @@
                 "php": ">=5.3.3"
             },
             "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.2-dev"
+                }
+            },
             "autoload": {
                 "classmap": [
                     "PHP/"
@@ -517,47 +1987,46 @@
                 }
             ],
             "description": "Wrapper around PHP's tokenizer extension.",
-            "homepage": "http://www.phpunit.de/",
+            "homepage": "https://github.com/sebastianbergmann/php-token-stream/",
             "keywords": [
                 "tokenizer"
             ],
-            "time": "2012-10-11 04:47:14"
+            "time": "2014-03-03 05:10:30"
         },
         {
             "name": "phpunit/phpunit",
-            "version": "3.7.21",
+            "version": "3.7.37",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "3.7.21"
+                "reference": "ae6cefd7cc84586a5ef27e04bae11ee940ec63dc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/3.7.21",
-                "reference": "3.7.21",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/ae6cefd7cc84586a5ef27e04bae11ee940ec63dc",
+                "reference": "ae6cefd7cc84586a5ef27e04bae11ee940ec63dc",
                 "shasum": ""
             },
             "require": {
+                "ext-ctype": "*",
                 "ext-dom": "*",
+                "ext-json": "*",
                 "ext-pcre": "*",
                 "ext-reflection": "*",
                 "ext-spl": "*",
                 "php": ">=5.3.3",
-                "phpunit/php-code-coverage": ">=1.2.1,<1.3.0",
-                "phpunit/php-file-iterator": ">=1.3.1",
-                "phpunit/php-text-template": ">=1.1.1",
-                "phpunit/php-timer": ">=1.0.2,<1.1.0",
-                "phpunit/phpunit-mock-objects": ">=1.2.0,<1.3.0",
-                "symfony/yaml": ">=2.0,<3.0"
+                "phpunit/php-code-coverage": "~1.2",
+                "phpunit/php-file-iterator": "~1.3",
+                "phpunit/php-text-template": "~1.1",
+                "phpunit/php-timer": "~1.0",
+                "phpunit/phpunit-mock-objects": "~1.2",
+                "symfony/yaml": "~2.0"
             },
             "require-dev": {
-                "pear-pear/pear": "1.9.4"
+                "pear-pear.php.net/pear": "1.9.4"
             },
             "suggest": {
-                "ext-json": "*",
-                "ext-simplexml": "*",
-                "ext-tokenizer": "*",
-                "phpunit/php-invoker": ">=1.1.0,<1.2.0"
+                "phpunit/php-invoker": "~1.1"
             },
             "bin": [
                 "composer/bin/phpunit"
@@ -595,7 +2064,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2013-05-23 18:54:29"
+            "time": "2014-04-30 12:24:19"
         },
         {
             "name": "phpunit/phpunit-mock-objects",
@@ -648,17 +2117,17 @@
         },
         {
             "name": "symfony/yaml",
-            "version": "v2.3.1",
+            "version": "v2.5.0",
             "target-dir": "Symfony/Component/Yaml",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/Yaml.git",
-                "reference": "v2.3.1"
+                "reference": "b4b09c68ec2f2727574544ef0173684281a5033c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/Yaml/zipball/v2.3.1",
-                "reference": "v2.3.1",
+                "url": "https://api.github.com/repos/symfony/Yaml/zipball/b4b09c68ec2f2727574544ef0173684281a5033c",
+                "reference": "b4b09c68ec2f2727574544ef0173684281a5033c",
                 "shasum": ""
             },
             "require": {
@@ -667,7 +2136,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.3-dev"
+                    "dev-master": "2.5-dev"
                 }
             },
             "autoload": {
@@ -682,7 +2151,9 @@
             "authors": [
                 {
                     "name": "Fabien Potencier",
-                    "email": "fabien@symfony.com"
+                    "email": "fabien@symfony.com",
+                    "homepage": "http://fabien.potencier.org",
+                    "role": "Lead Developer"
                 },
                 {
                     "name": "Symfony Community",
@@ -691,7 +2162,7 @@
             ],
             "description": "Symfony Yaml Component",
             "homepage": "http://symfony.com",
-            "time": "2013-05-10 18:12:13"
+            "time": "2014-05-16 14:25:18"
         }
     ],
     "aliases": [

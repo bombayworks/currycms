@@ -20,26 +20,26 @@ use Curry\Controller\Frontend;
 /**
  * Manage users and user permissions.
  * 
- * @package Curry\Backend
+ * @package Curry\Controller\Backend
  */
-class Curry_Backend_Users extends Curry_Backend
+class Curry_Backend_Users extends \Curry\Backend
 {
 	const PERMISSION_USERS = 'Users';
 	const PERMISSION_ROLES = 'Roles';
 	const PERMISSION_FILEACCESS = 'FileAccess';
 
 	/** {@inheritdoc} */
-	public static function getGroup()
+	public function getGroup()
 	{
 		return "Accounts";
 	}
 
-	public static function getName()
+	public function getName()
 	{
 		return "Users and roles";
 	}
 
-	public static function getPermissions()
+	public function getPermissions()
 	{
 		return array(
 			self::PERMISSION_USERS,
@@ -120,7 +120,7 @@ class Curry_Backend_Users extends Curry_Backend
 		$this->addMenu();
 
 		$user = User::getUser();
-		$backendModules = Curry_Backend::getBackendList();
+		$backendModules = \Curry\Backend::getBackendList();
 
 		$disable = array();
 		$backend = array("*" => "All");
@@ -150,7 +150,7 @@ class Curry_Backend_Users extends Curry_Backend
 		$form = new Curry_ModelView_Form('UserRole', array(
 			'elements' => array(
 				'backend' => array('multiselect', array(
-					'label' => 'Backend access',
+					'label' => 'Curry\Controller\Backend access',
 					'multiOptions' => $backend,
 					'size' => 10,
 					'order' => 1,

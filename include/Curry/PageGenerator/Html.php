@@ -191,7 +191,7 @@ JS
 
 		$view = Curry_Backend_Page::getPageView($page);
 		$url = url('admin.php?module=Curry_Backend_Page', array('view'=>$view,'page_id'=>$this->pageRevision->getPageId()));
-		$commands[] = array('Name' => 'Backend', 'Url' => $url, 'Class' => 'curry-admin-backend');
+		$commands[] = array('Name' => 'Curry\Controller\Backend', 'Url' => $url, 'Class' => 'curry-admin-backend');
 		
 		$url = (string)url('', $_GET)->add(array('curry_inline_admin'=>0));
 		$commands[] = array('Name' => 'Exit Live Edit', 'Url' => $url, 'Class' => 'curry-admin-logout');
@@ -202,7 +202,7 @@ JS
 		));
 		
 		$htmlHead = $this->getHtmlHead();
-		$htmlHead->addScript(Curry_Backend::JQUERY_JS);
+		$htmlHead->addScript(\Curry\Backend::JQUERY_JS);
 		$htmlHead->addInlineScript('window.inlineAdminContent = '.json_encode($content).';');
 		$htmlHead->addScript("shared/backend/common/js/inline-admin.js");
 		$htmlHead->addStyleSheet("shared/backend/".\Curry\App::getInstance()->config->curry->backend->theme."/css/inline-admin.css");

@@ -33,7 +33,7 @@ class Curry_ModelView_Delete extends Curry_ModelView_Abstract {
 		return $this->modelClass;
 	}
 
-	public function render(Curry_Backend $backend, array $params)
+	public function render(\Curry\Backend $backend, array $params)
 	{
 		$item = $this->getSelection($params);
 		if(!isset($item))

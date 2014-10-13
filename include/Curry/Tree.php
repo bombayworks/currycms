@@ -16,6 +16,8 @@
  * @link       http://currycms.com
  */
 use Curry\Controller\Frontend;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * HTML Tree View, implemented using dynatree javascript.
@@ -24,7 +26,7 @@ use Curry\Controller\Frontend;
  * 
  * @package Curry
  */
-class Curry_Tree {
+class Curry_Tree extends \Curry\View {
 	/**
 	 * id of tree container.
 	 *
@@ -66,7 +68,7 @@ class Curry_Tree {
 		$this->options['persist'] = true;
 		$this->options['cookieId'] = $this->id;
 		$this->options['imagePath'] = 'shared/images/icons/';
-		$this->options['initAjax'] = array('url' => (string)url('', $_GET)->add(array('json'=>'1')));
+		$this->options['initAjax'] = array();
 		$this->options['onActivate'] = new Zend_Json_Expr('function(node) {
 			if(node.data.href)
 				window.location.href = node.data.href;
@@ -108,7 +110,7 @@ class Curry_Tree {
 	 */
 	public function setAjaxUrl($value)
 	{
-		$this->options['initAjax'] = array('url' => (string)$value);
+		$this->options['initAjax']['url'] = (string)$value;
 	}
 	
 	/**
@@ -191,26 +193,26 @@ class Curry_Tree {
 	{
 		return $this->options[$name];
 	}
-	
-	/**
-	 * Cast to string, return HTML or JSON.
-	 *
-	 * @return string
-	 */
+
+	public function show(Request $request)
+	{
+		$response = new Response(json_encode($this->getJson()));
+		$response->headers->set('Content-Type', 'application/json');
+		return $response;
+	}
+
 	public function __toString()
 	{
-		try {
-			if(isset($_GET['json']))
-				Frontend::returnJson($this->getJson());
-			else
-				return $this->getHtml();
+		if (!array_key_exists('url', $this->options['initAjax'])) {
+			$this->setAjaxUrl($this->parent ? $this->url() : array('url' => (string)url('', $_GET)->add(array('json'=>'1'))));
 		}
-		catch(Exception $e) {
-			return $e->getMessage();
+		if (isset($_GET['json'])) {
+			throw new \Curry\Exception\ResponseException($this->show(\Curry\App::getInstance()->request));
 		}
-		return '';
+		return $this->getHtml();
 	}
-	
+
+
 	/**
 	 * Get HTML code to create tree component.
 	 *

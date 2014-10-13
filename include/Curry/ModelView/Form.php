@@ -15,12 +15,13 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  *
  * @package Curry\ModelView
  */
-class Curry_ModelView_Form extends Curry_ModelView_Abstract {
+class Curry_ModelView_Form extends \Curry\View {
 	protected $modelForm;
 	protected $preRender = null;
 	protected $preSave = null;
@@ -65,9 +66,12 @@ class Curry_ModelView_Form extends Curry_ModelView_Abstract {
 		return $this->modelForm->getModelClass();
 	}
 
-	public function render(Curry_Backend $backend, array $params)
+	public function show(Request $request)
 	{
+		$params = array();
 		$modelClass = $this->modelForm->getModelClass();
+		$item = new $modelClass;
+		/*
 		$item = $this->getSelection($params);
 		if(!isset($item)) {
 			$item = new $modelClass;
@@ -82,6 +86,7 @@ class Curry_ModelView_Form extends Curry_ModelView_Abstract {
 				}
 			}
 		}
+		*/
 
 		$form = clone $this->modelForm;
 		$form->setOptions(array(
@@ -90,7 +95,7 @@ class Curry_ModelView_Form extends Curry_ModelView_Abstract {
 		));
 		$buttons = array('save');
 		$form->addElement('submit', 'save', array('label' => 'Save'));
-		if(!$item->isNew() && ($this->parentView instanceof Curry_ModelView_List) && $this->parentView->hasAction('delete')) {
+		if(!$item->isNew() && ($this->parent instanceof Curry_ModelView_List) && $this->parent->hasAction('delete')) {
 			$form->addElement('submit', 'delete', array(
 				'label' => 'Delete',
 				'class' => 'btn btn-danger',
@@ -103,13 +108,13 @@ class Curry_ModelView_Form extends Curry_ModelView_Abstract {
 
 		if(isPost() && $form->isValid($_POST)) {
 			if($form->delete && $form->delete->isChecked()) {
-				$backend->createModelUpdateEvent($modelClass, $item->getPrimaryKey(), 'delete');
+				//$backend->createModelUpdateEvent($modelClass, $item->getPrimaryKey(), 'delete');
 				$item->delete();
 
 				if ($item instanceof Curry_ISearchable)
 					Curry_Backend_Indexer::removeItem($item);
 
-				$backend->addMainContent('<p>The item has been deleted.</p>');
+				//$backend->addMainContent('<p>The item has been deleted.</p>');
 				return;
 			}
 
@@ -119,7 +124,7 @@ class Curry_ModelView_Form extends Curry_ModelView_Abstract {
 			$this->triggerCallback($this->postSave, $item, $form);
 			$form->fillForm($item);
 
-			$backend->createModelUpdateEvent($modelClass, $item->getPrimaryKey(), 'update');
+			//$backend->createModelUpdateEvent($modelClass, $item->getPrimaryKey(), 'update');
 			if ($item instanceof Curry_ISearchable)
 				Curry_Backend_Indexer::updateItem($item);
 
@@ -128,6 +133,6 @@ class Curry_ModelView_Form extends Curry_ModelView_Abstract {
 		}
 
 		$this->triggerCallback($this->preRender, $item, $form);
-		$backend->addMainContent($form);
+		return $form;
 	}
 }

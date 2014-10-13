@@ -19,17 +19,17 @@
 /**
  * Manage predefined modules.
  *
- * @package Curry\Backend
+ * @package Curry\Controller\Backend
  */
-class Curry_Backend_PredefinedModules extends Curry_Backend {
+class Curry_Backend_PredefinedModules extends \Curry\Backend {
 	/** {@inheritdoc} */
-	public static function getName()
+	public function getName()
 	{
 		return 'Predefined modules';
 	}
 
 	/** {@inheritdoc} */
-	public static function getGroup()
+	public function getGroup()
 	{
 		return 'System';
 	}

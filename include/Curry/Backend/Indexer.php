@@ -20,11 +20,11 @@ use Curry\Controller\Frontend;
 /**
  * Manage search index.
  * 
- * @package Curry\Backend
+ * @package Curry\Controller\Backend
  */
-class Curry_Backend_Indexer extends Curry_Backend {
+class Curry_Backend_Indexer extends \Curry\Backend {
 	/** {@inheritdoc} */
-	public static function getGroup()
+	public function getGroup()
 	{
 		return "System";
 	}

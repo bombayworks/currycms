@@ -20,9 +20,9 @@ use Curry\Controller\Frontend;
 /**
  * Manage the database.
  * 
- * @package Curry\Backend
+ * @package Curry\Controller\Backend
  */
-class Curry_Backend_Database extends Curry_Backend
+class Curry_Backend_Database extends \Curry\Backend
 {
 	/**#@+
 	 * Propel-gen method constants.
@@ -51,7 +51,7 @@ class Curry_Backend_Database extends Curry_Backend
 	/**#@-*/
 	
 	/** {@inheritdoc} */
-	public static function getGroup()
+	public function getGroup()
 	{
 		return "System";
 	}
@@ -150,7 +150,7 @@ class Curry_Backend_Database extends Curry_Backend
 			}
 			$packages[] = $p;
 		}
-		Frontend::returnJson($packages);
+		return $packages;
 	}
 	
 	/**

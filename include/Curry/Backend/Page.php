@@ -15,27 +15,28 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Controller\Backend;
 use Curry\Controller\Frontend;
 
 /**
  * Manage pages.
  * 
- * @package Curry\Backend
+ * @package Curry\Controller\Backend
  */
-class Curry_Backend_Page extends Curry_Backend
+class Curry_Backend_Page extends \Curry\Backend
 {
 	/** {@inheritdoc} */
-	public static function getGroup()
+	public function getGroup()
 	{
 		return "Content";
 	}
 
-	public static function getName()
+	public function getName()
 	{
 		return "Pages";
 	}
 
-	public static function getNotifications()
+	public function getNotifications()
 	{
 		return PageQuery::create()
 			->filterByWorkingPageRevisionId(null, Criteria::ISNOTNULL)
@@ -46,7 +47,7 @@ class Curry_Backend_Page extends Curry_Backend
 	public static function updateIndex(Page $page)
 	{
 		if (\Curry\App::getInstance()->config->curry->autoUpdateIndex)
-			Frontend::registerBackgroundFunction(array(__CLASS__, 'doUpdateIndex'), $page);
+			\Curry\BackgroundFunctions::register(array(__CLASS__, 'doUpdateIndex'), $page);
 	}
 
 	public static function doUpdateIndex(Page $page)
@@ -783,7 +784,7 @@ class Curry_Backend_Page extends Curry_Backend
 			$values = $form->getValues();
 			Curry_Backend_PageHelper::savePageProperties($page, $values);
 			$form = Curry_Backend_PageHelper::getPagePropertiesForm($page);
-			Curry_Admin::getInstance()->addBodyClass('live-edit-close');
+			$this->addBodyClass('live-edit-close');
 			self::updateIndex($page);
 		}
 		

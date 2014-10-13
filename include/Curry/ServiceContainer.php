@@ -17,7 +17,7 @@ class ServiceContainer implements \ArrayAccess {
 	}
 
 	/**
-	 * Internal function to bypass php scoping issues.
+	 * Internal function used by singleton to bypass php scoping issues.
 	 *
 	 * @param $value
 	 * @return mixed

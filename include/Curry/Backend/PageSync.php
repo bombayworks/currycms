@@ -20,9 +20,9 @@ use Curry\Controller\Frontend;
 /**
  * Synchronize pages across sites.
  *
- * @package Curry\Backend
+ * @package Curry\Controller\Backend
  */
-class Curry_Backend_PageSync extends Curry_Backend
+class Curry_Backend_PageSync extends \Curry\Backend
 {
 	const INTRO = <<<HTML
 <p>This module allows you to synchronize pages with a remote source. It will compare the published revisions. If you
@@ -34,13 +34,13 @@ been added or deleted, it will only show the status relative to this site.</p>
 HTML;
 
 	/** {@inheritdoc} */
-	public static function getGroup()
+	public function getGroup()
 	{
 		return 'System';
 	}
 
 	/** {@inheritdoc} */
-	public static function getName()
+	public function getName()
 	{
 		return 'Synchronize pages';
 	}

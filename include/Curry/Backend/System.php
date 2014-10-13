@@ -15,18 +15,19 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Backend;
 use Curry\Archive\Archive;
 use Curry\Controller\Frontend;
 
 /**
  * Change system settings.
  * 
- * @package Curry\Backend
+ * @package Curry\Controller\Backend
  */
-class Curry_Backend_System extends Curry_Backend {
+class System extends \Curry\Backend {
 	
 	/** {@inheritdoc} */
-	public static function getGroup()
+	public function getGroup()
 	{
 		return "System";
 	}
@@ -54,18 +55,18 @@ class Curry_Backend_System extends Curry_Backend {
 		else if(!is_writable($configFile))
 			$this->addMessage("Configuration file doesn't seem to be writable.", self::MSG_ERROR);
 			
-		$config = Curry_Core::openConfiguration();
-		$defaultConfig = Curry_Core::getDefaultConfiguration();
+		$config = \Curry_Core::openConfiguration();
+		$defaultConfig = $config;//\Curry_Core::getDefaultConfiguration();
 		
-		$form = new Curry_Form(array(
+		$form = new \Curry_Form(array(
 			'action' => url('', array("module","view")),
 			'method' => 'post'
 		));
 
 		$themes = array();
-		$backendPath = Curry_Util::path(true, \Curry\App::getInstance()->config->curry->wwwPath, 'shared', 'backend');
+		$backendPath = \Curry_Util::path(true, \Curry\App::getInstance()->config->curry->wwwPath, 'shared', 'backend');
 		if($backendPath) {
-			foreach (new DirectoryIterator($backendPath) as $entry) {
+			foreach (new \DirectoryIterator($backendPath) as $entry) {
 				$name = $entry->getFilename();
 				if (!$entry->isDot() && $entry->isDir() && $name !== 'common') {
 					$themes[$name] = $name;
@@ -77,10 +78,10 @@ class Curry_Backend_System extends Curry_Backend {
 			$themes[$activeTheme] = $activeTheme;
 		}
 
-		$pages = PagePeer::getSelect();
+		$pages = \PagePeer::getSelect();
 		
 		// General
-		$form->addSubForm(new Curry_Form_SubForm(array(
+		$form->addSubForm(new \Curry_Form_SubForm(array(
 			'legend' => 'General',
 			'elements' => array(
 				'name' => array('text', array(
@@ -116,7 +117,7 @@ class Curry_Backend_System extends Curry_Backend {
 				)),
 				'fallbackLanguage' => array('select', array(
 					'label' => 'Fallback Language',
-					'multiOptions' => array('' => '[ None ]') + LanguageQuery::create()->find()->toKeyValue('PrimaryKey','Name'),
+					'multiOptions' => array('' => '[ None ]') + \LanguageQuery::create()->find()->toKeyValue('PrimaryKey','Name'),
 					'value' => isset($config->curry->fallbackLanguage) ? $config->curry->fallbackLanguage : '',
 					'description' => 'The language used when no language has been specified for the rendered page. Also the language used in backend context.',
 				)),
@@ -124,7 +125,7 @@ class Curry_Backend_System extends Curry_Backend {
 		)), 'general');
 		
 		// Backend
-		$form->addSubForm(new Curry_Form_SubForm(array(
+		$form->addSubForm(new \Curry_Form_SubForm(array(
 			'legend' => 'Backend',
 			'class' => 'advanced',
 			'elements' => array(
@@ -181,7 +182,7 @@ class Curry_Backend_System extends Curry_Backend {
 		)), 'backend');
 
 		// Live edit
-		$form->addSubForm(new Curry_Form_SubForm(array(
+		$form->addSubForm(new \Curry_Form_SubForm(array(
 			'legend' => 'Live edit',
 			'class' => 'advanced',
 			'elements' => array(
@@ -200,7 +201,7 @@ class Curry_Backend_System extends Curry_Backend {
 		)), 'liveEdit');
 		
 		// Error pages
-		$form->addSubForm(new Curry_Form_SubForm(array(
+		$form->addSubForm(new \Curry_Form_SubForm(array(
 			'legend' => 'Error pages',
 			'class' => 'advanced',
 			'elements' => array(
@@ -223,7 +224,7 @@ class Curry_Backend_System extends Curry_Backend {
 		)), 'errorPage');
 		
 		// Maintenance
-		$form->addSubForm(new Curry_Form_SubForm(array(
+		$form->addSubForm(new \Curry_Form_SubForm(array(
 			'legend' => 'Maintenance',
 			'class' => 'advanced',
 			'elements' => array(
@@ -250,7 +251,7 @@ class Curry_Backend_System extends Curry_Backend {
 		// Mail
 		$testEmailUrl = url('', array('module', 'view' => 'TestEmail'));
 		$dlgOpts = array('width' => 600, 'minHeight' => 150);
-		$form->addSubForm(new Curry_Form_SubForm(array(
+		$form->addSubForm(new \Curry_Form_SubForm(array(
 			'legend' => 'Mail',
 			'class' => 'advanced',
 			'elements' => array(
@@ -291,7 +292,7 @@ class Curry_Backend_System extends Curry_Backend {
 		)), 'mail');
 		
 		// Paths
-		$form->addSubForm(new Curry_Form_SubForm(array(
+		$form->addSubForm(new \Curry_Form_SubForm(array(
 			'legend' => 'Paths',
 			'class' => 'advanced',
 			'elements' => array(
@@ -319,7 +320,7 @@ class Curry_Backend_System extends Curry_Backend {
 		)), 'paths');
 		
 		// Encoding
-		$form->addSubForm(new Curry_Form_SubForm(array(
+		$form->addSubForm(new \Curry_Form_SubForm(array(
 			'legend' => 'Encoding',
 			'class' => 'advanced',
 			'elements' => array(
@@ -339,7 +340,7 @@ class Curry_Backend_System extends Curry_Backend {
 		)), 'encoding');
 		
 		// Misc
-		$form->addSubForm(new Curry_Form_SubForm(array(
+		$form->addSubForm(new \Curry_Form_SubForm(array(
 			'legend' => 'Misc',
 			'class' => 'advanced',
 			'elements' => array(
@@ -387,7 +388,7 @@ class Curry_Backend_System extends Curry_Backend {
 	/**
 	 * Save the config file.
 	 *
-	 * @param Zend\Config\Config $config
+	 * @param \Zend\Config\Config $config
 	 * @param array $values
 	 */
 	private function saveSettings(&$config, array $values)
@@ -470,17 +471,17 @@ class Curry_Backend_System extends Curry_Backend {
 		
 		// Set migration version if missing
 		if (!isset($config->curry->migrationVersion))
-			$config->curry->migrationVersion = Curry_Core::MIGRATION_VERSION;
+			$config->curry->migrationVersion = \Curry_Core::MIGRATION_VERSION;
 			
 		// Unset upgrade version if present
 		if (isset($config->curry->upgradeVersion))
 			unset($config->curry->upgradeVersion);
 		
 		try {
-			Curry_Core::writeConfiguration($config);
+			\Curry_Core::writeConfiguration($config);
 			$this->addMessage("Settings saved.", self::MSG_SUCCESS);
 		}
-		catch (Exception $e) {
+		catch (\Exception $e) {
 			$this->addMessage($e->getMessage(), self::MSG_ERROR);
 		}
 	}
@@ -488,13 +489,13 @@ class Curry_Backend_System extends Curry_Backend {
 	/**
 	 * Set configuration variable. If value is an empty string, the variable will be unset.
 	 *
-	 * @param Zend\Config\Config $config
+	 * @param \Zend\Config\Config $config
 	 * @param string $name
 	 * @param string $value
 	 */
 	private static function setvar(&$config, $name, $value)
 	{
-		if($config instanceof Zend\Config\Config) {
+		if($config instanceof \Zend\Config\Config) {
 			if($value != '')
 				$config->$name = $value;
 			else
@@ -512,7 +513,7 @@ class Curry_Backend_System extends Curry_Backend {
 		
 		$this->addMessage('You can install this bundle using <a href="'.url('', array('module','view'=>'InstallScript')).'">this installation script</a>.', self::MSG_NOTICE, false);
 		
-		$form = new Curry_Form(array(
+		$form = new \Curry_Form(array(
 			'action' => url('', array("module","view")),
 			'method' => 'post',
 			'elements' => array(
@@ -604,8 +605,8 @@ class Curry_Backend_System extends Curry_Backend {
 			if($form->database->isChecked()) {
 				$fiveMBs = 5 * 1024 * 1024;
 				$fp = fopen("php://temp/maxmemory:$fiveMBs", 'r+');
-				if(!Curry_Backend_DatabaseHelper::dumpDatabase($fp))
-					throw new Exception('Aborting: There was an error when dumping the database.');
+				if(!\Curry_Backend_DatabaseHelper::dumpDatabase($fp))
+					throw new \Exception('Aborting: There was an error when dumping the database.');
 				
 				fseek($fp, 0);
 				$tar->addString('db.txt', stream_get_contents($fp));
@@ -614,7 +615,7 @@ class Curry_Backend_System extends Curry_Backend {
 			
 			$filename = str_replace(" ", "_", \Curry\App::getInstance()->config->curry->name)."-bundle-".date("Ymd").".tar" . ($compression ? ".$compression" : '');
 			header("Content-type: " . Archive::getCompressionMimeType($compression));
-			header("Content-disposition: attachment; filename=" . Curry_String::escapeQuotedString($filename));
+			header("Content-disposition: attachment; filename=" . \Curry_String::escapeQuotedString($filename));
 			
 			// do not use output buffering
 			while(ob_end_clean())
@@ -641,14 +642,14 @@ class Curry_Backend_System extends Curry_Backend {
 			'Curry_Archive_Iterator',
 			'Curry_Archive',
 		);
-		$contents = "<?php\n\n// CurryCMS v".Curry_Core::VERSION." Installation Script\n// Created on ".strftime('%Y-%m-%d %H:%M:%S')."\n";
+		$contents = "<?php\n\n// CurryCMS v".\Curry_Core::VERSION." Installation Script\n// Created on ".strftime('%Y-%m-%d %H:%M:%S')."\n";
 		$contents .= str_repeat('/', 60)."\n\n";
 		
 		$contents .= "ini_set('error_reporting', E_ALL & ~E_NOTICE);\n";
 		$contents .= "ini_set('display_errors', 1);\n";
 		$contents .= "umask(0002);\n\n";
 
-		$autoloader = Curry_Core::getAutoloader();
+		$autoloader = \Curry_Core::getAutoloader();
 		foreach($classes as $clazz) {
 			$file = $autoloader->findFile($clazz);
 			$contents .= "// $clazz ($file)\n";
@@ -673,8 +674,8 @@ class Curry_Backend_System extends Curry_Backend {
 	{
 		$this->addMainMenu();
 		
-		\Curry\App::getInstance()->cache->clean(Zend_Cache::CLEANING_MODE_ALL);
-		Curry_Twig_Template::getSharedEnvironment()->clearCacheFiles();
+		\Curry\App::getInstance()->cache->clean(\Zend_Cache::CLEANING_MODE_ALL);
+		\Curry_Twig_Template::getSharedEnvironment()->clearCacheFiles();
 		if(extension_loaded('apc'))
 			@apc_clear_cache();
 		
@@ -689,11 +690,11 @@ class Curry_Backend_System extends Curry_Backend {
 	{
 		$this->addMainMenu();
 		
-		$this->addMessage('Curry: '. Curry_Core::VERSION);
+		$this->addMessage('Curry: '. \Curry_Core::VERSION);
 		$this->addMessage('PHP: '. PHP_VERSION . ' (<a href="'.url('', array('module','view'=>'PhpInfo')).'">phpinfo</a>)', self::MSG_NOTICE, false);
-		$this->addMessage('Zend Framework: '. Zend_Version::VERSION);
-		$this->addMessage('Propel: '. Propel::VERSION);
-		$this->addMessage('Twig: '. Twig_Environment::VERSION);
+		$this->addMessage('Zend Framework: '. \Zend_Version::VERSION);
+		$this->addMessage('Propel: '. \Propel::VERSION);
+		$this->addMessage('Twig: '. \Twig_Environment::VERSION);
 		
 		$license = \Curry\App::getInstance()->config->curry->basePath.'/LICENSE.txt';
 		if (file_exists($license))
@@ -717,7 +718,7 @@ class Curry_Backend_System extends Curry_Backend {
 			// Override user agent
 			$opts = array(
 				'http' => array(
-					'header' => "User-Agent: CurryCMS/".Curry_Core::VERSION." (http://currycms.com)\r\n"
+					'header' => "User-Agent: CurryCMS/".\Curry_Core::VERSION." (http://currycms.com)\r\n"
 				)
 			);
 			$context = stream_context_create($opts);
@@ -733,7 +734,7 @@ class Curry_Backend_System extends Curry_Backend {
 			uksort($versions, 'version_compare');
 			return $versions;
 		}
-		catch (Exception $e) {
+		catch (\Exception $e) {
 			trace_warning('Failed to fetch release list: '.$e->getMessage());
 			return null;
 		}
@@ -741,7 +742,7 @@ class Curry_Backend_System extends Curry_Backend {
 	
 	protected static function getButtonForm($name, $display)
 	{
-		return new Curry_Form(array(
+		return new \Curry_Form(array(
 			'action' => url('', $_GET),
 			'method' => 'post',
 			'elements' => array(
@@ -765,9 +766,9 @@ class Curry_Backend_System extends Curry_Backend {
 		} else {
 			$latest = count($releases) ? array_pop($releases) : null;
 			if($latest) {
-				$this->addMessage('Installed version: '.Curry_Core::VERSION);
+				$this->addMessage('Installed version: '.\Curry_Core::VERSION);
 				$this->addMessage('Latest version: '.$latest->version);
-				if (version_compare($latest->version, Curry_Core::VERSION, '>')) {
+				if (version_compare($latest->version, \Curry_Core::VERSION, '>')) {
 					$this->addMessage('New release found: '.$latest->name);
 				} else {
 					$this->addMessage('You already have the latest version.', self::MSG_SUCCESS);
@@ -777,22 +778,22 @@ class Curry_Backend_System extends Curry_Backend {
 			}
 		}
 		
-		if(!Curry_Core::requireMigration())
+		if(!\Curry_Core::requireMigration())
 			return;
 		
 		$form = self::getButtonForm('migrate', 'Migrate');
 		if (isPost() && $form->isValid($_POST) && $form->migrate->isChecked()) {
 			$currentVersion = \Curry\App::getInstance()->config->curry->migrationVersion;
-			while($currentVersion < Curry_Core::MIGRATION_VERSION) {
+			while($currentVersion < \Curry_Core::MIGRATION_VERSION) {
 				$nextVersion = $currentVersion + 1;
 				$migrateMethod = 'doMigrate'.$nextVersion;
 				if(method_exists($this, $migrateMethod)) {
 					try {
 						if($this->$migrateMethod()) {
 							// update configuration migrateVersion number
-							$config = Curry_Core::openConfiguration();
+							$config = \Curry_Core::openConfiguration();
 							$config->curry->migrateVersion = $nextVersion;
-							Curry_Core::writeConfiguration($config);
+							\Curry_Core::writeConfiguration($config);
 							$currentVersion = $nextVersion;
 							$this->addMessage('Migration to version '.$nextVersion.' was successful!', self::MSG_SUCCESS);
 						} else {
@@ -800,7 +801,7 @@ class Curry_Backend_System extends Curry_Backend {
 							break;
 						}
 					}
-					catch (Exception $e) {
+					catch (\Exception $e) {
 						$this->addMessage("Unable to migrate to version $nextVersion: ".$e->getMessage(), self::MSG_ERROR);
 						break;
 					}
@@ -811,7 +812,7 @@ class Curry_Backend_System extends Curry_Backend {
 			}
 		} else {
 			$backupUrl = url('', array('module','view'=>'Bundle'));
-			$this->addMessage('Curry CMS has been updated and you need to migrate your project before you can continue using the backend. You should <a href="'.$backupUrl.'">backup</a> your data and click the migrate button when you\'re ready!', Curry_Backend::MSG_WARNING, false);
+			$this->addMessage('Curry CMS has been updated and you need to migrate your project before you can continue using the backend. You should <a href="'.$backupUrl.'">backup</a> your data and click the migrate button when you\'re ready!', self::MSG_WARNING, false);
 			$this->addMainContent($form);
 		}
 	}
@@ -829,7 +830,7 @@ class Curry_Backend_System extends Curry_Backend {
 	
 	protected function getTestEmailForm()
 	{
-		return new Curry_Form(array(
+		return new \Curry_Form(array(
 			'action' => url('', array('module', 'view')),
 			'method' => 'post',
 			'elements' => array(
@@ -861,7 +862,7 @@ class Curry_Backend_System extends Curry_Backend {
 HTML;
 
 		try {
-			$mail = new Curry_Mail();
+			$mail = new \Curry_Mail();
 			$mail->addTo($values['toEmail'], $values['toEmail'])
 				->setFrom(\Curry\App::getInstance()->config->curry->adminEmail, $projectName)
 				->setSubject('Test email from '.\Curry\App::getInstance()->config->curry->name)
@@ -874,7 +875,7 @@ HTML;
 			} else {
 				$ret = 'An email has been sent to your email address at '.$values['toEmail'];
 			}
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			$ret = 'An exception has been thrown: '.$e->getMessage();
 		}
 		

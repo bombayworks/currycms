@@ -304,7 +304,7 @@ class Reader
 			if (($checksum == 256) && ($header['checksum'] == 0))
 				return null;
 
-			throw new Exception('Invalid checksum for file "' . $unpacked['filename'] . '" : ' . $checksum . ' calculated, ' . $header['checksum'] . ' expected');
+			throw new \Exception('Invalid checksum for file "' . $unpacked['filename'] . '" : ' . $checksum . ' calculated, ' . $header['checksum'] . ' expected');
 		}
 
 		$header['filename'] = $unpacked['filename'];

@@ -19,7 +19,7 @@
 /**
  * Static helper functions for the page backend.
  * 
- * @package Curry\Backend
+ * @package Curry\Controller\Backend
  */
 class Curry_Backend_PageHelper {
 	/**

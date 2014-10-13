@@ -16,12 +16,14 @@
  * @link       http://currycms.com
  */
 use Curry\Controller\Frontend;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  *
  * @package Curry\ModelView
  */
-class Curry_ModelView_List extends Curry_ModelView_Abstract {
+class Curry_ModelView_List extends \Curry\View {
 	protected $id;
 	protected $query;
 	protected $columns = array();
@@ -72,7 +74,7 @@ class Curry_ModelView_List extends Curry_ModelView_Abstract {
 		$this->setQuery($query, true);
 		$this->setOptions(array(
 			'title' => $this->getDefaultTitle(),
-			'url' => (string)url('', $_GET),
+			'url' => null,
 			'model' => $this->query->getModelName(),
 		));
 		// Set options, but delay actions until after default actions has been set
@@ -88,6 +90,33 @@ class Curry_ModelView_List extends Curry_ModelView_Abstract {
 		if ($actions !== null) {
 			$this->setOptions(array('actions' => $actions));
 		}
+	}
+
+	public function initialize()
+	{
+		foreach($this->actions as $name => $action) {
+			if (isset($action['action']) && $action['action'] instanceof \Curry\View) {
+				$this->addView($name, $action['action']);
+			} else if (isset($action['action']) && is_callable($action['action'])) {
+				$this->actions[$name]['action'] = $this->addViewFunction($name, $action['action']);
+			}
+		}
+	}
+
+	public function __toString()
+	{
+		$request = \Curry\App::getInstance()->request;
+		if ($request->query->get('json')) {
+			throw new \Curry\Exception\ResponseException($this->show($request));
+		}
+		return $this->getHtml($request->query->all());
+	}
+
+	public function show(Request $request)
+	{
+		$response = new Response(json_encode($this->getJson($request->query->all())));
+		$response->headers->set('Content-Type', 'application/json');
+		return $response;
 	}
 
 	public function getModelClass()
@@ -271,13 +300,13 @@ class Curry_ModelView_List extends Curry_ModelView_Abstract {
 				'general' => true,
 				'class' => 'dialog',
 			),
-			'delete' => array(
+			/*'delete' => array(
 				'label' => 'Delete',
 				'action' => new Curry_ModelView_Delete($this->query->getModelName()),
 				'single' => true,
 				'multi' => true,
 				'class' => 'inline modelview-delete',
-			),
+			),*/
 		);
 		$this->actions = Curry_Array::extend($actions, $this->actions);
 	}
@@ -346,65 +375,22 @@ class Curry_ModelView_List extends Curry_ModelView_Abstract {
 		return array_key_exists($name, $this->options) ? $this->options[$name] : null;
 	}
 
-	public function dispatch(array $action, Curry_Backend $backend, array $params)
-	{
-		if (count($action)) {
-			$nextAction = array_shift($action);
-			if ($nextAction === 'json') {
-				Frontend::returnJson($this->getJson($params));
-			} else if ($nextAction === 'sort' && is_callable($this->options['sortable'])) {
-				call_user_func($this->options['sortable'], $params);
-				Frontend::returnJson(array('success' => 1));
-			}
-			$a = $this->actions[$nextAction];
-			if(!isset($a))
-				throw new Exception("Action '$nextAction' not found.");
-			if(!isset($a['action']))
-				throw new Exception("Action '$nextAction' is not defined.");
-			$a = $a['action'];
-			if (is_object($a) && $a instanceof Curry_ModelView_Abstract) {
-				$a->parentView = $this;
-				$a->dispatch($action, $backend, $params);
-			} else if (is_callable($a)) {
-				call_user_func($a, $this->getSelfSelection($params), $backend, $params, $this);
-			} else {
-				throw new Exception("Action '$nextAction' has unknown type.");
-			}
-		} else {
-			$this->render($backend, $params);
-		}
-	}
-
-	public function render(Curry_Backend $backend, array $params)
-	{
-		$backend->addMainContent($this->getHtml($params));
-	}
-
 	public function getHtml($params)
 	{
-		$parentAction = isset($params['action']) ? $params['action'].'.' : '';
 		$options = $this->options;
-
-		$baseUrl = (string)url('', $_GET)->remove('curry_context');
-		$options['url'] = (string)url($baseUrl)->add(array(
-			'_parent' => array_diff_key($params, array('module'=>'','view'=>'','action'=>'')),
-			'action' => $parentAction.'json',
-		));
+		if (!isset($options['url']))
+			$options['url'] = $this->parent ? $this->url() : (string)(url('', $_GET)->add(array('json'=>true)));
 
 		if ($options['sortable']) {
-			$options['sortable'] = (string)url($baseUrl)->remove('item')->add(array(
-				'_parent' => array_diff_key($params, array('module'=>'','view'=>'','action'=>'')),
-				'action' => $parentAction.'sort',
-			));
+			$options['sortable'] = 'TODO';
 		}
 
 		$options['actions'] = array();
 		foreach($this->actions as $name => $action) {
 			if (isset($action['action']) && !isset($action['href'])) {
-				$action['href'] = (string)url($baseUrl)->remove('item')->add(array(
-					'_parent' => array_diff_key($params, array('module'=>'','view'=>'','action'=>'')),
-					'action' => $parentAction.$name,
-				));
+				if (!$action['action'] instanceof \Curry\View)
+					throw new Exception("$name action is not of type View");
+				$action['href'] = $this->$name->url();
 				unset($action['action']);
 			}
 			$allowed = array('label', 'href', 'class', 'single', 'multi', 'general');
@@ -427,7 +413,7 @@ class Curry_ModelView_List extends Curry_ModelView_Abstract {
 	public function getJson($params)
 	{
 		$query = clone $this->query;
-		$this->filterBySelection($query, $params);
+		//$this->filterBySelection($query, $params);
 		$this->filterByParams($query, $params);
 		$this->filterByKeyword($query, $params);
 		$this->sort($query, $params);

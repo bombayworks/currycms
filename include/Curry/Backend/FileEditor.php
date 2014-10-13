@@ -15,12 +15,13 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Controller\Backend;
 use Curry\Controller\Frontend;
 
 /**
  * Simple backend to create and edit files.
  */
-abstract class Curry_Backend_FileEditor extends Curry_Backend {
+abstract class Curry_Backend_FileEditor extends \Curry\Backend {
 	/**
 	 * Directory to edit files in.
 	 * @var string
@@ -28,7 +29,7 @@ abstract class Curry_Backend_FileEditor extends Curry_Backend {
 	protected $root = '.';
 
 	/** {@inheritdoc} */
-	public static function getGroup()
+	public function getGroup()
 	{
 		return "";
 	}
@@ -153,8 +154,8 @@ abstract class Curry_Backend_FileEditor extends Curry_Backend {
 			}
 		}
 
-		Curry_Admin::getInstance()->addBodyClass('tpl-fullscreen');
-		Curry_Admin::getInstance()->addBodyClass('tpl-fileeditor');
+		$this->addBodyClass('tpl-fullscreen');
+		$this->addBodyClass('tpl-fileeditor');
 		$this->addMenu($_GET['file']);
 		$this->addMainContent($form);
 	}

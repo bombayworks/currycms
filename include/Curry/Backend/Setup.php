@@ -19,11 +19,11 @@
 /**
  * Curry setup/installation backend.
  *
- * @package Curry\Backend
+ * @package Curry\Controller\Backend
  */
-class Curry_Backend_Setup extends Curry_Backend {
+class Curry_Backend_Setup extends \Curry\Backend {
 	
-	public static function getGroup()
+	public function getGroup()
 	{
 		return 'Installation';
 	}

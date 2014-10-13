@@ -2,23 +2,19 @@
 
 namespace Curry;
 
+use Curry\Controller\Backend;
 use Curry\Controller\Frontend;
 use Symfony\Component\EventDispatcher\EventDispatcher;
-use \Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
-use \Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Controller\ControllerResolver;
-use Symfony\Component\HttpKernel\EventListener\RouterListener;
 use Symfony\Component\HttpKernel\HttpKernel;
-use \Symfony\Component\HttpKernel\HttpKernelInterface;
-use \Symfony\Component\HttpKernel\TerminableInterface;
-use \Exception;
-use \Curry_Util;
-use \Curry_Array;
-use Symfony\Component\Routing\Matcher\UrlMatcher;
-use Symfony\Component\Routing\RequestContext;
-use Symfony\Component\Routing\Route;
-use Symfony\Component\Routing\RouteCollection;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\HttpKernel\TerminableInterface;
+use Exception;
+use Curry_Util;
+use Curry_Array;
 
 /**
  * Class App
@@ -82,13 +78,7 @@ class App extends ServiceContainer implements HttpKernelInterface, TerminableInt
 		$this->singleton('dispatcher', function () use ($app) {
 			$dispatcher = new EventDispatcher();
 
-
-
 			/*
-			$urlMatcher = new LazyUrlMatcher(function () use ($app) {
-				return $app['url_matcher'];
-			});
-
 			$dispatcher->addSubscriber(new LocaleListener($app, $urlMatcher, $app['request_stack']));
 			if (isset($app['exception_handler'])) {
 				$dispatcher->addSubscriber($app['exception_handler']);
@@ -100,20 +90,6 @@ class App extends ServiceContainer implements HttpKernelInterface, TerminableInt
 			*/
 
 			return $dispatcher;
-		});
-		$this->singleton('requestContext', function () use ($app) {
-			$context = new RequestContext();
-
-			//$context->setHttpPort($app['request.http_port']);
-			//$context->setHttpsPort($app['request.https_port']);
-
-			return $context;
-		});
-		$this->singleton('routes', function () use ($app) {
-			return new RouteCollection();
-		});
-		$this->singleton('urlMatcher', function () use ($app) {
-			return new UrlMatcher($app->routes, $app->requestContext);
 		});
 		$this->singleton('resolver', function () use ($app) {
 			return new ControllerResolver($app->logger);
@@ -150,9 +126,13 @@ class App extends ServiceContainer implements HttpKernelInterface, TerminableInt
 
 		register_shutdown_function(array($this, 'shutdown'));
 
+		$this->singleton('backend', function() {
+			return new Backend();
+		});
+
 		//$frontend = new Frontend();
-		//$this->routes->add('curry', new Route('/start/', array('_controller' => array($frontend, 'index'))));
 		$this->dispatcher->addSubscriber(new Frontend());
+		$this->dispatcher->addSubscriber($app->backend);
 	}
 
 	public function run(Request $request = null)
@@ -172,9 +152,6 @@ class App extends ServiceContainer implements HttpKernelInterface, TerminableInt
 	{
 		$current = isset($this->request) ? $this->request : null;
 		$this->request = $request;
-
-		if ($this->routes->count())
-			$this->dispatcher->addSubscriber(new RouterListener($this->urlMatcher, $this->requestContext, $this->logger, $this->requestStack));
 
 		$response = $this->kernel->handle($request, $type, $catch);
 		$this->request = $current;
@@ -551,7 +528,7 @@ class App extends ServiceContainer implements HttpKernelInterface, TerminableInt
 		}
 
 		if ($this['debug']) {
-			$queryCount = Curry_Propel::getQueryCount();
+			$queryCount = \Curry_Propel::getQueryCount();
 			$generationTime = self::getExecutionTime();
 			$this->logger->debug("Generation time: ".round($generationTime, 3)."s");
 			$this->logger->debug("Peak memory usage: ".Curry_Util::humanReadableBytes(memory_get_peak_usage()));
@@ -565,5 +542,15 @@ class App extends ServiceContainer implements HttpKernelInterface, TerminableInt
 	public function terminate(Request $request, Response $response)
 	{
 		$this->kernel->terminate($request, $response);
+	}
+
+	/**
+	 * Check if a migration of the project is required.
+	 *
+	 * @return bool
+	 */
+	public function requireMigration()
+	{
+		return $this->config->curry->migrationVersion < \Curry_Core::MIGRATION_VERSION;
 	}
 }

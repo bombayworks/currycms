@@ -24,7 +24,7 @@ use Curry\Controller\Frontend;
 abstract class Curry_ModelView_Abstract {
 	protected $parentView = null;
 
-	abstract public function render(Curry_Backend $backend, array $params);
+	abstract public function render(Curry\Backend $backend, array $params);
 	abstract public function getModelClass();
 
 	public function getSelfSelection($params)
@@ -50,12 +50,12 @@ abstract class Curry_ModelView_Abstract {
 		return isset($params['_parent']) ? $params['_parent'] : null;
 	}
 
-	public function dispatch(array $action, Curry_Backend $backend, array $params)
+	public function dispatch(array $action, \Curry\Backend $backend, array $params)
 	{
 		$this->render($backend, $params);
 	}
 	
-	public function show(Curry_Backend $backend, $params = null)
+	public function show(\Curry\Backend $backend, $params = null)
 	{
 		if ($params === null)
 			$params = $_GET;
@@ -67,7 +67,7 @@ abstract class Curry_ModelView_Abstract {
 			/*if (isAjax())
 				Curry_URL::setPreventRedirect($pr);*/
 		}
-		catch (Curry_Exception_RedirectPrevented $e) {
+		catch (\Curry_Exception_RedirectPrevented $e) {
 			Frontend::returnPartial('<script type="text/javascript">window.location.href = "'.addcslashes($e->getUrl(), '"').'";</script>');
 		}
 	}

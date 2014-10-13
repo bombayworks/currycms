@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Controller\Backend;
 use Curry\Controller\Frontend;
 
 /**
@@ -274,20 +275,10 @@ abstract class Curry_Module
 	/**
 	 * Get the page generator class used to generate the current page.
 	 *
-	 * @return Request
+	 * @return \Symfony\Component\HttpFoundation\Request
 	 */
 	public function getRequest()
 	{
 		return \Curry\App::getInstance()->request;
-	}
-	
-	/**
-	 * Get the currently active backend module.
-	 *
-	 * @return Curry_Backend
-	 */
-	public function getBackend()
-	{
-		return Curry_Admin::getInstance()->getBackend();
 	}
 }

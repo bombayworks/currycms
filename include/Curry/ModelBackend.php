@@ -19,9 +19,9 @@
 /**
  * Base class for "model backend modules".
  * 
- * @package Curry\Backend
+ * @package Curry\Controller\Backend
  */
-abstract class Curry_ModelBackend extends Curry_Backend {
+abstract class Curry_ModelBackend extends \Curry\Backend {
 	/**
 	 * Array of allowed model classes.
 	 *
@@ -52,12 +52,12 @@ abstract class Curry_ModelBackend extends Curry_Backend {
 	 *
 	 * @param string $modelClass
 	 * @param array $options
-	 * @return Curry_Flexigrid
+	 * @return \Curry_Flexigrid
 	 */
 	public function getGrid($modelClass, $options = array()) {
 		
 		$options = array_merge(array('title' => $modelClass.'s', 'rp' => 100, 'rpOptions' => array(25,50,100,200, 500)), $options);
-		$flexigrid = new Curry_Flexigrid_Propel($modelClass,
+		$flexigrid = new \Curry_Flexigrid_Propel($modelClass,
 			url('', $_GET)->add(array('view'=>$modelClass.'Json')),
 			$options);
 		$editUrl = url('', $_GET)->add(array('module', 'view' => $modelClass));
@@ -101,7 +101,7 @@ abstract class Curry_ModelBackend extends Curry_Backend {
 	 *
 	 * @return string
 	 */
-	public function show()
+	public function show(\Symfony\Component\HttpFoundation\Request $request)
 	{
 		try {
 			$this->preShow();

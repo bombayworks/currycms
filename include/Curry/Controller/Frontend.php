@@ -42,13 +42,6 @@ class Frontend implements EventSubscriberInterface {
 	 * @var object
 	 */
 	protected $globalVariables = null;
-	
-	/**
-	 * Array of background functions to be executed on shutdown.
-	 *
-	 * @var array
-	 */
-	protected static $backgroundFunctions = null;
 
 	/**
 	 * Initializes the application. Sets up default routes.
@@ -113,7 +106,7 @@ class Frontend implements EventSubscriberInterface {
 			$requestUri = substr($requestUri, strlen($basePath));
 
 		// add trailing slash if missing
-		if($requestUri && substr($requestUri,-1) != '/')
+		if(substr($requestUri,-1) != '/')
 			$requestUri .= '/';
 
 		// use domain mapping to restrict page to a certain page-branch
@@ -231,7 +224,7 @@ class Frontend implements EventSubscriberInterface {
 	/**
 	 * Change the active language.
 	 *
-	 * @param string|Language $language
+	 * @param string|\Language $language
 	 */
 	public function setLanguage($language)
 	{
@@ -270,7 +263,7 @@ class Frontend implements EventSubscriberInterface {
 		if($validUser) {
 			
 			// check for inline-admin
-			$adminNamespace = new \Zend\Session\Container('Curry_Admin');
+			$adminNamespace = new \Zend\Session\Container('Curry\Controller\Backend');
 			if($app->config->curry->liveEdit && !$request->getParam('curry_force_show')) {
 				if($request->hasParam('curry_inline_admin'))
 					$adminNamespace->inlineAdmin = $request->getParam('curry_inline_admin') ? true : false;
@@ -403,182 +396,5 @@ class Frontend implements EventSubscriberInterface {
 		$app->generator = $generator;
 
 		return $generator->render($vars, $options);
-	}
-
-	/**
-	 * Register a function for background execution on shutdown.
-	 * Output is not possible in the callback function.
-	 *
-	 * @param callback $callback
-	 * @param mixed $parameters,... [optional] Optional parameters passed to the callback function.
-	 */
-	public static function registerBackgroundFunction($callback)
-	{
-		if (self::$backgroundFunctions === null) {
-			// Replace output-buffering with custom function
-			while(ob_get_level())
-				ob_end_clean();
-			ob_start(function($buffer) {
-				header("Connection: close", true);
-				header("Content-Encoding: none", true);
-				header("Content-Length: ".strlen($buffer), true);
-				return $buffer;
-			});
-			register_shutdown_function(array(__CLASS__, 'executeBackgroundFunctions'));
-			self::$backgroundFunctions = array();
-		}
-		self::$backgroundFunctions[] = func_get_args();
-	}
-
-	/**
-	 * Remove a previously registered function (using registerBackgroundFunction) from being executed.
-	 *
-	 * @param $callback
-	 * @return bool
-	 */
-	public static function unregisterBackgroundFunction($callback)
-	{
-		if (self::$backgroundFunctions === null)
-			return false;
-		$status = false;
-		foreach(self::$backgroundFunctions as $k => $args) {
-			$cb = array_shift($args);
-			if ($cb === $callback) {
-				unset(self::$backgroundFunctions[$k]);
-				$status = true;
-			}
-		}
-		return $status;
-	}
-
-	/**
-	 * Execute registered callback functions.
-	 * This function will be called automatically if there are background
-	 * functions registered and is not supposed to be called manually.
-	 */
-	public static function executeBackgroundFunctions()
-	{
-		// Send browser response, and continue running script in background
-		ignore_user_abort(true);
-		set_time_limit(60);
-		ob_end_flush();
-		flush();
-		if (session_id())
-			session_write_close();
-		if (function_exists('fastcgi_finish_request'))
-			fastcgi_finish_request();
-
-		// Execute registered functions
-		foreach(self::$backgroundFunctions as $args) {
-			$callback = array_shift($args);
-			call_user_func_array($callback, $args);
-		}
-	}
-	
-	/**
-	 * Return json-data to browser and exit. Will set content-type header and encode the data.
-	 *
-	 * @param mixed $content	Data to encode with json_encode. Note that this must be utf-8 encoded.
-	 * @param string $jsonp		To send the response using a JSONP callback, set this to a string with the name of the callback-function.
-	 * @param string $contentType	The content-type header to send, charset will be appended.
-	 * @param bool $exit		Terminate the script after sending the data.
-	 */
-	public static function returnJson($content, $jsonp = "", $contentType = "application/json", $exit = true)
-	{
-		header("Content-type: $contentType; charset=utf-8");
-		if(!is_string($content))
-			$content = json_encode($content);
-		echo $jsonp ? "$jsonp($content);" : $content;
-		if($exit)
-			exit;
-	}
-	
-	/**
-	 * Return partial html-content to browser and exit. Will set content-type header and return the content.
-	 *
-	 * @param string $content		Content to send to browser.
-	 * @param string $contentType	The content-type header to send, charset will be appended.
-	 * @param string $charset		Charset to send with content-type, if not set this will default to the outputEncoding.
-	 * @param bool $exit			Terminate the script after sending the data.
-	 */
-	public static function returnPartial($content, $contentType = 'text/html', $charset = null, $exit = true)
-	{
-		$charset = $charset ? $charset : \Curry\App::getInstance()->config->curry->outputEncoding;
-		header("Content-type: $contentType; charset=$charset");
-		echo (string)$content;
-		if($exit)
-			exit;
-	}
-	
-	/**
-	 * Return data as file attachment.
-	 *
-	 * @param resource|string $data	A string or resource containing the data to send.
-	 * @param string $contentType	The content-type header to send.
-	 * @param string $filename		Filename to send to browser.
-	 * @param bool $exit			Terminate the script after sending the data.
-	 */
-	public static function returnData($data, $contentType = 'application/octet-stream', $filename = 'file.dat', $exit = true)
-	{
-		header('Content-Description: File Transfer');
-		header('Content-Transfer-Encoding: binary');
-		header("Content-Disposition: attachment; filename=".\Curry_String::escapeQuotedString($filename));
-		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-		header('Pragma: public');
-		header("Content-type: $contentType");
-		if(is_string($data)) {
-			header('Content-Length: ' . strlen($data));
-			echo $data;
-		} else if(is_resource($data) && (get_resource_type($data) === 'stream' || get_resource_type($data) === 'file')) {
-			// save current
-			$current = ftell($data);
-		
-			//Seek to the end
-			fseek($data, 0, SEEK_END);
-		
-			//Get the size value
-			$size = ftell($data) - $current;
-		
-			fseek($data, $current, SEEK_SET);
-			header('Content-Length: ' . $size);
-			fpassthru($data);
-			if ($exit)
-				fclose($data);
-		} else
-			throw new \Curry_Exception('Data is of unknown type.');
-		if($exit)
-			exit;
-	}
-
-	/**
-	 * Return a file to browser and exit. Will set appropriate headers and return the content.
-	 *
-	 * @param string $file			Path to file
-	 * @param string $contentType	The content-type header to send.
-	 * @param string $filename		Filename to send to browser, uses the basename of $file if not specified.
-	 * @param bool $exit			Terminate the script after sending the data.
-	 * @param bool $disableOutputBuffering	Disable output buffering.
-	 */
-	public static function returnFile($file, $contentType = 'application/octet-stream', $filename = '', $exit = true, $disableOutputBuffering = true)
-	{
-		if(!$filename)
-			$filename = basename($file);
-		header('Content-Description: File Transfer');
-		header('Content-Transfer-Encoding: binary');
-		header('Content-Disposition: attachment; filename='.\Curry_String::escapeQuotedString($filename));
-		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-		header('Pragma: public');
-		header('Content-type: '.$contentType);
-		header('Content-Length: '.filesize($file));
-		
-		if($disableOutputBuffering) {
-			while(@ob_end_flush())
-				;
-		}
-		
-		readfile($file);
-		
-		if($exit)
-			exit;
 	}
 }

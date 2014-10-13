@@ -313,14 +313,4 @@ class Curry_Core {
 			\Curry\App::getInstance()->logger->error('Failed to send error notification');
 		}
 	}
-
-	/**
-	 * Check if a migration of the project is required.
-	 *
-	 * @return bool
-	 */
-	public static function requireMigration()
-	{
-		return self::$config->curry->migrationVersion < Curry_Core::MIGRATION_VERSION;
-	}
 }

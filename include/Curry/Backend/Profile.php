@@ -19,13 +19,13 @@
 /**
  * Manage users and user permissions.
  * 
- * @package Curry\Backend
+ * @package Curry\Controller\Backend
  *
  */
-class Curry_Backend_Profile extends Curry_Backend
+class Curry_Backend_Profile extends \Curry\Backend
 {
 	/** {@inheritdoc} */
-	public static function getGroup()
+	public function getGroup()
 	{
 		return "Accounts";
 	}

@@ -16,6 +16,7 @@
  * @link       http://currycms.com
  */
 use Curry\Controller\Frontend;
+use Curry\Module\AbstractModule;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -217,10 +218,10 @@ class Curry_PageGenerator
 	 * Get unique name for storing module cache.
 	 *
 	 * @param Curry_PageModuleWrapper $pageModuleWrapper
-	 * @param Curry_Module $module
+	 * @param AbstractModule $module
 	 * @return string
 	 */
-	private function getModuleCacheName(Curry_PageModuleWrapper $pageModuleWrapper, Curry_Module $module)
+	private function getModuleCacheName(Curry_PageModuleWrapper $pageModuleWrapper, AbstractModule $module)
 	{
 		$params = array(
 			'_moduleDataId' => $pageModuleWrapper->getModuleDataId(),

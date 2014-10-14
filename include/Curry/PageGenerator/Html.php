@@ -202,7 +202,7 @@ JS
 		));
 		
 		$htmlHead = $this->getHtmlHead();
-		$htmlHead->addScript(\Curry\AbstractLegacyBackend::JQUERY_JS);
+		$htmlHead->addScript(\Curry\Backend\AbstractLegacyBackend::JQUERY_JS);
 		$htmlHead->addInlineScript('window.inlineAdminContent = '.json_encode($content).';');
 		$htmlHead->addScript("shared/backend/common/js/inline-admin.js");
 		$htmlHead->addStyleSheet("shared/backend/".\Curry\App::getInstance()->config->curry->backend->theme."/css/inline-admin.css");

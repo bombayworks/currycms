@@ -15,13 +15,14 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Module\AbstractModule;
 
 /**
  * Manage predefined modules.
  *
- * @package Curry\Controller\Backend
+ * @package Curry\Backend
  */
-class Curry_Backend_PredefinedModules extends \Curry\AbstractLegacyBackend {
+class Curry_Backend_PredefinedModules extends \Curry\Backend\AbstractLegacyBackend {
 	/** {@inheritdoc} */
 	public function getName()
 	{
@@ -38,7 +39,7 @@ class Curry_Backend_PredefinedModules extends \Curry\AbstractLegacyBackend {
 	public function showMain()
 	{
 		$modules = array();
-		foreach(Curry_Module::getModuleList() as $className) {
+		foreach(AbstractModule::getModuleList() as $className) {
 			$parts = explode("_", str_replace("_Module_", "_", $className));
 			$package = array_shift($parts);
 			$modules[$package][$className] = join(" / ", $parts);

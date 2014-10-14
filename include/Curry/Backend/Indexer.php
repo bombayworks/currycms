@@ -20,9 +20,9 @@ use Curry\Controller\Frontend;
 /**
  * Manage search index.
  * 
- * @package Curry\Controller\Backend
+ * @package Curry\Backend
  */
-class Curry_Backend_Indexer extends \Curry\AbstractLegacyBackend {
+class Curry_Backend_Indexer extends \Curry\Backend\AbstractLegacyBackend {
 	/** {@inheritdoc} */
 	public function getGroup()
 	{

@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Module;
 
 /**
  * Single image module.
@@ -30,7 +31,7 @@
  * 
  * @package Curry\Module
  */
-class Curry_Module_Image extends Curry_Module {
+class Image extends AbstractModule {
 	/**
 	 * Image source.
 	 *
@@ -75,7 +76,7 @@ class Curry_Module_Image extends Curry_Module {
 			$vars['Width'] = $width;
 			$vars['Height'] = $height;
 		}
-		catch (Exception $e) {}
+		catch (\Exception $e) {}
 		
 		return $vars;
 	}
@@ -103,24 +104,24 @@ TPL
 	/** {@inheritdoc} */
 	public function showBack()
 	{
-		$form = new Curry_Form_SubForm(array(
-		    'elements' => array(
-		    	'source' => array('previewImage', array(
-		    		'label' => 'Source',
-		    		'value' => $this->source,
-		    	)),
-		    	'title' => array('text', array(
-		    		'label' => 'Title',
-		    		'value' => $this->title,
-		    	)),
-		    	'description' => array('text', array(
-		    		'label' => 'Description',
-		    		'value' => $this->description,
-		    	)),
-		    	'link' => array('link', array(
-		    		'label' => 'Link',
-		    		'value' => $this->link,
-		    	)),
+		$form = new \Curry_Form_SubForm(array(
+			'elements' => array(
+				'source' => array('previewImage', array(
+					'label' => 'Source',
+					'value' => $this->source,
+				)),
+				'title' => array('text', array(
+					'label' => 'Title',
+					'value' => $this->title,
+				)),
+				'description' => array('text', array(
+					'label' => 'Description',
+					'value' => $this->description,
+				)),
+				'link' => array('link', array(
+					'label' => 'Link',
+					'value' => $this->link,
+				)),
 			)
 		));
 
@@ -128,7 +129,7 @@ TPL
 	}
 
 	/** {@inheritdoc} */
-	public function saveBack(Zend_Form_SubForm $form)
+	public function saveBack(\Zend_Form_SubForm $form)
 	{
 		$values = $form->getValues(true);
 		$this->source = $values['source'];

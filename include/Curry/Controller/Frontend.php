@@ -419,7 +419,7 @@ class Frontend implements EventSubscriberInterface {
 		// Attempt to render page
 		$app->logger->notice('Showing page ' . $page->getName() . ' (PageRevisionId: '.$pageRevision->getPageRevisionId().')');
 
-		$generatorClass = $pageRevision->getPage()->getInheritedProperty('Generator', $app->config->curry->defaultGeneratorClass);
+		$generatorClass = $page->getInheritedProperty('Generator', $app->config->curry->defaultGeneratorClass);
 		$generator = new $generatorClass($pageRevision, $request);
 
 		$app->page = $page;

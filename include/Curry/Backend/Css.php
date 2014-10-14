@@ -19,7 +19,7 @@
 /**
  * Create and update css files.
  * 
- * @package Curry\Controller\Backend
+ * @package Curry\Backend
  */
 class Curry_Backend_Css extends Curry_Backend_FileEditor
 {

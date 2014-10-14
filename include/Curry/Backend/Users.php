@@ -15,14 +15,15 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
-use Curry\Controller\Frontend;
+use Curry\Backend\AbstractLegacyBackend;
+use Curry\Module\AbstractModule;
 
 /**
  * Manage users and user permissions.
  * 
- * @package Curry\Controller\Backend
+ * @package Curry\Backend
  */
-class Curry_Backend_Users extends \Curry\AbstractLegacyBackend
+class Curry_Backend_Users extends AbstractLegacyBackend
 {
 	const PERMISSION_USERS = 'Users';
 	const PERMISSION_ROLES = 'Roles';
@@ -120,7 +121,7 @@ class Curry_Backend_Users extends \Curry\AbstractLegacyBackend
 		$this->addMenu();
 
 		$user = User::getUser();
-		$backendModules = \Curry\AbstractLegacyBackend::getBackendList();
+		$backendModules = AbstractLegacyBackend::getBackendList();
 
 		$disable = array();
 		$backend = array("*" => "All");
@@ -139,7 +140,7 @@ class Curry_Backend_Users extends \Curry\AbstractLegacyBackend
 		}
 
 		$content = array();
-		$contentAccess = array("*" => "All") + Curry_Module::getModuleList();
+		$contentAccess = array("*" => "All") + AbstractModule::getModuleList();
 		$allContentAccess = $user->hasAccess('Curry_Backend_Content/*');
 		foreach($contentAccess as $k => $v) {
 			$content['Curry_Backend_Content/'.$k] = $v;

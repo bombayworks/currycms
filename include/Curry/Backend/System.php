@@ -22,9 +22,9 @@ use Curry\Controller\Frontend;
 /**
  * Change system settings.
  * 
- * @package Curry\Controller\Backend
+ * @package Curry\Backend
  */
-class System extends \Curry\AbstractLegacyBackend {
+class System extends \Curry\Backend\AbstractLegacyBackend {
 	
 	/** {@inheritdoc} */
 	public function getGroup()

@@ -19,7 +19,7 @@
 /**
  * Class used to specify how to cache front end modules.
  * 
- * This object should be used by Curry_Module::getCacheProperties()
+ * This object should be used by Curry\Module\AbstractModule::getCacheProperties()
  * to specify how to cache the module.
  * 
  * @see Curry_Module::getCacheProperties()

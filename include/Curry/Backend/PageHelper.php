@@ -15,11 +15,12 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Module\AbstractModule;
 
 /**
  * Static helper functions for the page backend.
  * 
- * @package Curry\Controller\Backend
+ * @package Curry\Backend
  */
 class Curry_Backend_PageHelper {
 	/**
@@ -636,7 +637,7 @@ class Curry_Backend_PageHelper {
 		$modulePermission = $user->hasPagePermission($pageRevision->getPage(), PageAccessPeer::PERM_MODULES);
 		if ($modulePermission) {
 			$modules = array('Predefined' => $modules);
-			foreach(Curry_Module::getModuleList() as $className) {
+			foreach(AbstractModule::getModuleList() as $className) {
 				$parts = explode("_", str_replace("_Module_", "_", $className));
 				$package = array_shift($parts);
 				$modules[$package][$className] = join(" / ", $parts);

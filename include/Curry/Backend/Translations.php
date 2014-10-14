@@ -15,13 +15,15 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Backend\AbstractBackend;
+use Curry\Backend\AbstractLegacyBackend;
 
 /**
  * Curry\Controller\Backend module for managing languages and translation-strings.
  * 
- * @package Curry\Controller\Backend
+ * @package Curry\Backend
  */
-class Curry_Backend_Translations extends \Curry\AbstractLegacyBackend {
+class Curry_Backend_Translations extends AbstractLegacyBackend {
 	const PERMISSION_TRANSLATIONS = 'Translations';
 	const PERMISSION_LANGUAGES = 'Languages';
 	const PERMISSION_FIELDS = 'Fields';
@@ -42,7 +44,7 @@ class Curry_Backend_Translations extends \Curry\AbstractLegacyBackend {
 		);
 	}
 
-	public static function addLanguageForm(\Curry\AbstractLegacyBackend $backend, $user = null)
+	public static function addLanguageForm(AbstractLegacyBackend $backend, $user = null)
 	{
 		if (!$user)
 			$user = User::getUser();

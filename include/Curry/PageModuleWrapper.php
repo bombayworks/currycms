@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Module\AbstractModule;
 
 /**
  * Helper class to manage inheritance for page modules.
@@ -441,10 +442,10 @@ class Curry_PageModuleWrapper {
 	}
 	
 	/**
-	 * Create the Curry_Module instance from the serialized data.
+	 * Create the Curry\Module\AbstractModule instance from the serialized data.
 	 *
 	 * @param bool $inherited
-	 * @return Curry_Module
+	 * @return AbstractModule
 	 */
 	public function createObject($inherited = true)
 	{

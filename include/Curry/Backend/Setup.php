@@ -19,9 +19,9 @@
 /**
  * Curry setup/installation backend.
  *
- * @package Curry\Controller\Backend
+ * @package Curry\Backend
  */
-class Curry_Backend_Setup extends \Curry\AbstractLegacyBackend {
+class Curry_Backend_Setup extends \Curry\Backend\AbstractLegacyBackend {
 	
 	public function getGroup()
 	{

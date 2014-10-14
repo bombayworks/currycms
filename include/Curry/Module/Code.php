@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Module;
 
 /**
  * Executes PHP code and sends output to the front-end.
@@ -26,7 +27,7 @@
  * 
  * @package Curry\Module
  */
-class Curry_Module_Code extends Curry_Module {
+class Code extends AbstractModule {
 	/**
 	 * PHP code to execute.
 	 *
@@ -35,7 +36,7 @@ class Curry_Module_Code extends Curry_Module {
 	protected $code = "echo 'Hello world!';";
 	
 	/** {@inheritdoc} */
-	public function showFront(Curry_Twig_Template $template = null)
+	public function showFront(\Curry_Twig_Template $template = null)
 	{
 		$twig = $this->toTwig();
 		return $template ? $template->render($twig) : $twig['content'];
@@ -52,23 +53,23 @@ class Curry_Module_Code extends Curry_Module {
 	/** {@inheritdoc} */
 	public function showBack()
 	{
-		$form = new Curry_Form_SubForm(array(
-		    'elements' => array(
-		    	'code' => array('textarea', array(
-		    		'label' => 'Code',
-		    		'value' => $this->code,
-		    		'rows' => 10,
-		    		'cols' => 30,
-		    		'wrap' => 'off',
-		    		'spellcheck' => 'false',
-		    	)),
+		$form = new \Curry_Form_SubForm(array(
+			'elements' => array(
+				'code' => array('textarea', array(
+					'label' => 'Code',
+					'value' => $this->code,
+					'rows' => 10,
+					'cols' => 30,
+					'wrap' => 'off',
+					'spellcheck' => 'false',
+				)),
 			)
 		));
 		return $form;
 	}
 	
 	/** {@inheritdoc} */
-	public function saveBack(Zend_Form_SubForm $form)
+	public function saveBack(\Zend_Form_SubForm $form)
 	{
 		$values = $form->getValues(true);
 		$this->code = $values['code'];

@@ -20,9 +20,9 @@ use Curry\Controller\Frontend;
 /**
  * Synchronize pages across sites.
  *
- * @package Curry\Controller\Backend
+ * @package Curry\Backend
  */
-class Curry_Backend_PageSync extends \Curry\AbstractLegacyBackend
+class Curry_Backend_PageSync extends \Curry\Backend\AbstractLegacyBackend
 {
 	const INTRO = <<<HTML
 <p>This module allows you to synchronize pages with a remote source. It will compare the published revisions. If you

@@ -21,9 +21,9 @@ use Curry\Controller\Frontend;
 /**
  * Manage pages.
  * 
- * @package Curry\Controller\Backend
+ * @package Curry\Backend
  */
-class Curry_Backend_Page extends \Curry\AbstractLegacyBackend
+class Curry_Backend_Page extends \Curry\Backend\AbstractLegacyBackend
 {
 	/** {@inheritdoc} */
 	public function getGroup()

@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Module;
 
 /**
  * Search in the search-index and show matching results.
@@ -35,7 +36,7 @@
  *
  * @package Curry\Module
  */
-class Curry_Module_Search extends Curry_Module {
+class Search extends AbstractModule {
 	/**
 	 * Snippet max character length.
 	 *
@@ -60,8 +61,7 @@ class Curry_Module_Search extends Curry_Module {
 	/** {@inheritdoc} */
 	public function getCacheProperties()
 	{
-		$r = $this->getRequest();
-		return new Curry_CacheProperties((array)$r->get);
+		return new \Curry_CacheProperties($this->app->request->query->all());
 	}
 
 	/** {@inheritdoc} */
@@ -83,13 +83,13 @@ TPL
 	/** {@inheritdoc} */
 	public function toTwig()
 	{
-		$r = $this->getRequest();
-		$luceneIndex = Curry_Core::getSearchIndex();
+		$r = $this->app->request;
+		$luceneIndex = $this->app->index;
 		$vars = array();
 		$vars['Total'] = $luceneIndex->numDocs();
 		
-		if(isset($r->get['query'])) {
-			$query = trim($r->get['query']);
+		if (($query = $r->query->get('query'))) {
+			$query = trim($query);
 			$hits = $luceneIndex->find($query);
 			
 			if($this->alwaysWildcard && count($hits) === 0) {
@@ -100,9 +100,9 @@ TPL
 			if($this->onlyThisLanguage) {
 				foreach($hits as $hit) {
 					try{
-						if($hit->locale == Curry_Language::getLangCode())
+						if($hit->locale == \Curry_Language::getLangCode())
 							$tmp[] = $hit;
-					} catch(Zend_Search_Lucene_Exception $e) {
+					} catch(\Zend_Search_Lucene_Exception $e) {
 						$tmp[] = $hit;
 					}
 				}
@@ -110,7 +110,7 @@ TPL
 			}
 			$vars['Query'] = $query;
 			$vars['NumHits'] = count($hits);
-			$vars['hits'] = new Curry_Twig_CollectionWrapper($hits, array($this, 'getHitProperties'));
+			$vars['hits'] = new \Curry_Twig_CollectionWrapper($hits, array($this, 'getHitProperties'));
 		}
 
 		return $vars;
@@ -119,30 +119,30 @@ TPL
 	/**
 	 * Get twig properties for matching search document.
 	 *
-	 * @param Zend_Search_Lucene_Search_QueryHit $hit
+	 * @param \Zend_Search_Lucene_Search_QueryHit $hit
 	 * @return array
 	 */
-	public function getHitProperties(Zend_Search_Lucene_Search_QueryHit $hit)
+	public function getHitProperties(\Zend_Search_Lucene_Search_QueryHit $hit)
 	{
-		$r = $this->getRequest();
-		$snippet = Curry_String::toInternalEncoding($hit->body, 'utf-8');
-		$snippet = self::createSearchSnippet($snippet, $r->get['query'], $this->snippetLength);
+		$r = $this->app->request;
+		$snippet = \Curry_String::toInternalEncoding($hit->body, 'utf-8');
+		$snippet = self::createSearchSnippet($snippet, $r->query->get('query'), $this->snippetLength);
 		
 		$relatedObject = null;
-		$model = Curry_String::toInternalEncoding($hit->model, 'utf-8');
+		$model = \Curry_String::toInternalEncoding($hit->model, 'utf-8');
 
 		$fields = array();
 		foreach($hit->getDocument()->getFieldNames() as $fieldName)
 			$fields[$fieldName] = $hit->{$fieldName};
 
 		return array(
-			'Title' => Curry_String::toInternalEncoding($hit->title, 'utf-8'),
-			'Description' => Curry_String::toInternalEncoding($hit->description, 'utf-8'),
-			'Url' => Curry_String::toInternalEncoding($hit->url, 'utf-8'),
+			'Title' => \Curry_String::toInternalEncoding($hit->title, 'utf-8'),
+			'Description' => \Curry_String::toInternalEncoding($hit->description, 'utf-8'),
+			'Url' => \Curry_String::toInternalEncoding($hit->url, 'utf-8'),
 			'Snippet' => $snippet,
 			'Score' => $hit->score,
 			'Fields' => $fields,
-			'RelatedObject' => new Curry_OnDemand(array($this, 'getRelatedObject'), $model, unserialize($hit->model_id)),
+			'RelatedObject' => new \Curry_OnDemand(array($this, 'getRelatedObject'), $model, unserialize($hit->model_id)),
 		);
 	}
 	
@@ -155,7 +155,7 @@ TPL
 	 */
 	public function getRelatedObject($model, $id)
 	{
-		$object = PropelQuery::from($model)->findPk($id);
+		$object = \PropelQuery::from($model)->findPk($id);
 		if($object) {
 			if(method_exists($object, 'toTwig'))
 				return $object->toTwig();
@@ -231,7 +231,7 @@ TPL
 	/** {@inheritdoc} */
 	public function showBack()
 	{
-		$form = new Curry_Form_SubForm(array(
+		$form = new \Curry_Form_SubForm(array(
 			'elements' => array(
 				'snippet_length' => array('text', array(
 					'label' => 'Snippet length',
@@ -253,7 +253,7 @@ TPL
 	}
 	
 	/** {@inheritdoc} */
-	public function saveBack(Zend_Form_SubForm $form)
+	public function saveBack(\Zend_Form_SubForm $form)
 	{
 		$values = $form->getValues(true);
 		$this->snippetLength = $values['snippet_length'];

@@ -21,7 +21,7 @@
  * 
  * @package Curry\Controller\Backend
  */
-abstract class Curry_ModelBackend extends \Curry\AbstractLegacyBackend {
+abstract class Curry_ModelBackend extends \Curry\Backend\AbstractLegacyBackend {
 	/**
 	 * Array of allowed model classes.
 	 *

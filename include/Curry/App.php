@@ -15,11 +15,16 @@ use Symfony\Component\HttpKernel\TerminableInterface;
 use Exception;
 use Curry_Util;
 use Curry_Array;
+use Zend\Config\Config;
 
 /**
  * Class App
  *
  * @property \Symfony\Component\HttpFoundation\Request $request
+ * @property \Monolog\Logger $logger
+ * @property \Page $page
+ * @property \PageRevision $pageRevision
+ * @property \Curry_PageGenerator $generator
  *
  * @package Curry
  */
@@ -51,7 +56,7 @@ class App extends ServiceContainer implements HttpKernelInterface, TerminableInt
 		// Load config
 		foreach($config as $k => $v)
 			$this[$k] = $v;
-		$this->config = new \Zend\Config\Config($config);
+		$this->config = new Config($config);
 	}
 
 	public static function getInstance()

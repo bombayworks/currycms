@@ -17,7 +17,7 @@ class Modules extends AbstractBackend {
 	public function initialize()
 	{
 		$modules = array();
-		foreach(\Curry_Module::getModuleList() as $className) {
+		foreach(\Curry\Module\AbstractModule::getModuleList() as $className) {
 			$parts = explode("_", str_replace("_Module_", "_", $className));
 			$package = array_shift($parts);
 			$modules[$package][$className] = join(" / ", $parts);

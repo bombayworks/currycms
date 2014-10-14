@@ -15,8 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
-namespace Curry;
-use Curry\Controller\Frontend;
+namespace Curry\Backend;
 use Curry\Exception\ResponseException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,7 +24,7 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Base class for backend modules.
  *
- * @package Curry\Controller\Backend
+ * @package Curry\Backend
  */
 abstract class AbstractLegacyBackend extends \Curry\Backend\AbstractBackend {
 	/**

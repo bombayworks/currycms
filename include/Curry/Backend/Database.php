@@ -15,14 +15,13 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
-use Curry\Controller\Frontend;
 
 /**
  * Manage the database.
  * 
- * @package Curry\Controller\Backend
+ * @package Curry\Backend
  */
-class Curry_Backend_Database extends \Curry\AbstractLegacyBackend
+class Curry_Backend_Database extends \Curry\Backend\AbstractLegacyBackend
 {
 	/**#@+
 	 * Propel-gen method constants.

@@ -19,7 +19,7 @@
 /**
  * Create and update templates.
  * 
- * @package Curry\Controller\Backend
+ * @package Curry\Backend
  */
 class Curry_Backend_Template extends Curry_Backend_FileEditor
 {

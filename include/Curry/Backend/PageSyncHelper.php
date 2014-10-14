@@ -19,7 +19,7 @@
 /**
  * Helper functions for copy-paste and page-sync functionality.
  *
- * @package Curry\Controller\Backend
+ * @package Curry\Backend
  */
 class Curry_Backend_PageSyncHelper
 {

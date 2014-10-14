@@ -20,9 +20,9 @@ use Curry\Controller\Frontend;
 /**
  * This module allows you to browse the filesystem.
  *
- * @package Curry\Controller\Backend
+ * @package Curry\Backend
  */
-class Curry_Backend_FileBrowser extends \Curry\AbstractLegacyBackend
+class Curry_Backend_FileBrowser extends \Curry\Backend\AbstractLegacyBackend
 {
 	/** {@inheritdoc} */
 	public function getName()

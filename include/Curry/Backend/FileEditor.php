@@ -21,7 +21,7 @@ use Curry\Controller\Frontend;
 /**
  * Simple backend to create and edit files.
  */
-abstract class Curry_Backend_FileEditor extends \Curry\AbstractLegacyBackend {
+abstract class Curry_Backend_FileEditor extends \Curry\Backend\AbstractLegacyBackend {
 	/**
 	 * Directory to edit files in.
 	 * @var string

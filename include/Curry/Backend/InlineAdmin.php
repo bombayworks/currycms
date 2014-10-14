@@ -20,10 +20,10 @@ use Curry\Controller\Backend;
 /**
  * Shows the Live edit (aka Inline Admin) view of the webpage.
  *
- * @package Curry\Controller\Backend
+ * @package Curry\Backend
  *
  */
-class Curry_Backend_InlineAdmin extends \Curry\AbstractLegacyBackend
+class Curry_Backend_InlineAdmin extends \Curry\Backend\AbstractLegacyBackend
 {
 	/** {@inheritdoc} */
 	public function getGroup()

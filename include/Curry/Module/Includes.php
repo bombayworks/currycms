@@ -15,13 +15,14 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Module;
 
 /**
  * Module to handle javascript and stylesheet includes.
  * 
  * @package Curry\Module
  */
-class Curry_Module_Includes extends Curry_Module {
+class Includes extends AbstractModule {
 	/**
 	 * Minify JavaScript and CSS?
 	 *
@@ -64,15 +65,15 @@ class Curry_Module_Includes extends Curry_Module {
 	public function getCacheProperties()
 	{
 		// If minification is enabled, cache for 10 minutes, otherwise we dont need to set a limit
-		return new Curry_CacheProperties(array(), $this->minify ? 600 : false);
+		return new \Curry_CacheProperties(array(), $this->minify ? 600 : false);
 	}
 	
 	/** {@inheritdoc} */
-	public function showFront(Curry_Twig_Template $template = null)
+	public function showFront(\Curry_Twig_Template $template = null)
 	{
-		$pageGenerator = \Curry\App::getInstance()->generator;
-		if(!($pageGenerator instanceof Curry_PageGenerator_Html))
-			throw new Exception('Includes module only works on pages with PageGenerator set to Curry_PageGenerator_Html.');
+		$pageGenerator = $this->app->generator;
+		if(!($pageGenerator instanceof \Curry_PageGenerator_Html))
+			throw new \Exception('Includes module only works on pages with PageGenerator set to Curry_PageGenerator_Html.');
 		$head = $pageGenerator->getHtmlHead();
 		
 		// Stylesheets
@@ -148,7 +149,7 @@ class Curry_Module_Includes extends Curry_Module {
 		}
 		
 		// Combine and minify files
-		$content = Minify::combine($files);
+		$content = \Minify::combine($files);
 		
 		// Write content
 		file_put_contents($target, $content);
@@ -185,18 +186,18 @@ class Curry_Module_Includes extends Curry_Module {
 		$content = "";
 		foreach($files as $file) {
 			$processor = new CssProcessor($file['source']);
-			$relative = Curry_Util::getRelativePath($basedir, dirname($file['source']));
+			$relative = \Curry_Util::getRelativePath($basedir, dirname($file['source']));
 			$content .= $processor->getContent($file['media'], $relative);
 			$imports = array_merge($imports, $processor->getImportedFiles());
 		}
 		
 		// Minify
-		$source = new Minify_Source(array(
+		$source = new \Minify_Source(array(
 			'id' => $target,
 			'content' => $content,
-			'contentType' => Minify::TYPE_CSS,
+			'contentType' => \Minify::TYPE_CSS,
 		));
-		$content = Minify::combine(array($source));
+		$content = \Minify::combine(array($source));
 		
 		// Add header
 		$header = array('files' => $imports, 'modified' => self::getLastModified($imports));
@@ -217,17 +218,17 @@ class Curry_Module_Includes extends Curry_Module {
 	{
 		$fp = @fopen($file, "r");
 		if(!$fp)
-			throw new Exception('Unable to read minification target file: '.$file);
+			throw new \Exception('Unable to read minification target file: '.$file);
 		
 		$line = stream_get_line($fp, 4096, "\n");
 		fclose($fp);
 		
 		if(!preg_match('@/\* (.*) \*/$@', $line, $m))
-			throw new Exception('Invalid minification target file: '.$file);
+			throw new \Exception('Invalid minification target file: '.$file);
 			
 		$data = json_decode($m[1], true);
 		if(!$data)
-			throw new Exception('Unable to parse minification file header: '.$file);
+			throw new \Exception('Unable to parse minification file header: '.$file);
 			
 		return $data;
 	}
@@ -249,7 +250,7 @@ class Curry_Module_Includes extends Curry_Module {
 	/** {@inheritdoc} */
 	public function showBack()
 	{
-		$form = new Curry_Form_SubForm(array(
+		$form = new \Curry_Form_SubForm(array(
 			'elements' => array(
 				'minify' => array('checkbox', array(
 					'label' => 'Minify',
@@ -258,7 +259,7 @@ class Curry_Module_Includes extends Curry_Module {
 			)
 		));
 		
-		$scriptForm = new Curry_Form_Dynamic(array(
+		$scriptForm = new \Curry_Form_Dynamic(array(
 			'legend' => 'Script',
 			'elements' => array(
 				'source' => array('filebrowser', array(
@@ -293,13 +294,13 @@ class Curry_Module_Includes extends Curry_Module {
 		));
 		$scriptForm->addDisplayGroup(array('type','condition','async','defer'), 'options', array('Legend' => 'Options', 'class' => 'horizontal-group'));
 		
-		$form->addSubForm(new Curry_Form_MultiForm(array(
+		$form->addSubForm(new \Curry_Form_MultiForm(array(
 			'legend' => 'Script includes',
 			'cloneTarget' => $scriptForm,
 			'defaults' => $this->script,
 		)), 'script');
 		
-		$stylesheetForm = new Curry_Form_Dynamic(array(
+		$stylesheetForm = new \Curry_Form_Dynamic(array(
 			'legend' => 'Stylesheet',
 			'elements' => array(
 				'source' => array('filebrowser', array(
@@ -318,13 +319,13 @@ class Curry_Module_Includes extends Curry_Module {
 			),
 		));
 		
-		$form->addSubForm(new Curry_Form_MultiForm(array(
+		$form->addSubForm(new \Curry_Form_MultiForm(array(
 			'legend' => 'Stylesheet includes',
 			'cloneTarget' => $stylesheetForm,
 			'defaults' => $this->stylesheet,
 		)), 'stylesheet');
 		
-		$form->addSubForm(new Curry_Form_SubForm(array(
+		$form->addSubForm(new \Curry_Form_SubForm(array(
 			'legend' => 'Custom inline javascript',
 			'class' => $this->inlineScript ? '' : 'advanced',
 			'elements' => array(
@@ -348,7 +349,7 @@ class Curry_Module_Includes extends Curry_Module {
 	}
 	
 	/** {@inheritdoc} */
-	public function saveBack(Zend_Form_SubForm $form)
+	public function saveBack(\Zend_Form_SubForm $form)
 	{
 		$values = $form->getValues(true);
 		$this->minify = (bool)$values['minify'];

@@ -19,10 +19,10 @@
 /**
  * Manage users and user permissions.
  * 
- * @package Curry\Controller\Backend
+ * @package Curry\Backend
  *
  */
-class Curry_Backend_Profile extends \Curry\AbstractLegacyBackend
+class Curry_Backend_Profile extends \Curry\Backend\AbstractLegacyBackend
 {
 	/** {@inheritdoc} */
 	public function getGroup()

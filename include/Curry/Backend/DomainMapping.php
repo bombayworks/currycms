@@ -19,9 +19,9 @@
 /**
  * Creates mapping between domains and pages.
  * 
- * @package Curry\Controller\Backend
+ * @package Curry\Backend
  */
-class Curry_Backend_DomainMapping extends \Curry\AbstractLegacyBackend {
+class Curry_Backend_DomainMapping extends \Curry\Backend\AbstractLegacyBackend {
 	/** {@inheritdoc} */
 	public function getName()
 	{

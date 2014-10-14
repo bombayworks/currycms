@@ -194,7 +194,7 @@ abstract class AbstractModule {
 	 * Return an object describing how caching of this module is handled. Return
 	 * null to disable caching.
 	 *
-	 * @return \Curry_CacheProperties|null
+	 * @return \Curry\Module\CacheProperties|null
 	 */
 	public function getCacheProperties() {
 		return NULL;

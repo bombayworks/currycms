@@ -61,7 +61,7 @@ class Search extends AbstractModule {
 	/** {@inheritdoc} */
 	public function getCacheProperties()
 	{
-		return new \Curry_CacheProperties($this->app->request->query->all());
+		return new CacheProperties($this->app->request->query->all());
 	}
 
 	/** {@inheritdoc} */

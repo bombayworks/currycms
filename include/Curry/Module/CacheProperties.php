@@ -16,6 +16,8 @@
  * @link       http://currycms.com
  */
 
+namespace Curry\Module;
+
 /**
  * Class used to specify how to cache front end modules.
  * 
@@ -23,9 +25,9 @@
  * to specify how to cache the module.
  * 
  * @see Curry_Module::getCacheProperties()
- * @package Curry
+ * @package Curry/Module
  */
-class Curry_CacheProperties {
+class CacheProperties {
 	/**
 	 * Parameters that together creates the unique cache-entry.
 	 *

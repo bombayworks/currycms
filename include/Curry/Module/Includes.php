@@ -65,7 +65,7 @@ class Includes extends AbstractModule {
 	public function getCacheProperties()
 	{
 		// If minification is enabled, cache for 10 minutes, otherwise we dont need to set a limit
-		return new \Curry_CacheProperties(array(), $this->minify ? 600 : false);
+		return new CacheProperties(array(), $this->minify ? 600 : false);
 	}
 	
 	/** {@inheritdoc} */

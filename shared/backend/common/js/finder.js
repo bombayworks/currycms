@@ -38,7 +38,7 @@
 				var name = overwrite[i];
 				o[name] = confirm('Do you want to overwrite ' + name + '?');
 			}
-			var action = base.options.action + '&' + $.param({
+			var action = base.options.action + '?' + $.param({
 				action: 'UploadOverwrite',
 				overwrite: o
 			});
@@ -150,7 +150,7 @@
 							var source = $file.data('finder').path;
 							var destination = $(target).data('finder').path;
 							var postMove = function(overwrite) {
-								var action = base.options.action + '&' + $.param({
+								var action = base.options.action + '?' + $.param({
 									action: 'Move',
 									path: source,
 									destination: destination,
@@ -372,7 +372,7 @@
         	var preLeft = $wrapper.scrollLeft();
         	var preWidth = $wrapper.length ? $wrapper.get(0).scrollWidth : 0;
         	
-        	var path = base.options.action + '&' + $.param({
+        	var path = base.options.action + '?' + $.param({
         		path: base.options.path,
         		filter: base.options.filter,
         		public: base.options.public,
@@ -428,7 +428,7 @@
     };
     
     $.finder.defaultOptions = {
-        action: 'admin.php?module=Curry_Backend_FileBrowser',
+        action: '/admin/curry_backend_filebrowser/',
         filter: null,
         filters: [
         	['all', '*','All files'],

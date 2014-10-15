@@ -46,7 +46,7 @@ class Curry_Backend_Page extends \Curry\Backend\AbstractLegacyBackend
 
 	public static function updateIndex(Page $page)
 	{
-		if ($this->app->config->curry->autoUpdateIndex)
+		if (\Curry\App::getInstance()->config->curry->autoUpdateIndex)
 			\Curry\BackgroundFunctions::register(array(__CLASS__, 'doUpdateIndex'), $page);
 	}
 

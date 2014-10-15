@@ -16,6 +16,7 @@
  * @link       http://currycms.com
  */
 use Curry\Controller\Frontend;
+use Curry\Module\PageModuleWrapper;
 
 /**
  * Page Generator for HTML documents.
@@ -79,7 +80,7 @@ class Curry_PageGenerator_Html extends Curry_PageGenerator {
 	}
 	
 	/** {@inheritdoc} */
-	protected function insertModule(Curry_PageModuleWrapper $pageModuleWrapper)
+	protected function insertModule(PageModuleWrapper $pageModuleWrapper)
 	{
 		$this->htmlHead->clearBacklog();
 		if($this->inlineAdmin && $this->pageRevision->allowEdit())
@@ -242,10 +243,10 @@ JS
 	 * Wrap module with inline admin controls.
 	 *
 	 * @param string $content
-	 * @param Curry_PageModuleWrapper $pageModuleWrapper
+	 * @param PageModuleWrapper $pageModuleWrapper
 	 * @return string
 	 */
-	protected function adminModule($content, Curry_PageModuleWrapper $pageModuleWrapper)
+	protected function adminModule($content, PageModuleWrapper $pageModuleWrapper)
 	{
 		$user = User::getUser();
 		$pageId = $pageModuleWrapper->getPageRevision()->getPageId();

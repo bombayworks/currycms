@@ -17,6 +17,7 @@
  */
 use Curry\Controller\Frontend;
 use Curry\Module\AbstractModule;
+use Curry\Module\PageModuleWrapper;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -102,10 +103,10 @@ class Curry_PageGenerator
 	/**
 	 * Insert module and return generated content.
 	 *
-	 * @param Curry_PageModuleWrapper $pageModuleWrapper
+	 * @param PageModuleWrapper $pageModuleWrapper
 	 * @return string
 	 */
-	protected function insertModule(Curry_PageModuleWrapper $pageModuleWrapper)
+	protected function insertModule(PageModuleWrapper $pageModuleWrapper)
 	{
 		\Curry\App::getInstance()->logger->debug(($pageModuleWrapper->getEnabled() ? 'Inserting' : 'Skipping').' module "'.$pageModuleWrapper->getName().'" of type "'.$pageModuleWrapper->getClassName() . '" with target "'.$pageModuleWrapper->getTarget().'"');
 		
@@ -217,11 +218,11 @@ class Curry_PageGenerator
 	/**
 	 * Get unique name for storing module cache.
 	 *
-	 * @param Curry_PageModuleWrapper $pageModuleWrapper
+	 * @param PageModuleWrapper $pageModuleWrapper
 	 * @param AbstractModule $module
 	 * @return string
 	 */
-	private function getModuleCacheName(Curry_PageModuleWrapper $pageModuleWrapper, AbstractModule $module)
+	private function getModuleCacheName(PageModuleWrapper $pageModuleWrapper, AbstractModule $module)
 	{
 		$params = array(
 			'_moduleDataId' => $pageModuleWrapper->getModuleDataId(),
@@ -400,7 +401,7 @@ class Curry_PageGenerator
 	}
 	
 	/**
-	 * Get an array of Curry_PageModuleWrapper objects for all modules on the PageRevision we are rendering.
+	 * Get an array of Curry\Module\PageModuleWrapper objects for all modules on the PageRevision we are rendering.
 	 *
 	 * @return array
 	 */

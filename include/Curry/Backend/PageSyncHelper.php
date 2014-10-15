@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Module\PageModuleWrapper;
 
 /**
  * Helper functions for copy-paste and page-sync functionality.
@@ -280,10 +281,10 @@ class Curry_Backend_PageSyncHelper
 	/**
 	 * Get "copy code" for module.
 	 *
-	 * @param Curry_PageModuleWrapper $module
+	 * @param PageModuleWrapper $module
 	 * @return array
 	 */
-	public static function getModuleCode(Curry_PageModuleWrapper $module)
+	public static function getModuleCode(PageModuleWrapper $module)
 	{
 		$datas = array();
 		$moduleDatas = ModuleDataQuery::create()

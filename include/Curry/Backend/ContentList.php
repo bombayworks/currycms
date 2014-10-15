@@ -16,6 +16,7 @@
  * @link       http://currycms.com
  */
 use Curry\Backend\AbstractBackend;
+use Curry\Module\PageModuleWrapper;
 
 /**
  * Page content list view.
@@ -240,10 +241,10 @@ class Curry_Backend_ContentList extends Curry_ModelView_List {
 		$pageModule = $pk ? PropelQuery::from($this->getModelClass())->findPk($pk) : null;
 		if (!$pageModule)
 			return null;
-		return new Curry_PageModuleWrapper($pageModule, $this->pageRevision, $this->langcode);
+		return new PageModuleWrapper($pageModule, $this->pageRevision, $this->langcode);
 	}
 
-	public function getInfo(Curry_PageModuleWrapper $wrapper)
+	public function getInfo(PageModuleWrapper $wrapper)
 	{
 		$icons = '';
 		$pageModule = $wrapper->getPageModule();
@@ -305,7 +306,7 @@ class Curry_Backend_ContentList extends Curry_ModelView_List {
 		);
 	}
 
-	public function showDelete(Curry_PageModuleWrapper $wrapper, $backend)
+	public function showDelete(PageModuleWrapper $wrapper, $backend)
 	{
 		if ($wrapper->isInherited() && !$this->pagePermission[PageAccessPeer::PERM_MODULES]) {
 			$backend->addMessage('You do not have permission to delete inherited modules.', AbstractBackend::MSG_ERROR);
@@ -352,7 +353,7 @@ class Curry_Backend_ContentList extends Curry_ModelView_List {
 		}
 	}
 
-	public function showProperties(Curry_PageModuleWrapper $wrapper, $backend)
+	public function showProperties(PageModuleWrapper $wrapper, $backend)
 	{
 		$form = Curry_Backend_PageHelper::getModulePropertiesForm($wrapper);
 		if (isPost('pid_moduleproperties') && $form->isValid($_POST)) {
@@ -369,7 +370,7 @@ class Curry_Backend_ContentList extends Curry_ModelView_List {
 		$backend->addMainContent($form);
 	}
 
-	public function showEdit(Curry_PageModuleWrapper $wrapper, $backend)
+	public function showEdit(PageModuleWrapper $wrapper, $backend)
 	{
 		$form = $this->getModuleForm($wrapper);
 		if(!$form) {
@@ -424,10 +425,10 @@ class Curry_Backend_ContentList extends Curry_ModelView_List {
 	/**
 	 * Edit module form.
 	 *
-	 * @param Curry_PageModuleWrapper $wrapper
+	 * @param PageModuleWrapper $wrapper
 	 * @return Curry_Form|null
 	 */
-	protected function getModuleForm(Curry_PageModuleWrapper $wrapper)
+	protected function getModuleForm(PageModuleWrapper $wrapper)
 	{
 		$form = new Curry_Form(array(
 			'action' => url('', $_GET),

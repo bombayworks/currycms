@@ -16,6 +16,7 @@
  * @link       http://currycms.com
  */
 use Curry\Module\AbstractModule;
+use Curry\Module\PageModuleWrapper;
 
 /**
  * Static helper functions for the page backend.
@@ -870,7 +871,7 @@ class Curry_Backend_PageHelper {
 		$moduleData->save();
 		
 		// create default data
-		$wrapper = new Curry_PageModuleWrapper($pageModule, $pageRevision, null);
+		$wrapper = new PageModuleWrapper($pageModule, $pageRevision, null);
 		$wrapper->createData();
 		
 		return $pageModule;
@@ -879,10 +880,10 @@ class Curry_Backend_PageHelper {
 	/**
 	 * Module properties form.
 	 *
-	 * @param Curry_PageModuleWrapper $pageModuleWrapper
+	 * @param PageModuleWrapper $pageModuleWrapper
 	 * @return Curry_Form
 	 */
-	public static function getModulePropertiesForm(Curry_PageModuleWrapper $pageModuleWrapper)
+	public static function getModulePropertiesForm(PageModuleWrapper $pageModuleWrapper)
 	{
 		$form = new Curry_Form(array(
 			'action' => url('', $_GET),
@@ -957,10 +958,10 @@ class Curry_Backend_PageHelper {
 	/**
 	 * Save module properties.
 	 *
-	 * @param Curry_PageModuleWrapper $pageModuleWrapper
+	 * @param PageModuleWrapper $pageModuleWrapper
 	 * @param array $values
 	 */
-	public static function saveModuleProperties(Curry_PageModuleWrapper $pageModuleWrapper, array $values)
+	public static function saveModuleProperties(PageModuleWrapper $pageModuleWrapper, array $values)
 	{
 		$modified = false;
 		

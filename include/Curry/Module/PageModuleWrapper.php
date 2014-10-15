@@ -15,113 +15,113 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
-use Curry\Module\AbstractModule;
+namespace Curry\Module;
 
 /**
  * Helper class to manage inheritance for page modules.
  *
- * @package Curry
+ * @package Curry\Module
  */
-class Curry_PageModuleWrapper {
+class PageModuleWrapper {
 	/**
 	 * The PageRevision of this wrapper.
 	 *
-	 * @var PageRevision
+	 * @var \PageRevision
 	 */
 	private $pageRevisionId;
-	
+
 	/**
 	 * The PageModule of this wrapper;
 	 *
-	 * @var PageModule
+	 * @var \PageModule
 	 */
 	private $pageModuleId;
-	
+
 	/**
 	 * Class name.
 	 *
 	 * @var string
 	 */
 	private $className;
-	
+
 	/**
 	 * Name of template target to attach this module to.
 	 *
 	 * @var string
 	 */
 	private $target;
-	
+
 	/**
 	 * Name of module.
 	 *
 	 * @var string
 	 */
 	private $name;
-	
+
 	/**
 	 * Path to template.
 	 *
 	 * @var string|null
 	 */
 	private $template = null;
-	
+
 	/**
 	 * Is this module enabled?
 	 *
 	 * @var bool|null
 	 */
 	private $enabled = null;
-	
+
 	/**
 	 * The serialized data for this module.
 	 *
 	 * @var string|null
 	 */
 	private $data = null;
-	
+
 	/**
 	 * ModuleDataId from where $template is inherited.
 	 *
 	 * @var int|null
 	 */
 	private $templateSourceId = null;
-	
+
 	/**
 	 * ModuleDataId from where $enabled is inherited.
 	 *
 	 * @var int|null
 	 */
 	private $enabledSourceId = null;
-	
+
 	/**
 	 * ModuleDataId from where $data is inherited.
 	 *
 	 * @var int|null
 	 */
 	private $dataSourceId = null;
-	
+
 	/**
 	 * Is this module inherited from another page?
 	 *
 	 * @var bool
 	 */
 	private $inherited;
-	
+
 	/**
 	 * Langcode for module.
 	 *
 	 * @var string
 	 */
 	private $langcode;
-	
+
 	/**
 	 * Constructor
 	 *
-	 * @param PageModule $pageModule
-	 * @param PageRevision $pageRevision
+	 * @param \PageModule $pageModule
+	 * @param \PageRevision $pageRevision
 	 * @param string $langcode
 	 */
-	public function __construct(PageModule $pageModule, PageRevision $pageRevision, $langcode)
+	public function __construct(\PageModule $pageModule, \PageRevision $pageRevision, $langcode)
 	{
 		$this->pageRevisionId = $pageRevision->getPageRevisionId();
 		$this->pageModuleId = $pageModule->getPageModuleId();
@@ -148,7 +148,7 @@ class Curry_PageModuleWrapper {
 
 		$this->populateModuleData();
 	}
-	
+
 	/**
 	 * Get PageRevisionId for the related PageRevision.
 	 *
@@ -158,37 +158,37 @@ class Curry_PageModuleWrapper {
 	{
 		return $this->pageRevisionId;
 	}
-		
+
 	/**
 	 * Return the PageRevision object.
 	 *
-	 * @return PageRevision
+	 * @return \PageRevision
 	 */
 	public function getPageRevision()
 	{
-		return PageRevisionQuery::create()->findPk($this->pageRevisionId);
+		return \PageRevisionQuery::create()->findPk($this->pageRevisionId);
 	}
 
 	/**
 	 * Get the Page from which this module belongs to.
 	 *
-	 * @return Page
+	 * @return \Page
 	 */
 	public function getOriginPage()
 	{
 		return $this->getPageModule()->getPage();
 	}
-	
+
 	/**
 	 * Return the PageModule object.
 	 *
-	 * @return PageModule
+	 * @return \PageModule
 	 */
 	public function getPageModule()
 	{
-		return PageModuleQuery::create()->findPk($this->pageModuleId);
+		return \PageModuleQuery::create()->findPk($this->pageModuleId);
 	}
-	
+
 	/**
 	 * Get PageModuleId.
 	 *
@@ -198,22 +198,22 @@ class Curry_PageModuleWrapper {
 	{
 		return $this->pageModuleId;
 	}
-	
+
 	/**
 	 * Get ModuleData object for this module. If it doesn't exist in the
 	 * database, it will be created but not saved.
 	 *
-	 * @return ModuleData
+	 * @return \ModuleData
 	 */
 	public function getModuleData()
 	{
-		return ModuleDataQuery::create()
+		return \ModuleDataQuery::create()
 			->filterByPageModuleId($this->pageModuleId)
 			->filterByPageRevisionId($this->pageRevisionId)
 			->filterByLangcode($this->langcode)
 			->findOneOrCreate();
 	}
-	
+
 	/**
 	 * Get ModuleDataId.
 	 *
@@ -226,7 +226,7 @@ class Curry_PageModuleWrapper {
 			return $this->dataSourceId;
 		return $this->getModuleData($inherited)->getModuleDataId();
 	}
-	
+
 	/**
 	 * Get module class name.
 	 *
@@ -236,7 +236,7 @@ class Curry_PageModuleWrapper {
 	{
 		return $this->className;
 	}
-	
+
 	/**
 	 * Get the name of the template variable this module is attached to.
 	 *
@@ -266,7 +266,7 @@ class Curry_PageModuleWrapper {
 	{
 		return $this->inherited;
 	}
-	
+
 	/**
 	 * Get filename of module template.
 	 *
@@ -276,7 +276,7 @@ class Curry_PageModuleWrapper {
 	{
 		return $this->template;
 	}
-	
+
 	/**
 	 * Is this module enabled?
 	 *
@@ -286,7 +286,7 @@ class Curry_PageModuleWrapper {
 	{
 		return $this->enabled;
 	}
-	
+
 	/**
 	 * Get the module data. This is the serialized module.
 	 *
@@ -299,19 +299,19 @@ class Curry_PageModuleWrapper {
 
 	public function getTemplateSource()
 	{
-		return ModuleDataQuery::create()->findPk($this->templateSourceId);
+		return \ModuleDataQuery::create()->findPk($this->templateSourceId);
 	}
 
 	public function getEnabledSource()
 	{
-		return ModuleDataQuery::create()->findPk($this->enabledSourceId);
+		return \ModuleDataQuery::create()->findPk($this->enabledSourceId);
 	}
 
 	public function getDataSource()
 	{
-		return ModuleDataQuery::create()->findPk($this->dataSourceId);
+		return \ModuleDataQuery::create()->findPk($this->dataSourceId);
 	}
-	
+
 	/**
 	 * Internal function to read and cascade all ModuleData objects.
 	 */
@@ -319,9 +319,9 @@ class Curry_PageModuleWrapper {
 	{
 		// get PageRevision ancestors
 		$ancestors = array_reverse($this->getPageRevision()->getInheritanceChain(true));
-		$ancestors = Curry_Array::objectsToArray($ancestors, null, 'getPageRevisionId');
+		$ancestors = \Curry_Array::objectsToArray($ancestors, null, 'getPageRevisionId');
 		$ancestors = array_flip($ancestors);
-		
+
 		$keys = array();
 		$depth = array();
 		$lang = array();
@@ -336,35 +336,35 @@ class Curry_PageModuleWrapper {
 			$lang[] = $moduleData->getLangcode() ? 1 : 0;
 		}
 		$moduleDatas->clearIterator(); // PropelCollection causes memory leak in php 5.3 unless we explicitly clear the iterator
-		
+
 		array_multisort($depth, $lang, $keys);
 		foreach($keys as $key)
 			$this->addData($moduleDatas[$key]);
 	}
-	
+
 	/**
 	 * Internal function to add a ModuleData object.
 	 *
-	 * @param ModuleData $moduleData
+	 * @param \ModuleData $moduleData
 	 */
-	protected function addData(ModuleData $moduleData)
+	protected function addData(\ModuleData $moduleData)
 	{
 		if($moduleData->getTemplate() !== NULL) {
 			$this->template = $moduleData->getTemplate();
 			$this->templateSourceId = $moduleData->getModuleDataId();
 		}
-			
+
 		if($moduleData->getEnabled() !== NULL) {
 			$this->enabled = $moduleData->getEnabled();
 			$this->enabledSourceId = $moduleData->getModuleDataId();
 		}
-			
+
 		if($moduleData->getData() !== NULL) {
 			$this->data = $moduleData->getData();
 			$this->dataSourceId = $moduleData->getModuleDataId();
 		}
 	}
-	
+
 	/**
 	 * Does this module want a template?
 	 *
@@ -375,11 +375,11 @@ class Curry_PageModuleWrapper {
 		// Make sure the module class exists
 		$className = $this->getClassName();
 		if(!class_exists($className))
-			throw new Exception("Module class '{$className}' not found.");
-			
+			throw new \Exception("Module class '{$className}' not found.");
+
 		return call_user_func(array($className, 'hasTemplate'));
 	}
-	
+
 	/**
 	 * Create ModuleData object, if it doesnt exist it will create it with the current module data.
 	 *
@@ -388,22 +388,22 @@ class Curry_PageModuleWrapper {
 	{
 		$moduleData = $this->getModuleData();
 		if($moduleData->getData() !== null)
-			throw new Exception('Module already have data');
-			
+			throw new \Exception('Module already have data');
+
 		if($this->data !== null)
 			$moduleData->setData($this->data);
 		else {
 			$className = $this->getClassName();
 			if(!class_exists($className))
-				throw new Exception("Module class '{$className}' not found.");
+				throw new \Exception("Module class '{$className}' not found.");
 			$obj = new $className;
 			$moduleData->setData(serialize($obj));
 		}
-		
+
 		$moduleData->save();
 		$this->addData($moduleData);
 	}
-	
+
 	/**
 	 * Does the specified ModuleData have any data?
 	 *
@@ -423,24 +423,24 @@ class Curry_PageModuleWrapper {
 	{
 		return $this->langcode !== '' || $this->isInherited();
 	}
-	
+
 	/**
 	 * Get ModuleSortorder object for this module/pagerevision.
 	 *
 	 * @param bool $create
-	 * @return ModuleSortorder|null
+	 * @return \ModuleSortorder|null
 	 */
 	public function getSortorder($create = false)
 	{
-		$sortorder = ModuleSortorderQuery::create()->findPk(array($this->pageModuleId, $this->pageRevisionId));
+		$sortorder = \ModuleSortorderQuery::create()->findPk(array($this->pageModuleId, $this->pageRevisionId));
 		if($sortorder === null && $create) {
-			$sortorder = new ModuleSortorder();
+			$sortorder = new \ModuleSortorder();
 			$sortorder->setPageModuleId($this->pageModuleId);
 			$sortorder->setPageRevisionId($this->pageRevisionId);
 		}
 		return $sortorder;
 	}
-	
+
 	/**
 	 * Create the Curry\Module\AbstractModule instance from the serialized data.
 	 *
@@ -452,8 +452,8 @@ class Curry_PageModuleWrapper {
 		// Make sure the module class exists
 		$className = $this->getClassName();
 		if(!class_exists($className))
-			throw new Exception("Module class '{$className}' not found.");
-		
+			throw new \Exception("Module class '{$className}' not found.");
+
 		// Get the module data
 		$moduleDataId = null;
 		if(!$inherited) {
@@ -464,7 +464,7 @@ class Curry_PageModuleWrapper {
 			$data = $this->data;
 			$moduleDataId = $this->dataSourceId;
 		}
-		
+
 		// Create instance
 		$obj = null;
 		if ($data !== null) {
@@ -475,16 +475,16 @@ class Curry_PageModuleWrapper {
 					$obj = null;
 				}
 			}
-			catch(Exception $e) {
+			catch(\Exception $e) {
 				trace_warning('Failed to unserialize module of class '.$className);
 			}
 		}
-		
+
 		if (!$obj)
 			$obj = new $className;
-			
+
 		$obj->setModuleDataId($moduleDataId);
-		
+
 		return $obj;
 	}
 }

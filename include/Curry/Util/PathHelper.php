@@ -17,8 +17,6 @@
  */
 namespace Curry\Util;
 
-use Curry\Util\StringHelper;
-
 /**
  * Static utility class.
  *

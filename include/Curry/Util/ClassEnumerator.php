@@ -1,6 +1,6 @@
 <?php
 
-namespace Curry;
+namespace Curry\Util;
 
 class ClassEnumerator {
 	public static function findClasses($path)

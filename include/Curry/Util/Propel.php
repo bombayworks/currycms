@@ -20,7 +20,7 @@ namespace Curry\Util;
 /**
  * Static class with Propel utility functions.
  * 
- * @package Curry
+ * @package Curry\Util
  */
 class Propel {
 	/**

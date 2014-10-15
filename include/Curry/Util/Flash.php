@@ -20,7 +20,7 @@ namespace Curry\Util;
 /**
  * Helper class to embed flash content.
  *
- * @package Curry
+ * @package Curry\Util
  */
 class Flash {
 	/**

@@ -18,7 +18,7 @@
 namespace Curry\Module;
 
 use Curry\App;
-use Curry\ClassEnumerator;
+use Curry\Util\ClassEnumerator;
 use Curry\Util\PathHelper;
 
 /**

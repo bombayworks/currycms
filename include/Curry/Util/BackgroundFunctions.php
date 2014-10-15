@@ -16,11 +16,11 @@
  * @link       http://currycms.com
  */
 
-namespace Curry;
+namespace Curry\Util;
 
 /**
  * Class BackgroundFunctions
- * @package Curry
+ * @package Curry\Util
  */
 class BackgroundFunctions {
 	/**

@@ -20,7 +20,7 @@ namespace Curry\Util;
 /**
  * Static class with HTML utility functions.
  * 
- * @package Curry
+ * @package Curry\Util
  */
 class Html {
 	

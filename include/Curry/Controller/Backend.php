@@ -40,7 +40,7 @@ class Backend extends \Curry\Backend\AbstractBackend implements EventSubscriberI
 		$backendClasses = $app->cache->load($cacheName);
 		if ($backendClasses === false) {
 			$backendClasses = array();
-			$classes = \Curry\ClassEnumerator::findClasses(__DIR__.'/../Backend');
+			$classes = \Curry\Util\ClassEnumerator::findClasses(__DIR__.'/../Backend');
 			foreach($classes as $className) {
 				if (class_exists($className) && $className !== __CLASS__) {
 					$r = new \ReflectionClass($className);

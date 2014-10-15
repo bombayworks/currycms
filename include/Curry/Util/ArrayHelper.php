@@ -20,7 +20,7 @@ namespace Curry\Util;
 /**
  * Static class with utility functions for arrays.
  * 
- * @package Curry
+ * @package Curry\Util
  */
 class ArrayHelper {
 	/**

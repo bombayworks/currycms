@@ -17,6 +17,7 @@
  */
 use Curry\Controller\Frontend;
 use Curry\Util\ArrayHelper;
+use Curry\Util\StringHelper;
 use Curry\Util\Flash;
 use Curry\Util\PathHelper;
 
@@ -182,7 +183,7 @@ class Curry_Backend_FileBrowser extends \Curry\Backend\AbstractLegacyBackend
 	{
 		$roots = self::getRoots();
 		foreach($roots as $root) {
-			if ($root['writable'] && Curry_String::startsWith($physical.'/', $root['realpath'].'/'))
+			if ($root['writable'] && StringHelper::startsWith($physical.'/', $root['realpath'].'/'))
 				return true;
 		}
 		return false;

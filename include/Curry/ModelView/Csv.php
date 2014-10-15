@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Util\StringHelper;
 
 /**
  *
@@ -60,7 +61,7 @@ class Curry_ModelView_Csv extends Curry_ModelView_Abstract {
 		// Send response headers to the browser
 		$filename = $this->filename ? $this->filename : $view->getOption('title') . ".csv";
 		header('Content-Type: text/csv');
-		header('Content-Disposition: attachment; filename='.Curry_String::escapeQuotedString($filename));
+		header('Content-Disposition: attachment; filename='.StringHelper::escapeQuotedString($filename));
 		$fp = fopen('php://output', 'w');
 
 		// Print column headers

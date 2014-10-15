@@ -15,13 +15,14 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Util;
 
 /**
  * A static class with utility string functions.
  *
- * @package Curry
+ * @package Curry\Util
  */
-class Curry_String
+class StringHelper
 {
 	const ICONV_CUT = "cut";
 	const ICONV_TRANSLIT = "translit";
@@ -102,7 +103,7 @@ class Curry_String
 	 */
 	public static function breakLongWordsHtml($html, $limit, $break = "\xC2\xAD")
 	{
-		$doc = new DOMDocument();
+		$doc = new \DOMDocument();
 		$doc->loadXML("<root>".$html."</root>");
 		self::_breakWordsNode($doc, $limit, $break);
 		$xml = $doc->saveXML();
@@ -114,11 +115,11 @@ class Curry_String
 	/**
 	 * Internal function used by breakLongWordsHtml to process HTML nodes.
 	 *
-	 * @param DOMNode $node
+	 * @param \DOMNode $node
 	 * @param integer $limit
 	 * @param string $break
 	 */
-	private static function _breakWordsNode(DOMNode $node, $limit, $break)
+	private static function _breakWordsNode(\DOMNode $node, $limit, $break)
 	{
 		if ($node->nodeType == XML_TEXT_NODE) {
 			$node->nodeValue = self::breakLongWords($node->nodeValue, $limit, $break);

@@ -115,7 +115,7 @@ class Frontend implements EventSubscriberInterface {
 		$baseUrl = \Curry_URL::getDefaultBaseUrl();
 		$basePath = $baseUrl['path'];
 		$basePathRemoved = false;
-		if (\Curry_String::startsWith($path, $basePath) && $path !== '/') {
+		if (\Curry\Util\StringHelper::startsWith($path, $basePath) && $path !== '/') {
 			$path = substr($path, strlen($basePath));
 			$basePathRemoved = true;
 		}

@@ -238,7 +238,7 @@ abstract class AbstractBackend extends \Curry\View {
 			$twig = new \Twig_Environment($loader, $options);
 			$twig->addFunction('url', new \Twig_Function_Function('url'));
 			$twig->addFunction('L', new \Twig_Function_Function('L'));
-			$twig->addFilter('rewrite', new \Twig_Filter_Function('Curry_String::getRewriteString'));
+			$twig->addFilter('rewrite', new \Twig_Filter_Function('Curry\Util\StringHelper::getRewriteString'));
 			$twig->addFilter('attr', new \Twig_Filter_Function('Curry_Html::createAttributes'));
 			$this->twig = $twig;
 		}
@@ -290,7 +290,7 @@ abstract class AbstractBackend extends \Curry\View {
 			list($view, $route) = $viewAndRoute;
 			//if(!$user->hasAccess(get_class($view)))
 			//	continue;
-			$active = \Curry_String::startsWith($app->request->getPathInfo(), $view->url());
+			$active = \Curry\Util\StringHelper::startsWith($app->request->getPathInfo(), $view->url());
 			$group = $view->getGroup();
 			$moduleProperties = array(
 				'Module' => $viewName,

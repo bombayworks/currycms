@@ -616,7 +616,7 @@ class System extends \Curry\Backend\AbstractLegacyBackend {
 			
 			$filename = str_replace(" ", "_", $this->app->config->curry->name)."-bundle-".date("Ymd").".tar" . ($compression ? ".$compression" : '');
 			header("Content-type: " . Archive::getCompressionMimeType($compression));
-			header("Content-disposition: attachment; filename=" . \Curry_String::escapeQuotedString($filename));
+			header("Content-disposition: attachment; filename=" . \Curry\Util\StringHelper::escapeQuotedString($filename));
 			
 			// do not use output buffering
 			while(ob_end_clean())
@@ -636,7 +636,7 @@ class System extends \Curry\Backend\AbstractLegacyBackend {
 	{
 		$classes = array(
 			'Curry_Install',
-			'Curry_String',
+			'Curry\Util\StringHelper',
 			'Curry_Util',
 			'Curry_Archive_FileInfo',
 			'Curry_Archive_Reader',

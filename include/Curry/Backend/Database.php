@@ -16,6 +16,7 @@
  * @link       http://currycms.com
  */
 use Curry\Util\ArrayHelper;
+use Curry\Util\StringHelper;
 
 /**
  * Manage the database.
@@ -903,7 +904,7 @@ class Curry_Backend_Database extends \Curry\Backend\AbstractLegacyBackend
 				$fp = fopen("php://temp", 'r+');
 				Curry_Backend_DatabaseHelper::dumpDatabase($fp, $values['tables'], $this);
 				rewind($fp);
-				$name = Curry_String::getRewriteString($this->app->config->curry->name).'-db.txt';
+				$name = StringHelper::getRewriteString($this->app->config->curry->name).'-db.txt';
 				self::returnData($fp, 'application/octet-stream', $name);
 			} else if($values['type'] == 'online') {
 				$filename = Curry_Backend_DatabaseHelper::createBackupName($values['name']);

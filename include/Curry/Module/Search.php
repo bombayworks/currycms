@@ -125,20 +125,20 @@ TPL
 	public function getHitProperties(\Zend_Search_Lucene_Search_QueryHit $hit)
 	{
 		$r = $this->app->request;
-		$snippet = \Curry_String::toInternalEncoding($hit->body, 'utf-8');
+		$snippet = \Curry\Util\StringHelper::toInternalEncoding($hit->body, 'utf-8');
 		$snippet = self::createSearchSnippet($snippet, $r->query->get('query'), $this->snippetLength);
 		
 		$relatedObject = null;
-		$model = \Curry_String::toInternalEncoding($hit->model, 'utf-8');
+		$model = \Curry\Util\StringHelper::toInternalEncoding($hit->model, 'utf-8');
 
 		$fields = array();
 		foreach($hit->getDocument()->getFieldNames() as $fieldName)
 			$fields[$fieldName] = $hit->{$fieldName};
 
 		return array(
-			'Title' => \Curry_String::toInternalEncoding($hit->title, 'utf-8'),
-			'Description' => \Curry_String::toInternalEncoding($hit->description, 'utf-8'),
-			'Url' => \Curry_String::toInternalEncoding($hit->url, 'utf-8'),
+			'Title' => \Curry\Util\StringHelper::toInternalEncoding($hit->title, 'utf-8'),
+			'Description' => \Curry\Util\StringHelper::toInternalEncoding($hit->description, 'utf-8'),
+			'Url' => \Curry\Util\StringHelper::toInternalEncoding($hit->url, 'utf-8'),
 			'Snippet' => $snippet,
 			'Score' => $hit->score,
 			'Fields' => $fields,

@@ -192,7 +192,7 @@ abstract class AbstractLegacyBackend extends \Curry\Backend\AbstractBackend {
 	{
 		header('Content-Description: File Transfer');
 		header('Content-Transfer-Encoding: binary');
-		header("Content-Disposition: attachment; filename=".\Curry_String::escapeQuotedString($filename));
+		header("Content-Disposition: attachment; filename=". \Curry\Util\StringHelper::escapeQuotedString($filename));
 		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 		header('Pragma: public');
 		header("Content-type: $contentType");
@@ -235,7 +235,7 @@ abstract class AbstractLegacyBackend extends \Curry\Backend\AbstractBackend {
 			$filename = basename($file);
 		header('Content-Description: File Transfer');
 		header('Content-Transfer-Encoding: binary');
-		header('Content-Disposition: attachment; filename='.\Curry_String::escapeQuotedString($filename));
+		header('Content-Disposition: attachment; filename='. \Curry\Util\StringHelper::escapeQuotedString($filename));
 		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 		header('Pragma: public');
 		header('Content-type: '.$contentType);

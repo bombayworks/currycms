@@ -17,7 +17,7 @@
  */
 namespace Curry\Util;
 
-use Curry_String;
+use Curry\Util\StringHelper;
 
 /**
  * Static utility class.
@@ -189,7 +189,7 @@ class PathHelper {
 		$from = self::getAbsolute($from);
 		$to = self::getAbsolute($to);
 		$relative = "";
-		while ($from && $from !== $to && !Curry_String::startsWith($to, $from . '/')) {
+		while ($from && $from !== $to && !StringHelper::startsWith($to, $from . '/')) {
 			$relative .= '../';
 			$from = dirname($from);
 			if ($from == '/') {

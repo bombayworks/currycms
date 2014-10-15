@@ -215,12 +215,12 @@ TPL
 	public function twigGetPage(\Page $page)
 	{
 		$p = $page->toTwig();
-		$p['parent'] = new \Curry_OnDemand(array($this, 'twigGetParent'), $page);
-		$p['subpages'] = new \Curry_OnDemand(array($this, 'twigGetSubpages'), $page);
+		$p['parent'] = new \Curry\Util\OnDemand(array($this, 'twigGetParent'), $page);
+		$p['subpages'] = new \Curry\Util\OnDemand(array($this, 'twigGetSubpages'), $page);
 		
 		$activePage = $this->app->page;
 		$p['IsActive'] = $activePage->getUrl() === $page->getUrl();
-		$p['IsActiveSubpage'] = new \Curry_OnDemand(array($this, 'twigGetActiveSubpage'), $page, $activePage);
+		$p['IsActiveSubpage'] = new \Curry\Util\OnDemand(array($this, 'twigGetActiveSubpage'), $page, $activePage);
 		
 		return $p;
 	}

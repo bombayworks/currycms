@@ -142,7 +142,7 @@ TPL
 			'Snippet' => $snippet,
 			'Score' => $hit->score,
 			'Fields' => $fields,
-			'RelatedObject' => new \Curry_OnDemand(array($this, 'getRelatedObject'), $model, unserialize($hit->model_id)),
+			'RelatedObject' => new \Curry\Util\OnDemand(array($this, 'getRelatedObject'), $model, unserialize($hit->model_id)),
 		);
 	}
 	

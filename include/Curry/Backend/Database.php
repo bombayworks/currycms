@@ -71,8 +71,8 @@ class Curry_Backend_Database extends \Curry\Backend\AbstractLegacyBackend
 			@set_time_limit(250);
 		}
 
-		Propel::disableInstancePooling();
-		Propel::setLogger(null);
+		\Propel::disableInstancePooling();
+		\Propel::setLogger(null);
 		
 		// make sure all classes are included
 		foreach(Propel::getModels() as $classes)
@@ -379,7 +379,7 @@ class Curry_Backend_Database extends \Curry\Backend\AbstractLegacyBackend
 			$deleted = 0;
 			$updated = 0;
 			$inserted = 0;
-			$con = Propel::getConnection(PropelQuery::from($modelClass)->getDbName());
+			$con = \Propel::getConnection(PropelQuery::from($modelClass)->getDbName());
 			$con->beginTransaction();
 			try {
 				// Replace will empty the table

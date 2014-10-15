@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Util;
 
 /**
  * Helper class to only execute costly functions when used, and optionally cache the result.
@@ -25,14 +26,14 @@
  * 
  * Example:
  * <code>
- * $od = new Curry_OnDemand('rand', 1, 10);
+ * $od = new Curry\Util\OnDemand('rand', 1, 10);
  * echo $od->get(); // outputs a number between 1-10
  * echo $od->get(); // outputs the same number
  * </code>
  * 
- * @package Curry
+ * @package Curry\Util
  */
-class Curry_OnDemand {
+class OnDemand {
 	/**
 	 * Callback to the costly function.
 	 *

@@ -15,13 +15,14 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Util;
 
 /**
  * Helper class to embed flash content.
  *
  * @package Curry
  */
-class Curry_Flash {
+class Flash {
 	/**
 	 * Embed using SWFObject static method.
 	 */
@@ -67,7 +68,7 @@ class Curry_Flash {
 				return self::swfobjectStatic($source, $width, $height, $version, $options);
 				break;
 			default:
-				throw new Exception("Unknown embed method.");
+				throw new \Exception("Unknown embed method.");
 		}
 	}
 	
@@ -134,14 +135,14 @@ class Curry_Flash {
 		
 		$paramHtml = "";
 		foreach($params as $k => $v)
-			$paramHtml .= Curry_Html::createTag("param", array('name' => $k, 'value' => $v), '', true);
+			$paramHtml .= \Curry_Html::createTag("param", array('name' => $k, 'value' => $v), '', true);
 		
 		return array(
-			'html' => Curry_Html::createTag("object", array_merge($objectAttr, $attributes),
-				Curry_Html::createTag("param", array('name' => 'movie', 'value' => $source), '', true).
+			'html' => \Curry_Html::createTag("object", array_merge($objectAttr, $attributes),
+				\Curry_Html::createTag("param", array('name' => 'movie', 'value' => $source), '', true).
 				$paramHtml.
 				'<!--[if !IE]>-->'.
-				Curry_Html::createTag("object", array_merge($object2Attr, $attributes2),
+				\Curry_Html::createTag("object", array_merge($object2Attr, $attributes2),
 					$paramHtml.
 					'<!--<![endif]-->'.
 					$options['alternativeContent'].

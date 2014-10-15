@@ -17,6 +17,8 @@
  */
 namespace Curry\Module;
 
+use Curry\Util\Flash as FlashUtil;
+
 /**
  * Module to embed flash content.
  * 
@@ -50,7 +52,7 @@ class Flash extends AbstractModule {
 	 *
 	 * @var string
 	 */
-	protected $method = \Curry_Flash::SWFOBJECT_DYNAMIC;
+	protected $method = FlashUtil::SWFOBJECT_DYNAMIC;
 	
 	/**
 	 * Flash width.
@@ -178,7 +180,7 @@ class Flash extends AbstractModule {
 		$options['params'] = count($this->params) ? $this->params : null;
 		$options['flashvars'] = count($flashvars) ? $flashvars : null;
 		$options['alternativeContent'] = $this->alternativeContent;
-		$flashContent = \Curry_Flash::embed($this->method, $this->flash, $this->width, $this->height, $this->version, $options);
+		$flashContent = FlashUtil::embed($this->method, $this->flash, $this->width, $this->height, $this->version, $options);
 		
 		return array(
 			'Source' => $this->flash,
@@ -224,8 +226,8 @@ TPL;
 				'method' => array('select', array(
 					'label' => 'Method',
 					'multiOptions' => array(
-						\Curry_Flash::SWFOBJECT_DYNAMIC => "swfobject (dynamic)",
-						\Curry_Flash::SWFOBJECT_STATIC => "swfobject (static)",
+						FlashUtil::SWFOBJECT_DYNAMIC => "swfobject (dynamic)",
+						FlashUtil::SWFOBJECT_STATIC => "swfobject (static)",
 					),
 					'required' => true,
 					'value' => $this->method,

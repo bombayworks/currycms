@@ -16,6 +16,7 @@
  * @link       http://currycms.com
  */
 use Curry\Controller\Frontend;
+use Curry\Util\Flash;
 
 /**
  * This module allows you to browse the filesystem.
@@ -765,7 +766,7 @@ TPL
 						break;
 					case 'swf':
 						$size = getimagesize($physical);
-						$flash = Curry_Flash::embed(Curry_Flash::SWFOBJECT_STATIC, $public, $size[0], $size[1], '9.0.0', array());
+						$flash = Flash::embed(Flash::SWFOBJECT_STATIC, $public, $size[0], $size[1], '9.0.0', array());
 						$fi['Preview'] = $flash['html'];
 						break;
 				}

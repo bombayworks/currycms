@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Util\Flash;
 
 /**
  * Use a flash to act as a input-field.
@@ -44,7 +45,7 @@ class Curry_Form_Decorator_Flashtool extends Zend_Form_Decorator_Abstract
 		
 		$flashvars = array_merge($flashvars, $element->getAttrib('flashvars'));
 		
-		$markup = Curry_Flash::embed(Curry_FLash::SWFOBJECT_DYNAMIC, $element->getAttrib('source'), $element->getAttrib('width'),
+		$markup = Flash::embed(Flash::SWFOBJECT_DYNAMIC, $element->getAttrib('source'), $element->getAttrib('width'),
 			$element->getAttrib('height'), $element->getAttrib('version'), array_merge($element->getAttrib('options'), array('flashvars' => $flashvars, 'target' => $element->getId().'flashTool')))
 			. '<div id="'.$element->getId().'flashTool'.'"></div>';
 		

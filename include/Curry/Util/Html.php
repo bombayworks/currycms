@@ -15,13 +15,14 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Util;
 
 /**
  * Static class with HTML utility functions.
  * 
  * @package Curry
  */
-class Curry_Html {
+class Html {
 	
 	/**
 	 * Create <option value="$key">$value</option> from an array.
@@ -39,7 +40,7 @@ class Curry_Html {
 				$optgroup = "";
 				foreach($v as $ok => $ov)
 					$optgroup .= self::_createSelectOption($ok, $ov, $selected, $disabled);
-				$ret .= self::createTag('optgroup', array('label' => $k), $optgroup);
+				$ret .= self::tag('optgroup', array('label' => $k), $optgroup);
 			} else {
 				$ret .= self::_createSelectOption($k, $v, $selected, $disabled);
 			}
@@ -63,7 +64,7 @@ class Curry_Html {
 			$attr['selected'] = 'selected';
 		if(is_array($disabled) ? in_array($k, $disabled) : $k == $disabled)
 			$attr['disabled'] = 'disabled';
-		return self::createTag('option', $attr, $v);
+		return self::tag('option', $attr, $v);
 	}
 	
 	/**
@@ -75,14 +76,14 @@ class Curry_Html {
 	 * @param boolean $allowSelfClosing
 	 * @return string
 	 */
-	public static function createTag($tagName, array $attributes = array(), $content = "", $allowSelfClosing = false)
+	public static function tag($tagName, array $attributes = array(), $content = "", $allowSelfClosing = false)
 	{
 		if(!is_string($content))
 			$content = (string)$content;
 		if($content !== "")
-			return "<$tagName ".self::createAttributes($attributes).">$content</$tagName>";
+			return "<$tagName ".self::attr($attributes).">$content</$tagName>";
 		else
-			return "<$tagName ".self::createAttributes($attributes).($allowSelfClosing ? ' />' : "></$tagName>");
+			return "<$tagName ".self::attr($attributes).($allowSelfClosing ? ' />' : "></$tagName>");
 	}
 	
 	/**
@@ -91,7 +92,7 @@ class Curry_Html {
 	 * @param array $attributes
 	 * @return string
 	 */
-	public static function createAttributes(array $attributes)
+	public static function attr(array $attributes)
 	{
 		$attr = array();
 		foreach($attributes as $k => $v)
@@ -122,7 +123,7 @@ class Curry_Html {
 		$hidden = "";
 		foreach($env as $k => $v) {
 			$n = strlen($name) ? $name.'['.$k.']' : $k;
-			$hidden .= is_array($v) ? self::_createHiddenFields($n, $v) : self::createTag('input', array('type' => 'hidden', 'name' => $n, 'value' => $v), "", true);
+			$hidden .= is_array($v) ? self::_createHiddenFields($n, $v) : self::tag('input', array('type' => 'hidden', 'name' => $n, 'value' => $v), "", true);
 		}
 		return $hidden;
 	}

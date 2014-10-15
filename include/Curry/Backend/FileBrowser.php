@@ -17,6 +17,7 @@
  */
 use Curry\Controller\Frontend;
 use Curry\Util\ArrayHelper;
+use Curry\Util\Html;
 use Curry\Util\StringHelper;
 use Curry\Util\Flash;
 use Curry\Util\PathHelper;
@@ -874,7 +875,7 @@ TPL
 			'title' => basename($image),
 		));
 		
-		$this->addMainContent(Curry_Html::createTag('iframe', array(
+		$this->addMainContent(Html::tag('iframe', array(
 			'frameborder' => 0,
 			'style' => 'width: 100%; height: 100%; border: none; display: block;',
 			'src' => $pixlrUrl,

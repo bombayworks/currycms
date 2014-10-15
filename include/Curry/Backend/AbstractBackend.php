@@ -239,7 +239,7 @@ abstract class AbstractBackend extends \Curry\View {
 			$twig->addFunction('url', new \Twig_Function_Function('url'));
 			$twig->addFunction('L', new \Twig_Function_Function('L'));
 			$twig->addFilter('rewrite', new \Twig_Filter_Function('Curry\Util\StringHelper::getRewriteString'));
-			$twig->addFilter('attr', new \Twig_Filter_Function('Curry_Html::createAttributes'));
+			$twig->addFilter('attr', new \Twig_Filter_Function('Curry\Util\Html::createAttributes'));
 			$this->twig = $twig;
 		}
 		return $this->twig;

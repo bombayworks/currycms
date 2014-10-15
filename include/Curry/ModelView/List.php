@@ -17,6 +17,7 @@
  */
 use Curry\Controller\Frontend;
 use Curry\Util\ArrayHelper;
+use Curry\Util\Html;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -409,7 +410,7 @@ class Curry_ModelView_List extends \Curry\View {
 		$options = array_intersect_key($options, array_flip($allowed));
 
 		$options = Zend_Json::encode($options, false, array('enableJsonExprFinder' => true));
-		return Curry_Html::createTag('div', array('class' => 'modelview', 'data-modelview' => $options));
+		return Html::tag('div', array('class' => 'modelview', 'data-modelview' => $options));
 	}
 
 	public function getJson($params)

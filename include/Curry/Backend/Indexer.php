@@ -16,6 +16,7 @@
  * @link       http://currycms.com
  */
 use Curry\Controller\Frontend;
+use Curry\Util\Html;
 
 /**
  * Manage search index.
@@ -73,7 +74,7 @@ class Curry_Backend_Indexer extends \Curry\Backend\AbstractLegacyBackend {
 				$title = in_array('title', $fieldNames) ? (string)$hit->title : '<Untitled>';
 				$url = in_array('url', $fieldNames) ? (string)$hit->url : null;
 				$model = in_array('model', $fieldNames) ? (string)$hit->model : 'Unknown type';
-				$item = ($url !== null) ? Curry_Html::createTag('a', array('href' => $url), $title) : $title;
+				$item = ($url !== null) ? Html::tag('a', array('href' => $url), $title) : $title;
 				$item .= ' ('.htmlspecialchars($model).')<br/>';
 				$html .= '<li>'.$item.'<small>Fields: '.htmlspecialchars(join(', ', $fieldNames)).'</small></li>';
 			}

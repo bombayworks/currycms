@@ -18,6 +18,7 @@
 use Curry\Backend\AbstractBackend;
 use Curry\Module\PageModuleWrapper;
 use Curry\Util\ArrayHelper;
+use Curry\Util\Html;
 
 /**
  * Page content list view.
@@ -66,7 +67,7 @@ class Curry_Backend_ContentList extends Curry_ModelView_List {
 					'sortable' => false,
 					'escape' => false,
 					'callback' => function($wrapper) {
-						return Curry_Html::createTag('span', array('title' => $wrapper->getClassName()),
+						return Html::tag('span', array('title' => $wrapper->getClassName()),
 							basename(str_replace('_', '/', $wrapper->getClassName()))
 						);
 					}
@@ -94,7 +95,7 @@ class Curry_Backend_ContentList extends Curry_ModelView_List {
 					if (!$wrapper->getTemplate())
 						return 'None';
 					$templateUrl = url('', array('module' => 'Curry_Backend_Template', 'view' => 'Edit', 'file' => $wrapper->getTemplate()));
-					return Curry_Html::createTag('a', array(
+					return Html::tag('a', array(
 						'href' => $templateUrl,
 						'title' => $wrapper->getTemplate(),
 					), basename($wrapper->getTemplate()));
@@ -137,7 +138,7 @@ class Curry_Backend_ContentList extends Curry_ModelView_List {
 
 	protected function getPageInheritance($page, $wrappers)
 	{
-		$ret = Curry_Html::createTag('a', array(
+		$ret = Html::tag('a', array(
 				'href' => url('', array('module','view','page_id'=>$page->getPageId())),
 				'title' => $page->getUrl(),
 			), $page->getName());

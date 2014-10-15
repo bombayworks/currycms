@@ -18,6 +18,7 @@
 use Curry\Backend\AbstractBackend;
 use Curry\Backend\AbstractLegacyBackend;
 use Curry\Util\ArrayHelper;
+use Curry\Util\Html;
 
 /**
  * Static helper functions for database backend.
@@ -320,7 +321,7 @@ class Curry_Backend_DatabaseHelper {
 				if($backend) {
 					// Add message with link to edit row
 					$url = (string)url('', array('module' => 'Curry_Backend_Database', 'view' => 'Row', 'table' => $table, 'pk' => self::getObjectPk($obj)));
-					$link = Curry_Html::createTag('a', array('href' => $url, 'title' => 'Edit '.$objName, 'class' => 'dialog'), $objName);
+					$link = Html::tag('a', array('href' => $url, 'title' => 'Edit '.$objName, 'class' => 'dialog'), $objName);
 					$backend->addMessage("$link: ".join(', ', $error).'.', AbstractBackend::MSG_WARNING, false);
 				}
 			}

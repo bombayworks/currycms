@@ -269,10 +269,10 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractLegacyBackend {
 	public function showSetupComplete()
 	{
 		// Disable setup and enable backend authorization
-		$config = Curry_Core::openConfiguration();
+		$config = $this->app->openConfiguration();
 		$config->curry->setup = false;
 		$config->curry->backend->noauth = false;
-		Curry_Core::writeConfiguration($config);
+		$this->app->writeConfiguration($config);
 
 		$backendUrl = url('');
 		$frontendUrl = url('~/');
@@ -665,7 +665,7 @@ HTML
 		}
 
 		if (file_exists($this->app->config->curry->configPath)) {
-			$config = Curry_Core::openConfiguration();
+			$config = $this->app->openConfiguration();
 			$config->curry->name = $values['name'];
 			$config->curry->adminEmail = $values['email'];
 			if ($values['base_url'])
@@ -674,7 +674,7 @@ HTML
 				unset($config->curry->baseUrl);
 			$config->curry->developmentMode = (bool)$values['development_mode'];
 			$config->curry->secret = sha1(uniqid(mt_rand(), true) . microtime());
-			Curry_Core::writeConfiguration($config);
+			$this->app->writeConfiguration($config);
 		}
 
 		return true;

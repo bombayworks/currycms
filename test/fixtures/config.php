@@ -5,7 +5,7 @@ return array (
 		'name' => 'Curry Unit Tests',
 		'adminEmail' => 'info@currycms.com',
 		//'applicationClass' => 'Project_Application',
-		'migrationVersion' => Curry_Core::MIGRATION_VERSION,
+		'migrationVersion' => \Curry\App::MIGRATION_VERSION,
 		'template' =>
 		array (
 		),

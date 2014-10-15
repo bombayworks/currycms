@@ -16,6 +16,7 @@
  * @link       http://currycms.com
  */
 namespace Curry\Backend;
+use Curry\App;
 use Curry\Archive\Archive;
 use Curry\Controller\Frontend;
 use Curry\Util\PathHelper;
@@ -56,8 +57,8 @@ class System extends \Curry\Backend\AbstractLegacyBackend {
 		else if(!is_writable($configFile))
 			$this->addMessage("Configuration file doesn't seem to be writable.", self::MSG_ERROR);
 			
-		$config = \Curry_Core::openConfiguration();
-		$defaultConfig = $config;//\Curry_Core::getDefaultConfiguration();
+		$config = $this->app->openConfiguration();
+		$defaultConfig = $this->app->getDefaultConfiguration();
 		
 		$form = new \Curry_Form(array(
 			'action' => url('', array("module","view")),
@@ -472,14 +473,14 @@ class System extends \Curry\Backend\AbstractLegacyBackend {
 		
 		// Set migration version if missing
 		if (!isset($config->curry->migrationVersion))
-			$config->curry->migrationVersion = \Curry_Core::MIGRATION_VERSION;
+			$config->curry->migrationVersion = App::MIGRATION_VERSION;
 			
 		// Unset upgrade version if present
 		if (isset($config->curry->upgradeVersion))
 			unset($config->curry->upgradeVersion);
 		
 		try {
-			\Curry_Core::writeConfiguration($config);
+			$this->app->writeConfiguration($config);
 			$this->addMessage("Settings saved.", self::MSG_SUCCESS);
 		}
 		catch (\Exception $e) {
@@ -643,7 +644,7 @@ class System extends \Curry\Backend\AbstractLegacyBackend {
 			'Curry_Archive_Iterator',
 			'Curry_Archive',
 		);
-		$contents = "<?php\n\n// CurryCMS v".\Curry_Core::VERSION." Installation Script\n// Created on ".strftime('%Y-%m-%d %H:%M:%S')."\n";
+		$contents = "<?php\n\n// CurryCMS v". App::VERSION ." Installation Script\n// Created on ".strftime('%Y-%m-%d %H:%M:%S')."\n";
 		$contents .= str_repeat('/', 60)."\n\n";
 		
 		$contents .= "ini_set('error_reporting', E_ALL & ~E_NOTICE);\n";
@@ -691,7 +692,7 @@ class System extends \Curry\Backend\AbstractLegacyBackend {
 	{
 		$this->addMainMenu();
 		
-		$this->addMessage('Curry: '. \Curry_Core::VERSION);
+		$this->addMessage('Curry: '. App::VERSION);
 		$this->addMessage('PHP: '. PHP_VERSION . ' (<a href="'.url('', array('module','view'=>'PhpInfo')).'">phpinfo</a>)', self::MSG_NOTICE, false);
 		$this->addMessage('Zend Framework: '. \Zend_Version::VERSION);
 		$this->addMessage('Propel: '. \Propel::VERSION);
@@ -719,7 +720,7 @@ class System extends \Curry\Backend\AbstractLegacyBackend {
 			// Override user agent
 			$opts = array(
 				'http' => array(
-					'header' => "User-Agent: CurryCMS/".\Curry_Core::VERSION." (http://currycms.com)\r\n"
+					'header' => "User-Agent: CurryCMS/". App::VERSION ." (http://currycms.com)\r\n"
 				)
 			);
 			$context = stream_context_create($opts);
@@ -767,9 +768,9 @@ class System extends \Curry\Backend\AbstractLegacyBackend {
 		} else {
 			$latest = count($releases) ? array_pop($releases) : null;
 			if($latest) {
-				$this->addMessage('Installed version: '.\Curry_Core::VERSION);
+				$this->addMessage('Installed version: '. App::VERSION);
 				$this->addMessage('Latest version: '.$latest->version);
-				if (version_compare($latest->version, \Curry_Core::VERSION, '>')) {
+				if (version_compare($latest->version, App::VERSION, '>')) {
 					$this->addMessage('New release found: '.$latest->name);
 				} else {
 					$this->addMessage('You already have the latest version.', self::MSG_SUCCESS);
@@ -785,16 +786,16 @@ class System extends \Curry\Backend\AbstractLegacyBackend {
 		$form = self::getButtonForm('migrate', 'Migrate');
 		if (isPost() && $form->isValid($_POST) && $form->migrate->isChecked()) {
 			$currentVersion = $this->app->config->curry->migrationVersion;
-			while($currentVersion < \Curry_Core::MIGRATION_VERSION) {
+			while($currentVersion < App::MIGRATION_VERSION) {
 				$nextVersion = $currentVersion + 1;
 				$migrateMethod = 'doMigrate'.$nextVersion;
 				if(method_exists($this, $migrateMethod)) {
 					try {
 						if($this->$migrateMethod()) {
 							// update configuration migrateVersion number
-							$config = \Curry_Core::openConfiguration();
+							$config = $this->app->openConfiguration();
 							$config->curry->migrateVersion = $nextVersion;
-							\Curry_Core::writeConfiguration($config);
+							$this->app->writeConfiguration($config);
 							$currentVersion = $nextVersion;
 							$this->addMessage('Migration to version '.$nextVersion.' was successful!', self::MSG_SUCCESS);
 						} else {

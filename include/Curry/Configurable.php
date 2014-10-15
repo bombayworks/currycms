@@ -32,7 +32,7 @@ abstract class Configurable {
 		return $this;
 	}
 
-	public function setOptions($options)
+	public function setOptions(array $options)
 	{
 		foreach(array_intersect_key($options, $this->prioritizedOptions) as $name => $value) {
 			$this->setOption($name, $value);

@@ -258,7 +258,7 @@ abstract class AbstractBackend extends \Curry\View {
 		$encoding = $this->app->config->curry->outputEncoding;
 		$twig->addGlobal('ProjectName', $this->app->config->curry->name);
 		$twig->addGlobal('Encoding', $encoding);
-		$twig->addGlobal('Version', \Curry_Core::VERSION);
+		$twig->addGlobal('Version', App::VERSION);
 
 		$user = \User::getUser();
 		if (!$user) {

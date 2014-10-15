@@ -17,11 +17,13 @@
  */
 
 namespace Curry\Controller;
+use Curry\App;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
@@ -34,23 +36,19 @@ use Symfony\Component\HttpKernel\KernelEvents;
  */
 class Frontend implements EventSubscriberInterface {
 	/**
-	 * List of routes.
-	 *
-	 * @var array
+	 * @var App
 	 */
-	protected $routes = array();
-
-	/**
-	 * @var object
-	 */
-	protected $globalVariables = null;
+	private $app;
 
 	/**
 	 * Initializes the application. Sets up default routes.
+	 * @param App $app
+	 * @throws \Exception
 	 */
-	public function __construct()
+	public function __construct(App $app)
 	{
-		if(\Curry\App::getInstance()->config->curry->pageCache && class_exists('\\Page')) {
+		$this->app = $app;
+		if($app->config->curry->pageCache && class_exists('\\Page')) {
 			\Page::getCachedPages();
 		}
 		\Curry_URL::setReverseRouteCallback(array($this, 'reverseRoute'));
@@ -61,7 +59,6 @@ class Frontend implements EventSubscriberInterface {
 		return array(
 			KernelEvents::REQUEST => 'onKernelRequest',
 			KernelEvents::EXCEPTION => 'onKernelException',
-			//KernelEvents::FINISH_REQUEST => array(array('onKernelFinishRequest', 0)),
 		);
 	}
 
@@ -142,23 +139,23 @@ class Frontend implements EventSubscriberInterface {
 
 		// use domain mapping to restrict page to a certain page-branch
 		$rootPage = null;
-		if(\Curry\App::getInstance()->config->curry->domainMapping->enabled){
+		if($this->app->config->curry->domainMapping->enabled){
 			$currentDomain = strtolower($_SERVER['HTTP_HOST']);
-			foreach (\Curry\App::getInstance()->config->curry->domainMapping->domains as $domain) {
+			foreach ($this->app->config->curry->domainMapping->domains as $domain) {
 				if(strtolower($domain->domain) === $currentDomain
 					|| ($domain->include_www && strtolower('www.'.$domain->domain) === $currentDomain)){
 					$rootPage = $domain->base_page;
 					break;
 				}
 			}
-			if(!$rootPage && \Curry\App::getInstance()->config->curry->domainMapping->default)
-				$rootPage = \Curry\App::getInstance()->config->curry->domainMapping->default;
+			if(!$rootPage && $this->app->config->curry->domainMapping->default)
+				$rootPage = $this->app->config->curry->domainMapping->default;
 			if($rootPage)
 				$rootPage = \PageQuery::create()->findPk($rootPage);
 		}
 
 		// attempt to find page using url
-		if(\Curry\App::getInstance()->config->curry->pageCache) {
+		if($this->app->config->curry->pageCache) {
 			$pages = array();
 			$allPages = \Page::getCachedPages();
 			foreach($allPages as $page) {
@@ -224,8 +221,8 @@ class Frontend implements EventSubscriberInterface {
 	public function autoPublish()
 	{
 		$cacheName = strtr(__CLASS__, '\\', '_') . '_' . 'AutoPublish';
-		if(($nextPublish = \Curry\App::getInstance()->cache->load($cacheName)) === false) {
-			\Curry\App::getInstance()->logger->notice('Doing auto-publish');
+		if(($nextPublish = $this->app->cache->load($cacheName)) === false) {
+			$this->app->logger->notice('Doing auto-publish');
 			$revisions = \PageRevisionQuery::create()
 				->filterByPublishDate(null, \Criteria::ISNOTNULL)
 				->orderByPublishDate()
@@ -235,7 +232,7 @@ class Frontend implements EventSubscriberInterface {
 				if($revision->getPublishDate('U') <= time()) {
 					// publish revision
 					$page = $revision->getPage();
-					\Curry\App::getInstance()->logger->notice('Publishing page: ' . $page->getUrl());
+					$this->app->logger->notice('Publishing page: ' . $page->getUrl());
 					$page->setActivePageRevision($revision);
 					$revision->setPublishedDate(time());
 					$revision->setPublishDate(null);
@@ -247,8 +244,8 @@ class Frontend implements EventSubscriberInterface {
 				}
 			}
 			$revisions->clearIterator();
-			\Curry\App::getInstance()->logger->info('Next publish is in '.($nextPublish - time()) . ' seconds.');
-			\Curry\App::getInstance()->cache->save(true, $cacheName, array(), $nextPublish - time());
+			$this->app->logger->info('Next publish is in '.($nextPublish - time()) . ' seconds.');
+			$this->app->cache->save(true, $cacheName, array(), $nextPublish - time());
 		}
 	}
 	
@@ -262,12 +259,12 @@ class Frontend implements EventSubscriberInterface {
 		$locale = \Curry_Language::setLanguage($language);
 		$language = \Curry_Language::getLanguage();
 		if($language)
-			\Curry\App::getInstance()->logger->info('Current language is now '.$language->getName().' (with locale '.$locale.')');
+			$this->app->logger->info('Current language is now '.$language->getName().' (with locale '.$locale.')');
 	}
 	
 	public function index()
 	{
-		$app = \Curry\App::getInstance();
+		$app = $this->app;
 		$request = $app->request;
 		$page = $request->attributes->get('_page');
 		$pageRevision = $page->getPageRevision();

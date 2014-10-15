@@ -41,7 +41,7 @@ class Curry_Backend_DomainMapping extends \Curry\Backend\AbstractLegacyBackend {
 		if(!is_writable($this->app->config->curry->configPath))
 			$this->addMessage("Configuration file doesn't seem to be writable.", self::MSG_ERROR);
 			
-		$config = Curry_Core::openConfiguration();
+		$config = $this->app->openConfiguration();
 
 		$pages = PagePeer::getSelect();
 
@@ -101,7 +101,7 @@ class Curry_Backend_DomainMapping extends \Curry\Backend\AbstractLegacyBackend {
 
 	
 			try {
-				Curry_Core::writeConfiguration($config);
+				$this->app->writeConfiguration($config);
 				$this->addMessage("Settings saved.", self::MSG_SUCCESS);
 			}
 			catch (Exception $e) {

@@ -578,7 +578,7 @@ class Curry_Backend_Database extends \Curry\Backend\AbstractLegacyBackend
 			$this->addMessage("Configuration file doesn't seem to be writable.", self::MSG_ERROR);
 			return;
 		}
-		$config = Curry_Core::openConfiguration();
+		$config = $this->app->openConfiguration();
 		$restoreConfig = clone $config;
 		
 		$config->curry->backend->noauth = true;
@@ -588,7 +588,7 @@ class Curry_Backend_Database extends \Curry\Backend\AbstractLegacyBackend
 			$config->curry->maintenance->message = "Rebuilding database, please wait...";
 		}
 
-		Curry_Core::writeConfiguration($config);
+		$this->app->writeConfiguration($config);
 
 		try {
 			$filename = Curry_Backend_DatabaseHelper::createBackupName('backup_%Y-%m-%d_%H-%M-%S_autorebuild.txt');
@@ -616,7 +616,7 @@ class Curry_Backend_Database extends \Curry\Backend\AbstractLegacyBackend
 		}
 		
 		if($restoreConfig !== null) {
-			Curry_Core::writeConfiguration($restoreConfig);
+			$this->app->writeConfiguration($restoreConfig);
 		}
 	}
 	

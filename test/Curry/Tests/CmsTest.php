@@ -2,6 +2,8 @@
 
 namespace Curry\Tests;
 
+use Curry\App;
+
 class CmsTest extends \PHPUnit_Framework_TestCase {
 	static protected $fixturesDirectory;
 
@@ -17,7 +19,7 @@ class CmsTest extends \PHPUnit_Framework_TestCase {
 					'adminEmail' => 'info@currycms.com',
 					'autoBackup' => false,
 					'projectPath' => self::$fixturesDirectory,
-					'migrationVersion' => \Curry_Core::MIGRATION_VERSION,
+					'migrationVersion' => App::MIGRATION_VERSION,
 					'template' => array(
 						'root' => self::$fixturesDirectory.'/templates',
 						'options' => array(

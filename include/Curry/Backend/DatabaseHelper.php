@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\App;
 use Curry\Backend\AbstractBackend;
 use Curry\Backend\AbstractLegacyBackend;
 use Curry\Util\ArrayHelper;
@@ -181,7 +182,7 @@ class Curry_Backend_DatabaseHelper {
 			'header' => array(
 				'version' => Curry_Backend_DatabaseHelper::VERSION,
 				'name' => \Curry\App::getInstance()->config->curry->name,
-				'curry-version' => Curry_Core::VERSION,
+				'curry-version' => App::VERSION,
 				'page-version' => defined('Page::VERSION') ? Page::VERSION : 0,
 				'date' => date(DATE_RFC822),
 			)
@@ -620,7 +621,7 @@ class Curry_Backend_DatabaseHelper {
 				++$failed;
 			}
 			// check execution time
-			if ($maxExecutionTime && Curry_Core::getExecutionTime() > $maxExecutionTime) {
+			if ($maxExecutionTime && App::getInstance()->getExecutionTime() > $maxExecutionTime) {
 				if($currentTable !== null && count($buffer))
 					Propel::doMultiInsert($currentTable, $buffer);
 				$session->total = $total;

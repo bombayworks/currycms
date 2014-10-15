@@ -15,13 +15,14 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Module;
 
 /**
  * Base class for "model backend modules".
  * 
- * @package Curry\Controller\Backend
+ * @package Curry\Backend
  */
-abstract class Curry_ModelBackend extends \Curry\Backend\AbstractLegacyBackend {
+abstract class ModelBackend extends \Curry\Backend\AbstractLegacyBackend {
 	/**
 	 * Array of allowed model classes.
 	 *
@@ -64,8 +65,8 @@ abstract class Curry_ModelBackend extends \Curry\Backend\AbstractLegacyBackend {
 		$flexigrid->addEditButton($editUrl);
 		$flexigrid->addAddButton($editUrl);
 		$flexigrid->addDeleteButton();
-		if(in_array('translatable', array_keys(PropelQuery::from($modelClass)->getTableMap()->getBehaviors()))) {
-			$langcode = LanguageQuery::create()->findOne()->getLangcode();
+		if(in_array('translatable', array_keys(\PropelQuery::from($modelClass)->getTableMap()->getBehaviors()))) {
+			$langcode = \LanguageQuery::create()->findOne()->getLangcode();
 			$flexigrid->addLinkButton('View Translations', 'icon-flag', url('', $_GET)->add(array('translate' => true, 'langcode' => $langcode)));
 		}
 		return $flexigrid;
@@ -120,14 +121,14 @@ abstract class Curry_ModelBackend extends \Curry\Backend\AbstractLegacyBackend {
 				$this->showGridJson(substr($_GET['view'], 0, -4));
 			}
 			else {
-				throw new Exception('Invalid view');
+				throw new \Exception('Invalid view');
 			}
 			$this->postShow();
 		}
-		catch (Exception $e) {
+		catch (\Exception $e) {
 			if(!headers_sent())
 				header("HTTP/1.0 500 Internal server error: ".str_replace("\n", "  ", $e->getMessage()));
-			\Curry\App::getInstance()->logger->error($e->getMessage(), array('exception' => $e));
+			$this->app->logger->error($e->getMessage(), array('exception' => $e));
 			$this->addMessage($e->getMessage(), self::MSG_ERROR);
 			$this->addMainContent("<pre>" . htmlspecialchars($e->getTraceAsString()) . "</pre>");
 		}
@@ -140,9 +141,9 @@ abstract class Curry_ModelBackend extends \Curry\Backend\AbstractLegacyBackend {
 	 * @param string $modelClass
 	 */
 	public function editModel($modelClass) {
-		$pks = PropelQuery::from($modelClass)->getTableMap()->getPrimaryKeys();
+		$pks = \PropelQuery::from($modelClass)->getTableMap()->getPrimaryKeys();
 		$idParam = strtolower(reset($pks)->getName());
-		$instance = isset($_GET[$idParam]) ? PropelQuery::from($modelClass)->findPk($_GET[$idParam]) : null;
+		$instance = isset($_GET[$idParam]) ? \PropelQuery::from($modelClass)->findPk($_GET[$idParam]) : null;
 		if(!$instance) {
 			$instance = new $modelClass;
 		}
@@ -154,7 +155,7 @@ abstract class Curry_ModelBackend extends \Curry\Backend\AbstractLegacyBackend {
 				if(isAjax())
 					self::returnPartial('');
 			}
-			catch(PropelException $e) {
+			catch(\PropelException $e) {
 				self::returnPartial(
 					$form->render().
 					'<p>'.$e->getMessage().'</p>'
@@ -193,7 +194,7 @@ abstract class Curry_ModelBackend extends \Curry\Backend\AbstractLegacyBackend {
 			'method' => 'post',
 			'class' => isAjax() ? 'dialog-form' : '',
 		), $options);
-		$form = new Curry_Form_ModelForm($modelClass, $options);
+		$form = new \Curry_Form_ModelForm($modelClass, $options);
 		if($instance !== null) {
 			$form->fillForm($instance);
 		}

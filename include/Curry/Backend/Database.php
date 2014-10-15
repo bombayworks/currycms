@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Util\ArrayHelper;
 
 /**
  * Manage the database.
@@ -278,7 +279,7 @@ class Curry_Backend_Database extends \Curry\Backend\AbstractLegacyBackend
 	{
 		$modelClass = $_GET['table'];
 		$tableMap = PropelQuery::from($modelClass)->getTableMap();
-		$columnOptions = Curry_Array::objectsToArray($tableMap->getColumns(), 'getName', 'getPhpName');
+		$columnOptions = ArrayHelper::objectsToArray($tableMap->getColumns(), 'getName', 'getPhpName');
 		$pks = array();
 		foreach($tableMap->getColumns() as $column) {
 			if($column->isPrimaryKey()) {

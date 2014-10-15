@@ -263,13 +263,13 @@ TPL
 		// set order
 		switch($this->sortOrder) {
 			case self::ORDER_SORTINDEX_DESC:
-				\Curry_Array::sortOn($subpages, 'getTreeLeft', \Curry_Array::SORT_REVERSE);
+				\Curry\Util\ArrayHelper::sortOn($subpages, 'getTreeLeft', \Curry\Util\ArrayHelper::SORT_REVERSE);
 				break;
 			case self::ORDER_NAME_ASC:
-				\Curry_Array::sortOn($subpages, 'getName');
+				\Curry\Util\ArrayHelper::sortOn($subpages, 'getName');
 				break;
 			case self::ORDER_NAME_DESC:
-				\Curry_Array::sortOn($subpages, 'getName', \Curry_Array::SORT_REVERSE);
+				\Curry\Util\ArrayHelper::sortOn($subpages, 'getName', \Curry\Util\ArrayHelper::SORT_REVERSE);
 				break;
 		}
 		

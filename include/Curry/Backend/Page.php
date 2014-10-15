@@ -17,6 +17,7 @@
  */
 use Curry\Controller\Backend;
 use Curry\Controller\Frontend;
+use Curry\Util\ArrayHelper;
 
 /**
  * Manage pages.
@@ -95,7 +96,7 @@ class Curry_Backend_Page extends \Curry\Backend\AbstractLegacyBackend
 
 		$dependantPages = $page->getDependantPages();
 		if(count($dependantPages)) {
-			$pageNames = join(", ", Curry_Array::objectsToArray($dependantPages, null, 'getName'));
+			$pageNames = join(", ", ArrayHelper::objectsToArray($dependantPages, null, 'getName'));
 			$this->addMessage("Unable to delete page, other pages depend on this page (".$pageNames.").", self::MSG_ERROR);
 		} elseif($page->countChildren()) {
 			$this->addMessage("Unable to delete page, page has subpages.", self::MSG_ERROR);
@@ -934,7 +935,7 @@ class Curry_Backend_Page extends \Curry\Backend\AbstractLegacyBackend
 
 		$a = (int)$_POST['a'];
 		$b = (int)$_POST['b'];
-		$modules = Curry_Array::objectsToArray($pageRevision->getModules(), null, 'getPageModuleId');
+		$modules = ArrayHelper::objectsToArray($pageRevision->getModules(), null, 'getPageModuleId');
 		$aIndex = array_search($a, $modules);
 		$bIndex = array_search($b, $modules);
 		if ($aIndex === false || $bIndex === false)

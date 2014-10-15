@@ -14,7 +14,7 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\TerminableInterface;
 use Exception;
 use Curry_Util;
-use Curry_Array;
+use Curry\Util\ArrayHelper;
 use Zend\Config\Config;
 
 /**
@@ -262,7 +262,7 @@ class App extends ServiceContainer implements HttpKernelInterface, TerminableInt
 		);
 
 		if($loadUserConfig)
-			Curry_Array::extend($config, $userConfig);
+			ArrayHelper::extend($config, $userConfig);
 
 		// Fix base url
 		$config['curry']['baseUrl'] = url($config['curry']['baseUrl'])->getAbsolute();
@@ -304,7 +304,7 @@ class App extends ServiceContainer implements HttpKernelInterface, TerminableInt
 				),
 			),
 		);
-		$config = Curry_Array::extend($secondaryConfig, $config);
+		$config = ArrayHelper::extend($secondaryConfig, $config);
 		return $config;
 	}
 

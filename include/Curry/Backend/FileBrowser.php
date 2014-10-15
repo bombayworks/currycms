@@ -16,6 +16,7 @@
  * @link       http://currycms.com
  */
 use Curry\Controller\Frontend;
+use Curry\Util\ArrayHelper;
 use Curry\Util\Flash;
 
 /**
@@ -683,7 +684,7 @@ TPL
 				'Path' => $vpath,
 			);
 		}
-		Curry_Array::sortOn($p['files'], array('IsFolder', 'Name'), array(Curry_Array::SORT_PROPERTY|Curry_Array::SORT_REVERSE, Curry_Array::SORT_PROPERTY|Curry_Array::SORT_CASEINSENSITIVE));
+		ArrayHelper::sortOn($p['files'], array('IsFolder', 'Name'), array(ArrayHelper::SORT_PROPERTY|ArrayHelper::SORT_REVERSE, ArrayHelper::SORT_PROPERTY|ArrayHelper::SORT_CASEINSENSITIVE));
 		return $p;
 	}
 	

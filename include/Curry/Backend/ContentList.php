@@ -17,6 +17,7 @@
  */
 use Curry\Backend\AbstractBackend;
 use Curry\Module\PageModuleWrapper;
+use Curry\Util\ArrayHelper;
 
 /**
  * Page content list view.
@@ -201,8 +202,8 @@ class Curry_Backend_ContentList extends Curry_ModelView_List {
 			->delete();
 
 		$wrappers = $this->pageRevision->getPageModuleWrappers();
-		$unsortedIds = Curry_Array::objectsToArray($wrappers, false, 'getPageModuleId');
-		$wrapperById = Curry_Array::objectsToArray($wrappers, 'getPageModuleId');
+		$unsortedIds = ArrayHelper::objectsToArray($wrappers, false, 'getPageModuleId');
+		$wrapperById = ArrayHelper::objectsToArray($wrappers, 'getPageModuleId');
 
 		// Get primary keys
 		$items = $_POST['item'];

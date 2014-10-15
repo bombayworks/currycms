@@ -16,6 +16,7 @@
  * @link       http://currycms.com
  */
 use Curry\Module\PageModuleWrapper;
+use Curry\Util\ArrayHelper;
 
 /**
  * Helper functions for copy-paste and page-sync functionality.
@@ -92,7 +93,7 @@ class Curry_Backend_PageSyncHelper
 			$basePage = $p->data['revision']['base_page'];
 			if ($basePage && isset($pageDatas[$basePage]) && !isset($alreadyMoved[$basePage])) {
 				$alreadyMoved[$basePage] = true;
-				Curry_Array::insertBefore($pageDatas, array($basePage => $pageDatas[$basePage]), $url);
+				ArrayHelper::insertBefore($pageDatas, array($basePage => $pageDatas[$basePage]), $url);
 			}
 		}
 		// Restore page data
@@ -133,7 +134,7 @@ class Curry_Backend_PageSyncHelper
 
 		// Add module data...
 		$order = array();
-		$parentPages = Curry_Array::objectsToArray($page->getWorkingPageRevision()->getInheritanceChain(true), null, 'getPageId');
+		$parentPages = ArrayHelper::objectsToArray($page->getWorkingPageRevision()->getInheritanceChain(true), null, 'getPageId');
 		$inheritedModules = $pr->getModules();
 		foreach($pageData['revision']['modules'] as $module) {
 			$pm = null;
@@ -175,7 +176,7 @@ class Curry_Backend_PageSyncHelper
 		}
 		$pr->save();
 
-		$modules = Curry_Array::objectsToArray($pr->getModules(), 'getUid');
+		$modules = ArrayHelper::objectsToArray($pr->getModules(), 'getUid');
 		if (array_keys($modules) !== $order) {
 			foreach($order as $uid) {
 				$module = $modules[$uid];

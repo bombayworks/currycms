@@ -16,6 +16,7 @@
  * @link       http://currycms.com
  */
 use Curry\Controller\Frontend;
+use Curry\Util\ArrayHelper;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -136,10 +137,10 @@ class Curry_ModelView_List extends \Curry\View {
 				$this->removeColumn($name);
 				return;
 			} else if (is_array($options))
-				Curry_Array::extend($this->columns[$name], $options);
+				ArrayHelper::extend($this->columns[$name], $options);
 		} else {
 			$o = self::$defaultColumnOptions;
-			Curry_Array::extend($o, $options);
+			ArrayHelper::extend($o, $options);
 			if (!isset($o['label']))
 				$o['label'] = ucfirst(str_replace('_', ' ', $name));
 			if (!isset($o['order']))
@@ -171,11 +172,11 @@ class Curry_ModelView_List extends \Curry\View {
 			if ($options === false)
 				$this->removeAction($name);
 			else if (is_array($options))
-				Curry_Array::extend($this->actions[$name], $options);
+				ArrayHelper::extend($this->actions[$name], $options);
 			return;
 		}
 		$o = self::$defaultActionOptions;
-		Curry_Array::extend($o, $options);
+		ArrayHelper::extend($o, $options);
 		if (!isset($o['label']))
 			$o['label'] = ucfirst(str_replace('_', ' ', $name));
 		$this->actions[$name] = $o;
@@ -308,7 +309,7 @@ class Curry_ModelView_List extends \Curry\View {
 				'class' => 'inline modelview-delete',
 			),*/
 		);
-		$this->actions = Curry_Array::extend($actions, $this->actions);
+		$this->actions = ArrayHelper::extend($actions, $this->actions);
 	}
 
 	public function sortI18nColumn($query, $colName, $order)
@@ -355,7 +356,7 @@ class Curry_ModelView_List extends \Curry\View {
 				$this->{'set'.$k}($v);
 			} else if(property_exists($this, $k)) {
 				if(is_array($this->$k))
-					Curry_Array::extend($this->$k, $v);
+					ArrayHelper::extend($this->$k, $v);
 				else
 					$this->$k = $v;
 			} else {
@@ -363,7 +364,7 @@ class Curry_ModelView_List extends \Curry\View {
 			}
 			unset($options[$k]);
 		}
-		Curry_Array::extend($this->options, $options);
+		ArrayHelper::extend($this->options, $options);
 	}
 
 	public function getOption($name)

@@ -17,6 +17,7 @@
  */
 use Curry\Module\AbstractModule;
 use Curry\Module\PageModuleWrapper;
+use Curry\Util\ArrayHelper;
 
 /**
  * Static helper functions for the page backend.
@@ -174,7 +175,7 @@ class Curry_Backend_PageHelper {
 				'value' => $pageMetadata->getValue() !== null ? $pageMetadata->getValue() : $metadata->getDefaultValue(),
 			);
 			if(isset($typeOptions[$metadata->getType()]))
-				Curry_Array::extend($options, $typeOptions[$metadata->getType()]);
+				ArrayHelper::extend($options, $typeOptions[$metadata->getType()]);
 			$form->addElement($metadata->getType(), $metadata->getName(), $options);
 		}
 		$form->addElement('submit', 'save', array('label' => 'Save'));
@@ -297,7 +298,7 @@ class Curry_Backend_PageHelper {
 	 */
 	public static function getNewRevisionForm(Page $page, $copyRevisionId)
 	{
-		$pageRevisions = Curry_Array::objectsToArray($page->getPageRevisions(), 'getPageRevisionId', 'getDescription');
+		$pageRevisions = ArrayHelper::objectsToArray($page->getPageRevisions(), 'getPageRevisionId', 'getDescription');
 		$pageRevisions = array(null => '[ None ]') + $pageRevisions;
 		
 		if($page->getWorkingPageRevisionId())
@@ -595,7 +596,7 @@ class Curry_Backend_PageHelper {
 
 		$dependantPages = array();
 		if ($page) {
-			$dependantPages = Curry_Array::objectsToArray($page->getDependantPages(), null, 'getPageId');
+			$dependantPages = ArrayHelper::objectsToArray($page->getDependantPages(), null, 'getPageId');
 			$dependantPages[] = $page->getPageId();
 		}
 

@@ -17,6 +17,7 @@
  */
 use Curry\Backend\AbstractBackend;
 use Curry\Backend\AbstractLegacyBackend;
+use Curry\Util\ArrayHelper;
 
 /**
  * Static helper functions for database backend.
@@ -589,7 +590,7 @@ class Curry_Backend_DatabaseHelper {
 				// Verify columns for new table
 				if($data['table'] !== $currentTable && $currentTable !== null && $backend) {
 					$backend->addMessage('Restoring rows for table '.$data['table']);
-					$columns = Curry_Array::objectsToArray(PropelQuery::from($data['table'])->getTableMap()->getColumns(), null, 'getPhpName');
+					$columns = ArrayHelper::objectsToArray(PropelQuery::from($data['table'])->getTableMap()->getColumns(), null, 'getPhpName');
 					$added = array_diff($columns, array_keys($data['values']));
 					$removed = array_diff(array_keys($data['values']), $columns);
 					if(count($added))

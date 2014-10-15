@@ -319,7 +319,7 @@ class PageModuleWrapper {
 	{
 		// get PageRevision ancestors
 		$ancestors = array_reverse($this->getPageRevision()->getInheritanceChain(true));
-		$ancestors = \Curry_Array::objectsToArray($ancestors, null, 'getPageRevisionId');
+		$ancestors = \Curry\Util\ArrayHelper::objectsToArray($ancestors, null, 'getPageRevisionId');
 		$ancestors = array_flip($ancestors);
 
 		$keys = array();

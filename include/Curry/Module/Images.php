@@ -44,7 +44,7 @@ class Images extends AbstractModule {
 	public function toTwig()
 	{
 		return array(
-			'images' => \Curry_Array::objectsToArray($this->images, null, array($this, 'getImageProperties')),
+			'images' => \Curry\Util\ArrayHelper::objectsToArray($this->images, null, array($this, 'getImageProperties')),
 		);
 	}
 	

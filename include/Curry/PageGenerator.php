@@ -18,6 +18,7 @@
 use Curry\Controller\Frontend;
 use Curry\Module\AbstractModule;
 use Curry\Module\PageModuleWrapper;
+use Curry\Util\ArrayHelper;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -317,8 +318,8 @@ class Curry_PageGenerator
 		// Todo: Rename curry to app?
 		$appVars = \Curry\App::getInstance()->globals;
 		if (isset($vars['curry']))
-			Curry_Array::extend($appVars, $vars['curry']);
-		$vars['curry'] = Curry_Array::extend($appVars, $this->getGlobals());
+			ArrayHelper::extend($appVars, $vars['curry']);
+		$vars['curry'] = ArrayHelper::extend($appVars, $this->getGlobals());
 		foreach($vars as $k => $v)
 			$twig->addGlobal($k, $v);
 		

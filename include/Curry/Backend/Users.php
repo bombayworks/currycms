@@ -17,6 +17,7 @@
  */
 use Curry\Backend\AbstractLegacyBackend;
 use Curry\Module\AbstractModule;
+use Curry\Util\ArrayHelper;
 
 /**
  * Manage users and user permissions.
@@ -311,7 +312,7 @@ class Curry_Backend_Users extends AbstractLegacyBackend
 				))
 			),
 		);
-		Curry_Array::extend($o, $formOptions);
+		ArrayHelper::extend($o, $formOptions);
 
 		$modelForm = new Curry_Form_ModelForm('FilebrowserAccess', $o);
 		$modelForm->path->getValidator('callback')->setMessage("Invalid permissions to path '%value%'");
@@ -327,7 +328,7 @@ class Curry_Backend_Users extends AbstractLegacyBackend
 				),
 			)
 		);
-		Curry_Array::extend($o, $listOptions);
+		ArrayHelper::extend($o, $listOptions);
 		$list = new Curry_ModelView_List($query, $o);
 
 		return $list;

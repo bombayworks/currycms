@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Util\ArrayHelper;
 
 /**
  * Static class with Propel utility functions.
@@ -370,7 +371,7 @@ class Curry_Propel {
 				if (in_array($relation->getType(), array(RelationMap::ONE_TO_MANY, RelationMap::MANY_TO_MANY))) {
 					$name = $relation->getPluralName();
 					$p[lcfirst($name)] = new Curry_OnDemand(function() use($obj, $name) {
-						return Curry_Array::objectsToArray($obj->{'get'.$name}(), null, array('Curry_Propel', 'toTwig'));
+						return ArrayHelper::objectsToArray($obj->{'get'.$name}(), null, array('Curry_Propel', 'toTwig'));
 					});
 				} else {
 					$name = $relation->getName();

@@ -15,13 +15,14 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Util;
 
 /**
  * Static class with utility functions for arrays.
  * 
  * @package Curry
  */
-class Curry_Array {
+class ArrayHelper {
 	/**
 	 * Flag to sort in reverse order.
 	 */
@@ -40,7 +41,7 @@ class Curry_Array {
 	/**
 	 * Sort an array of objects, based on the return value of a function for each of the objects.
 	 *
-	 * @param array|Traversable $objects
+	 * @param array|\Traversable $objects
 	 * @param string|array $valueFunc	One or multiple functions/properties to sort on.
 	 * @param int|array $flags			Flags how to sort.
 	 * @param bool $preserveKeys		Preserve the keys.
@@ -87,7 +88,7 @@ class Curry_Array {
 	 * 
 	 * print_r($assoc) => array(1 => 'namn', 2 => 'namn')
 	 *
-	 * @param array|Traversable $objects
+	 * @param array|\Traversable $objects
 	 * @param string|bool|null $keyFunc		String to use callback on object, null to preserve keys, false to re-index the array.
 	 * @param string|callback|null $valueFunc
 	 * @return array
@@ -107,7 +108,7 @@ class Curry_Array {
 			} else if(is_callable($valueFunc)) {
 				$value = call_user_func($valueFunc, $object);
 			} else {
-				throw new Exception('Invalid value callback');
+				throw new \Exception('Invalid value callback');
 			}
 			if($keyFunc)
 				$assoc[$object->{$keyFunc}()] = $value;
@@ -126,7 +127,7 @@ class Curry_Array {
 	 * the key is the groupFunc and the value is an array with all the objects
 	 * in that group (ie with the same value for the groupFunc call).
 	 *
-	 * @param array|Traversable $objects
+	 * @param array|\Traversable $objects
 	 * @param string $groupFunc
 	 * @param string $valueFunc
 	 * @param string $keyFunc
@@ -147,13 +148,14 @@ class Curry_Array {
 		}
 		return $assoc;
 	}
-	
+
 	/**
 	 * Extend one array (or object) with another, optionally recursively.
 	 *
 	 * @param array|object $array
 	 * @param array|object $extender
 	 * @param boolean $recursive
+	 * @param bool $extendStdClass
 	 * @return array
 	 */
 	public static function extend(&$array, $extender, $recursive = true, $extendStdClass = true)
@@ -161,8 +163,8 @@ class Curry_Array {
 		if (is_array($array)) {
 			foreach($extender as $key => $value) {
 				if ($recursive && isset($array[$key]) &&
-					(is_array($array[$key]) || ($extendStdClass && $array[$key] instanceof stdClass)) &&
-					(is_array($value) || ($extendStdClass && $value instanceof stdClass))) {
+					(is_array($array[$key]) || ($extendStdClass && $array[$key] instanceof \stdClass)) &&
+					(is_array($value) || ($extendStdClass && $value instanceof \stdClass))) {
 					self::extend($array[$key], $value);
 				} else {
 					$array[$key] = $value;
@@ -171,8 +173,8 @@ class Curry_Array {
 		} else if(is_object($array)) {
 			foreach($extender as $key => $value) {
 				if ($recursive && isset($array->$key) &&
-					(is_array($array->$key) || ($extendStdClass && $array->$key instanceof stdClass)) &&
-					(is_array($value) || ($extendStdClass && $value instanceof stdClass))) {
+					(is_array($array->$key) || ($extendStdClass && $array->$key instanceof \stdClass)) &&
+					(is_array($value) || ($extendStdClass && $value instanceof \stdClass))) {
 					self::extend($array->$key, $value);
 				} else {
 					$array->$key = $value;

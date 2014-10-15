@@ -42,7 +42,7 @@ class Links extends AbstractModule {
 	public function toTwig()
 	{
 		return array(
-			'links' => \Curry_Array::objectsToArray($this->links, null, array($this, 'getLinkProperties')),
+			'links' => \Curry\Util\ArrayHelper::objectsToArray($this->links, null, array($this, 'getLinkProperties')),
 		);
 	}
 	

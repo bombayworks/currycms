@@ -3,6 +3,7 @@
 namespace Curry\Backend;
 
 use Curry\App;
+use Curry\Util\PathHelper;
 use Symfony\Component\HttpFoundation\Request;
 
 abstract class AbstractBackend extends \Curry\View {
@@ -220,12 +221,12 @@ abstract class AbstractBackend extends \Curry\View {
 	public function getTwig()
 	{
 		if (!$this->twig) {
-			$backendPath = \Curry_Util::path(true, $this->app->config->curry->basePath, 'shared', 'backend');
+			$backendPath = PathHelper::path(true, $this->app->config->curry->basePath, 'shared', 'backend');
 			if (!$backendPath)
 				throw new \Exception('Curry\Controller\Backend path (shared/backend) not found.');
 			$templatePaths = array(
-				\Curry_Util::path($backendPath, $this->app->config->curry->backend->theme, 'templates'),
-				\Curry_Util::path($backendPath, 'common', 'templates'),
+				PathHelper::path($backendPath, $this->app->config->curry->backend->theme, 'templates'),
+				PathHelper::path($backendPath, 'common', 'templates'),
 			);
 			$templatePaths = array_filter($templatePaths, 'is_dir');
 			$options = array(

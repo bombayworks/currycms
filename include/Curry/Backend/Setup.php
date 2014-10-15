@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Util\PathHelper;
 
 /**
  * Curry setup/installation backend.
@@ -41,9 +42,9 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractLegacyBackend {
 			$curryPath = $this->app->config->curry->basePath;
 			$wwwPath = $this->app->config->curry->wwwPath;
 			$symlinks = array(
-				Curry_Util::path($projectPath,'propel','inject','core') => 'propel/inject/core',
-				Curry_Util::path($projectPath,'propel','core.schema.xml') => 'propel/core.schema.xml',
-				Curry_Util::path($wwwPath,'shared') => 'shared',
+				PathHelper::path($projectPath, 'propel', 'inject', 'core') => 'propel/inject/core',
+				PathHelper::path($projectPath, 'propel', 'core.schema.xml') => 'propel/core.schema.xml',
+				PathHelper::path($wwwPath, 'shared') => 'shared',
 			);
 			foreach ($symlinks as $symlink => $target) {
 				$source = $curryPath.DIRECTORY_SEPARATOR.$target;
@@ -69,11 +70,11 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractLegacyBackend {
 		$projectPath = $this->app->config->curry->projectPath;
 		$wwwPath = $this->app->config->curry->wwwPath;
 		$paths = array(
-			Curry_Util::path($projectPath,'data'),
-			Curry_Util::path($projectPath,'templates'),
-			Curry_Util::path($projectPath,'propel','build'),
-			Curry_Util::path($projectPath,'config'),
-			Curry_Util::path($wwwPath,'cache'),
+			PathHelper::path($projectPath, 'data'),
+			PathHelper::path($projectPath, 'templates'),
+			PathHelper::path($projectPath, 'propel', 'build'),
+			PathHelper::path($projectPath, 'config'),
+			PathHelper::path($wwwPath, 'cache'),
 		);
 		foreach ($paths as $path) {
 			if(!is_writable($path)) {
@@ -123,7 +124,7 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractLegacyBackend {
 		$this->addCommand('Create database', $url, 'icon-plus-sign', array('class' => 'dialog'));
 
 		$cmsPath = $this->app->config->curry->projectPath;
-		$propelConfig = Curry_Util::path($cmsPath,'config','propel.xml');
+		$propelConfig = PathHelper::path($cmsPath, 'config', 'propel.xml');
 		if(!is_writable($propelConfig))
 			$this->addMessage("Configuration file $propelConfig doesn't seem to be writable.", self::MSG_ERROR);
 
@@ -653,8 +654,8 @@ HTML
 		switch($values['template']) {
 			case 'empty':
 			case 'curry':
-				$source = Curry_Util::path($this->app->config->curry->wwwPath, 'shared', 'backend', 'common', 'templates', 'project-empty.html');
-				$templateFile = Curry_Util::path($templateRoot, 'Root.html');
+				$source = PathHelper::path($this->app->config->curry->wwwPath, 'shared', 'backend', 'common', 'templates', 'project-empty.html');
+				$templateFile = PathHelper::path($templateRoot, 'Root.html');
 				if(!file_exists($templateFile))
 					@copy($source, $templateFile);
 				break;
@@ -714,7 +715,7 @@ HTML
 			$fba->setUserRole($userOrRole);
 		$fba->setPath($path);
 		$fba->setWrite($write);
-		@mkdir(Curry_Util::path(\Curry\App::getInstance()->config->curry->wwwPath, $path), 0777, true);
+		@mkdir(PathHelper::path(\Curry\App::getInstance()->config->curry->wwwPath, $path), 0777, true);
 		return $fba;
 	}
 }

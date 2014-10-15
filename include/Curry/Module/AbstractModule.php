@@ -19,6 +19,7 @@ namespace Curry\Module;
 
 use Curry\App;
 use Curry\ClassEnumerator;
+use Curry\Util\PathHelper;
 
 /**
  * The base class for all page-modules.
@@ -78,7 +79,7 @@ abstract class AbstractModule {
 
 		// find all backend directories
 		$dirs = glob(
-			\Curry_Util::path(
+			PathHelper::path(
 				App::getInstance()->config->curry->projectPath,
 				'include',
 				'*',
@@ -89,7 +90,7 @@ abstract class AbstractModule {
 		if (!$dirs) {
 			$dirs = array();
 		}
-		$dirs[] = \Curry_Util::path(
+		$dirs[] = PathHelper::path(
 			App::getInstance()->config->curry->basePath,
 			'include',
 			'Curry',

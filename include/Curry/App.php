@@ -4,6 +4,7 @@ namespace Curry;
 
 use Curry\Controller\Backend;
 use Curry\Controller\Frontend;
+use Curry\Util\PathHelper;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -185,7 +186,7 @@ class App extends ServiceContainer implements HttpKernelInterface, TerminableInt
 			$configPath = realpath($config);
 			if(!$configPath)
 				throw new Exception('Configuration file not found: '.$config);
-			$projectPath = Curry_Util::path(true, dirname($configPath), '..');
+			$projectPath = PathHelper::path(true, dirname($configPath), '..');
 			if($loadUserConfig)
 				$userConfig = require($configPath);
 		} else if(is_array($config)) {
@@ -200,9 +201,9 @@ class App extends ServiceContainer implements HttpKernelInterface, TerminableInt
 
 		// Attempt to find project path
 		if(!$projectPath)
-			$projectPath = Curry_Util::path(true, getcwd(), '..', 'cms');
+			$projectPath = PathHelper::path(true, getcwd(), '..', 'cms');
 		if(!$projectPath)
-			$projectPath = Curry_Util::path(true, getcwd(), 'cms');
+			$projectPath = PathHelper::path(true, getcwd(), 'cms');
 
 		// default config
 		$config = array(
@@ -228,7 +229,7 @@ class App extends ServiceContainer implements HttpKernelInterface, TerminableInt
 				'internalEncoding' => 'utf-8',
 				'outputEncoding' => 'utf-8',
 
-				'basePath' => Curry_Util::path(true, dirname(__FILE__), '..', '..'),
+				'basePath' => PathHelper::path(true, dirname(__FILE__), '..', '..'),
 				'projectPath' => $projectPath,
 				'wwwPath' => getcwd(),
 				'configPath' => $configPath,
@@ -272,20 +273,20 @@ class App extends ServiceContainer implements HttpKernelInterface, TerminableInt
 
 		$secondaryConfig = array(
 			'curry' => array(
-				'vendorPath' => Curry_Util::path($config['curry']['basePath'], 'vendor'),
+				'vendorPath' => PathHelper::path($config['curry']['basePath'], 'vendor'),
 				'tempPath' => self::getTempDir($config['curry']['projectPath']),
-				'trashPath' => Curry_Util::path($config['curry']['projectPath'], 'data', 'trash'),
-				'hooksPath' => Curry_Util::path($config['curry']['projectPath'], 'config', 'hooks.php'),
+				'trashPath' => PathHelper::path($config['curry']['projectPath'], 'data', 'trash'),
+				'hooksPath' => PathHelper::path($config['curry']['projectPath'], 'config', 'hooks.php'),
 				'autoBackup' => $config['curry']['developmentMode'] ? 0 : 86400,
 				'propel' => array(
-					'conf' => Curry_Util::path($config['curry']['projectPath'], 'config', 'propel.php'),
-					'projectClassPath' => Curry_Util::path($config['curry']['projectPath'], 'propel', 'build', 'classes'),
+					'conf' => PathHelper::path($config['curry']['projectPath'], 'config', 'propel.php'),
+					'projectClassPath' => PathHelper::path($config['curry']['projectPath'], 'propel', 'build', 'classes'),
 				),
 				'template' => array(
-					'root' => Curry_Util::path($config['curry']['projectPath'], 'templates'),
+					'root' => PathHelper::path($config['curry']['projectPath'], 'templates'),
 					'options' => array(
 						'debug' => (bool)$config['curry']['developmentMode'],
-						'cache' => Curry_Util::path($config['curry']['projectPath'], 'data', 'cache', 'templates'),
+						'cache' => PathHelper::path($config['curry']['projectPath'], 'data', 'cache', 'templates'),
 						'base_template_class' => 'Curry_Twig_Template',
 					),
 				),
@@ -468,7 +469,7 @@ class App extends ServiceContainer implements HttpKernelInterface, TerminableInt
 
 		\Zend_Search_Lucene_Search_QueryParser::setDefaultEncoding($this->config->curry->internalEncoding);
 
-		$path = Curry_Util::path($this->config->curry->projectPath, 'data', 'searchindex');
+		$path = PathHelper::path($this->config->curry->projectPath, 'data', 'searchindex');
 		return \Zend_Search_Lucene::open($path);
 	}
 
@@ -496,7 +497,7 @@ class App extends ServiceContainer implements HttpKernelInterface, TerminableInt
 	 */
 	protected static function getTempDir($projectPath)
 	{
-		$dir = Curry_Util::path($projectPath, 'data', 'temp');
+		$dir = PathHelper::path($projectPath, 'data', 'temp');
 		if(function_exists('sys_get_temp_dir')) { // prefer system temp dir if it exists
 			$d = sys_get_temp_dir();
 			if(is_writable($d))

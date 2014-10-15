@@ -18,6 +18,7 @@
 use Curry\Controller\Frontend;
 use Curry\Util\ArrayHelper;
 use Curry\Util\Flash;
+use Curry\Util\PathHelper;
 
 /**
  * This module allows you to browse the filesystem.
@@ -679,7 +680,7 @@ TPL
 				'IsHighlighted' => $name == $highlighted,
 				'IsSelected' => in_array($vpath, $selected),
 				'IsFolder' => $entry->isDir(),
-				'Icon' => $entry->isDir() ? 'icon-folder-'.($name == $highlighted ? 'open' : 'close') : Curry_Util::getIconFromExtension(pathinfo($entry->getPathname(), PATHINFO_EXTENSION)),
+				'Icon' => $entry->isDir() ? 'icon-folder-'.($name == $highlighted ? 'open' : 'close') : PathHelper::getIconFromExtension(pathinfo($entry->getPathname(), PATHINFO_EXTENSION)),
 				'Url' => (string)url('', array('module','path' => $vpath)),
 				'Path' => $vpath,
 			);
@@ -737,7 +738,7 @@ TPL
 					'Preview' => '',
 					'Size' => '<strong>Size: </strong>' . Curry_Util::humanReadableBytes(filesize($physical)),
 					'Writable' => '<strong>Writable: </strong>'.(self::isWritable($physical)?'Yes':'No'),
-					'Permissions' => '<strong>Permissions: </strong>' . Curry_Util::getFilePermissions($physical),
+					'Permissions' => '<strong>Permissions: </strong>' . PathHelper::getFilePermissions($physical),
 					'Owner' => '<strong>Owner: </strong>' . $owner . ' / ' . $group,
 				);
 				

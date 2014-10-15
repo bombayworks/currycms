@@ -17,6 +17,7 @@
  */
 use Curry\Controller\Backend;
 use Curry\Controller\Frontend;
+use Curry\Util\PathHelper;
 
 /**
  * Simple backend to create and edit files.
@@ -201,8 +202,8 @@ abstract class Curry_Backend_FileEditor extends \Curry\Backend\AbstractLegacyBac
 		$form = $this->getNewForm();
 		if (isPost() && $form->isValid($_POST)) {
 			$values = $form->getValues();
-			$path = $values['location'] ? Curry_Util::path($values['location'], $values['name']) : $values['name'];
-			$target = Curry_Util::path($this->root, $path);
+			$path = $values['location'] ? PathHelper::path($values['location'], $values['name']) : $values['name'];
+			$target = PathHelper::path($this->root, $path);
 			touch($target);
 			self::redirect(url('', array('module','view'=>'Edit','file'=>$path)));
 		} else {
@@ -218,7 +219,7 @@ abstract class Curry_Backend_FileEditor extends \Curry\Backend\AbstractLegacyBac
 		$form = $this->getNewForm();
 		if (isPost() && $form->isValid($_POST)) {
 			$values = $form->getValues();
-			$target = Curry_Util::path($this->root, $values['location'], $values['name']);
+			$target = PathHelper::path($this->root, $values['location'], $values['name']);
 			mkdir($target);
 			self::redirect(url('', array('module','view'=>'Main')));
 		} else {

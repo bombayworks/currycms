@@ -18,6 +18,7 @@
 namespace Curry\Backend;
 use Curry\Archive\Archive;
 use Curry\Controller\Frontend;
+use Curry\Util\PathHelper;
 
 /**
  * Change system settings.
@@ -64,7 +65,7 @@ class System extends \Curry\Backend\AbstractLegacyBackend {
 		));
 
 		$themes = array();
-		$backendPath = \Curry_Util::path(true, $this->app->config->curry->wwwPath, 'shared', 'backend');
+		$backendPath = PathHelper::path(true, $this->app->config->curry->wwwPath, 'shared', 'backend');
 		if($backendPath) {
 			foreach (new \DirectoryIterator($backendPath) as $entry) {
 				$name = $entry->getFilename();

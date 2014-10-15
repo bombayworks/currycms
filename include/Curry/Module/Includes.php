@@ -17,6 +17,8 @@
  */
 namespace Curry\Module;
 
+use Curry\Util\PathHelper;
+
 /**
  * Module to handle javascript and stylesheet includes.
  * 
@@ -186,7 +188,7 @@ class Includes extends AbstractModule {
 		$content = "";
 		foreach($files as $file) {
 			$processor = new CssProcessor($file['source']);
-			$relative = \Curry_Util::getRelativePath($basedir, dirname($file['source']));
+			$relative = PathHelper::getRelative($basedir, dirname($file['source']));
 			$content .= $processor->getContent($file['media'], $relative);
 			$imports = array_merge($imports, $processor->getImportedFiles());
 		}

@@ -18,6 +18,7 @@
 use Curry\Backend\AbstractBackend;
 use Curry\Module\PageModuleWrapper;
 use Curry\Util\ArrayHelper;
+use Curry\Util\Propel;
 use Curry\Util\Html;
 
 /**
@@ -230,7 +231,7 @@ class Curry_Backend_ContentList extends Curry_ModelView_List {
 			foreach($sortedIds as $id) {
 				$pks[] = array($id, $this->pageRevision->getPageRevisionId());
 			}
-			Curry_Propel::sortableReorder($pks, 'ModuleSortorder');
+			Propel::sortableReorder($pks, 'ModuleSortorder');
 		}
 
 		$this->pageRevision->setUpdatedAt(time());

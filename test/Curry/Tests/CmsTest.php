@@ -35,7 +35,7 @@ class CmsTest extends \PHPUnit_Framework_TestCase {
 		$con = \Propel::getConnection();
 		$con->beginTransaction();
 		try {
-			foreach(\Curry_Propel::getModels(false) as $model)
+			foreach(\Curry\Util\Propel::getModels(false) as $model)
 				\PropelQuery::from($model)->deleteAll();
 			$con->commit();
 		}

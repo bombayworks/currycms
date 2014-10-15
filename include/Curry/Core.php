@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Util\Html;
 
 /**
  * Global helper function for logging messages or objects.
@@ -279,7 +280,7 @@ class Curry_Core {
 		try {
 			// Create form to recreate error
 			$method = strtoupper($_SERVER['REQUEST_METHOD']);
-			$hidden = Curry_Html::createHiddenFields($method == 'POST' ? $_POST : $_GET);
+			$hidden = Html::createHiddenFields($method == 'POST' ? $_POST : $_GET);
 			$action = url(Curry_URL::getRequestUri())->getAbsolute();
 			$form = '<form action="'.$action.'" method="'.$method.'">'.$hidden.'<button type="submit">Execute</button></form>';
 

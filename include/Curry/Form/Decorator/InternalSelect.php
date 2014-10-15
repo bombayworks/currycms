@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Util\Html;
 
 /**
  * Decorate element with page-selector.
@@ -52,8 +53,8 @@ class Curry_Form_Decorator_InternalSelect extends Zend_Form_Decorator_Abstract
 				continue;
 			$options[$page->getPageId().'|'.$page->getUrl()] = str_repeat(Curry_Core::SELECT_TREE_PREFIX, $page->getLevel()) . $page->getName();
 		}
-		$options = Curry_Html::createSelectOptions($options, '');
-		$markup = Curry_Html::createTag('select', $attr, $options);
+		$options = Html::createSelectOptions($options, '');
+		$markup = Html::tag('select', $attr, $options);
 		
 		switch ($placement) {
 			case 'PREPEND':

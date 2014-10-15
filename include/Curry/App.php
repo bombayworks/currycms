@@ -536,7 +536,7 @@ class App extends ServiceContainer implements HttpKernelInterface, TerminableInt
 		}
 
 		if ($this['debug']) {
-			$queryCount = \Curry_Propel::getQueryCount();
+			$queryCount = Util\Propel::getQueryCount();
 			$generationTime = self::getExecutionTime();
 			$this->logger->debug("Generation time: ".round($generationTime, 3)."s");
 			$this->logger->debug("Peak memory usage: ".Curry_Util::humanReadableBytes(memory_get_peak_usage()));

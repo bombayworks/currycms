@@ -17,6 +17,7 @@
  */
 use Curry\Controller\Frontend;
 use Curry\Util\ArrayHelper;
+use Curry\Util\Propel;
 use Curry\Util\Html;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -280,7 +281,7 @@ class Curry_ModelView_List extends \Curry\View {
 				throw new Exception('Invalid primary key for item: '.$item);
 			$pks[] = $pk;
 		}
-		Curry_Propel::sortableReorder($pks, $this->getModelClass());
+		Propel::sortableReorder($pks, $this->getModelClass());
 	}
 
 	protected function addDefaultActions()
@@ -549,6 +550,6 @@ class Curry_ModelView_List extends \Curry\View {
 	public function templateToString($template, BaseObject $obj)
 	{
 		$tpl = Curry_Twig_Template::loadTemplateString($template);
-		return $tpl->render(Curry_Propel::toTwig($obj));
+		return $tpl->render(Propel::toTwig($obj));
 	}
 }

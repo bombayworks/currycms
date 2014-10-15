@@ -18,6 +18,7 @@
 use Curry\Module\AbstractModule;
 use Curry\Module\PageModuleWrapper;
 use Curry\Util\ArrayHelper;
+use Curry\Util\Html;
 
 /**
  * Static helper functions for the page backend.
@@ -1124,7 +1125,7 @@ class Curry_Backend_PageHelper {
 					$selectedColor = $color;
 					$attr['selected'] = 'selected';
 				}
-				$opts .= Curry_Html::createTag('option', $attr, $optionLabel);
+				$opts .= Html::tag('option', $attr, $optionLabel);
 			}
 			$row.= '<td><select name="'.$fieldName.'" '.($userPermission[$colName] ? '' : 'disabled="disabled" ').'style="color:'.$selectedColor.'" onchange="this.style.color = this.options[this.selectedIndex].style.color">';
 			$row.= $opts;

@@ -19,6 +19,7 @@ use Curry\Controller\Frontend;
 use Curry\Module\AbstractModule;
 use Curry\Module\PageModuleWrapper;
 use Curry\Util\ArrayHelper;
+use Curry\Util\Propel;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -118,7 +119,7 @@ class Curry_PageGenerator
 		$devMode = \Curry\App::getInstance()->config->curry->developmentMode;
 		if ($devMode) {
 			$time = microtime(true);
-			$sqlQueries = Curry_Propel::getQueryCount();
+			$sqlQueries = Propel::getQueryCount();
 			$userTime = Curry_Util::getCpuTime('u');
 			$systemTime = Curry_Util::getCpuTime('s');
 			$memoryUsage = memory_get_usage(true);
@@ -164,7 +165,7 @@ class Curry_PageGenerator
 			$userTime = Curry_Util::getCpuTime('u') - $userTime;
 			$systemTime = Curry_Util::getCpuTime('s') - $systemTime;
 			$memoryUsage = memory_get_usage(true) - $memoryUsage;
-			$sqlQueries = $sqlQueries !== null ? Curry_Propel::getQueryCount() - $sqlQueries : null;
+			$sqlQueries = $sqlQueries !== null ? Propel::getQueryCount() - $sqlQueries : null;
 
 			$cpuLimit = \Curry\App::getInstance()->config->curry->debug->moduleCpuLimit;
 			$timeLimit = \Curry\App::getInstance()->config->curry->debug->moduleTimeLimit;

@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Util\Propel;
 
 /**
  * Wraps a propel ModelCriteria to provide additional functionality when used in a template.
@@ -160,7 +161,7 @@ class Curry_Twig_QueryWrapper extends PropelObjectFormatter implements IteratorA
 				$result[] = call_user_func($this->formatterFunction, $c);
 		} else if($collection instanceof PropelObjectCollection) {
 			foreach($collection as $c)
-				$result[] = Curry_Propel::toTwig($c);
+				$result[] = Propel::toTwig($c);
 		} else {
 			$result = $collection;
 		}
@@ -182,7 +183,7 @@ class Curry_Twig_QueryWrapper extends PropelObjectFormatter implements IteratorA
 			return call_user_func($this->formatterFunction, $item);
 		
 		if(is_object($item) && $item instanceof BaseObject)
-			return Curry_Propel::toTwig($item);
+			return Propel::toTwig($item);
 			
 		return $item;
 	}

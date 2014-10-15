@@ -16,6 +16,7 @@
  * @link       http://currycms.com
  */
 use Curry\Controller\Frontend;
+use Curry\Util\Propel;
 use Curry\Util\Html;
 
 /**
@@ -263,7 +264,7 @@ class Curry_Backend_Indexer extends \Curry\Backend\AbstractLegacyBackend {
 	public static function initRebuild()
 	{
 		$models = array();
-		foreach(Curry_Propel::getModels() as $classes) {
+		foreach(Propel::getModels() as $classes) {
 			foreach($classes as $model) {
 				if(in_array('Curry_ISearchable', class_implements($model)))
 					$models[] = $model;

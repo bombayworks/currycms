@@ -18,6 +18,7 @@
 use Curry\Backend\AbstractBackend;
 use Curry\Backend\AbstractLegacyBackend;
 use Curry\Util\ArrayHelper;
+use Curry\Util\Propel;
 use Curry\Util\Html;
 
 /**
@@ -188,7 +189,7 @@ class Curry_Backend_DatabaseHelper {
 		fwrite($fp, $data . "\n");
 		
 		// write tables
-		foreach(Curry_Propel::getModels() as $classes) {
+		foreach(Propel::getModels() as $classes) {
 			foreach($classes as $table) {
 				if(is_array($tables) && !in_array($table, $tables))
 					continue;
@@ -542,7 +543,7 @@ class Curry_Backend_DatabaseHelper {
 		
 		// Empty tables
 		if($continueLine == 0) {
-			foreach(Curry_Propel::getModels() as $classes) {
+			foreach(Propel::getModels() as $classes) {
 				foreach($classes as $table) {
 					try {
 						if(is_array($tables) && !in_array($table, $tables))
@@ -602,7 +603,7 @@ class Curry_Backend_DatabaseHelper {
 				// Flush buffer when changing tables
 				if($data['table'] !== $currentTable || count($buffer) >= self::MULTIINSERT_MAXBUFFER) {
 					if($currentTable !== null && count($buffer))
-						Curry_Propel::doMultiInsert($currentTable, $buffer);
+						Propel::doMultiInsert($currentTable, $buffer);
 					$currentTable = $data['table'];
 					$buffer = array();
 				}
@@ -621,7 +622,7 @@ class Curry_Backend_DatabaseHelper {
 			// check execution time
 			if ($maxExecutionTime && Curry_Core::getExecutionTime() > $maxExecutionTime) {
 				if($currentTable !== null && count($buffer))
-					Curry_Propel::doMultiInsert($currentTable, $buffer);
+					Propel::doMultiInsert($currentTable, $buffer);
 				$session->total = $total;
 				$session->skipped = $skipped;
 				$session->failed = $failed;
@@ -639,7 +640,7 @@ class Curry_Backend_DatabaseHelper {
 		
 		// Flush buffer
 		if($currentTable !== null && count($buffer))
-			Curry_Propel::doMultiInsert($currentTable, $buffer);
+			Propel::doMultiInsert($currentTable, $buffer);
 
 		if ($pageVersion !== Page::VERSION) {
 			Page::postMigrate($pageVersion);

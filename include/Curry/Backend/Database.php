@@ -16,6 +16,7 @@
  * @link       http://currycms.com
  */
 use Curry\Util\ArrayHelper;
+use Curry\Util\Propel;
 use Curry\Util\StringHelper;
 
 /**
@@ -74,7 +75,7 @@ class Curry_Backend_Database extends \Curry\Backend\AbstractLegacyBackend
 		Propel::setLogger(null);
 		
 		// make sure all classes are included
-		foreach(Curry_Propel::getModels() as $classes)
+		foreach(Propel::getModels() as $classes)
 			foreach($classes as $clazz)
 				class_exists($clazz.'Peer', true);
 	}
@@ -125,7 +126,7 @@ class Curry_Backend_Database extends \Curry\Backend\AbstractLegacyBackend
 	public function getTreeJson()
 	{
 		$packages = array();
-		foreach(Curry_Propel::getModels() as $package => $classes) {
+		foreach(Propel::getModels() as $package => $classes) {
 			$p = array(
 				'title' => $package,
 				'iconClass' => 'icon-folder-open',
@@ -801,7 +802,7 @@ class Curry_Backend_Database extends \Curry\Backend\AbstractLegacyBackend
 			$this->addMainContent($form);
 			if($form->scan->isChecked()) {
 				$numInvalidRows = 0;
-				foreach(Curry_Propel::getModels() as $classes) {
+				foreach(Propel::getModels() as $classes) {
 					foreach($classes as $clazz) {
 						$this->addMessage("Scanning table $clazz");
 						$numInvalidRows += Curry_Backend_DatabaseHelper::scanTable($clazz, $form->fix->getValue(), $form->delete->getValue(), $this);
@@ -859,7 +860,7 @@ class Curry_Backend_Database extends \Curry\Backend\AbstractLegacyBackend
 		
 		$tables = array();
 		$selectedTables = array();
-		foreach(Curry_Propel::getModels() as $package => $classes) {
+		foreach(Propel::getModels() as $package => $classes) {
 			$selectedTables = array_merge($selectedTables, array_values($classes));
 			$tables[$package] = array();
 			foreach($classes as $table)
@@ -925,7 +926,7 @@ class Curry_Backend_Database extends \Curry\Backend\AbstractLegacyBackend
 		$tables = array();
 		$selectedTables = array();
 		$disabledTables = array();
-		foreach(Curry_Propel::getModels() as $package => $classes) {
+		foreach(Propel::getModels() as $package => $classes) {
 			$tables[$package] = array();
 			foreach($classes as $table) {
 				$tables[$package][$table] = $table;

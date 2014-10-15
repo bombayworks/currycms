@@ -15,14 +15,14 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
-use Curry\Util\ArrayHelper;
+namespace Curry\Util;
 
 /**
  * Static class with Propel utility functions.
  * 
  * @package Curry
  */
-class Curry_Propel {
+class Propel {
 	/**
 	 * Get the number of SQL-queries executed for this request.
 	 *
@@ -31,10 +31,10 @@ class Curry_Propel {
 	public static function getQueryCount()
 	{
 		try {
-			$con = Propel::getConnection(); // assume we're using default connection
+			$con = \Propel::getConnection(); // assume we're using default connection
 			return ($con && $con->useDebug) ? $con->getQueryCount() : null;
 		}
-		catch (Exception $e) {
+		catch (\Exception $e) {
 			return null;
 		}
 	}
@@ -48,7 +48,7 @@ class Curry_Propel {
 	public static function getModels($packages = true)
 	{
 		$classes = array();
-		$configArray = Propel::getConfiguration();
+		$configArray = \Propel::getConfiguration();
 		foreach($configArray['classmap'] as $className => $file) {
 			if(preg_match('@^(.*)/map/(\w+)TableMap\.php$@', $file, $match)) {
 				$package = $match[1];
@@ -76,15 +76,15 @@ class Curry_Propel {
 	 * 
 	 * @todo Implement support for ORDER, LIMIT etc.
 	 *
-	 * @param ModelCriteria $mc1
-	 * @param ModelCriteria $mc2
+	 * @param \ModelCriteria $mc1
+	 * @param \ModelCriteria $mc2
 	 * @return mixed
 	 */
-	public static function union(ModelCriteria $mc1, ModelCriteria $mc2)
+	public static function union(\ModelCriteria $mc1, \ModelCriteria $mc2)
 	{
-		$dbMap = Propel::getDatabaseMap($mc1->getDbName());
-		$db = Propel::getDB($mc1->getDbName());
-		$con = Propel::getConnection($mc1->getDbName(), Propel::CONNECTION_READ);
+		$dbMap = \Propel::getDatabaseMap($mc1->getDbName());
+		$db = \Propel::getDB($mc1->getDbName());
+		$con = \Propel::getConnection($mc1->getDbName(), \Propel::CONNECTION_READ);
 		
 		// we may modify criteria, so copy it first
 		$c1 = clone $mc1;
@@ -102,13 +102,13 @@ class Curry_Propel {
 		$con->beginTransaction();
 		try {
 			$params = array();
-			$sql1 = BasePeer::createSelectSql($c1, $params);
-			$sql2 = BasePeer::createSelectSql($c2, $params);
+			$sql1 = \BasePeer::createSelectSql($c1, $params);
+			$sql2 = \BasePeer::createSelectSql($c2, $params);
 			$stmt = $con->prepare("($sql1) UNION ALL ($sql2)");
 			$db->bindValues($stmt, $params, $dbMap);
 			$stmt->execute();
 			$con->commit();
-		} catch (PropelException $e) {
+		} catch (\PropelException $e) {
 			$con->rollback();
 			throw $e;
 		}
@@ -120,10 +120,10 @@ class Curry_Propel {
      * Return true if $tableMap has the specified behavior else return false
      * 
      * @param string $behavior
-     * @param TableMap $tableMap
+     * @param \TableMap $tableMap
      * @return boolean
      */
-    public static function hasBehavior($behavior, TableMap $tableMap)
+    public static function hasBehavior($behavior, \TableMap $tableMap)
     {
         return array_key_exists(strtolower($behavior), $tableMap->getBehaviors());
     }
@@ -132,10 +132,10 @@ class Curry_Propel {
      * Return the specified behavior properties
      * 
      * @param string $behavior
-     * @param TableMap $tableMap
+     * @param \TableMap $tableMap
      * @return array
      */
-    public static function getBehavior($behavior, TableMap $tableMap)
+    public static function getBehavior($behavior, \TableMap $tableMap)
     {
     	$behaviors = $tableMap->getBehaviors();
     	return (array) $behaviors[strtolower($behavior)];
@@ -144,10 +144,10 @@ class Curry_Propel {
     /**
      * Whether $tableMap has i18n behavior
      * 
-     * @param TableMap $tableMap
+     * @param \TableMap $tableMap
      * @return boolean
      */
-    public static function hasI18nBehavior(TableMap $tableMap)
+    public static function hasI18nBehavior(\TableMap $tableMap)
     {
         return self::hasBehavior('i18n', $tableMap);
     }
@@ -155,14 +155,14 @@ class Curry_Propel {
     /**
      * Return the i18n TableMap if $tableMap has I18n behavior
      * 
-     * @param TableMap $tableMap
-     * @return TableMap|null
+     * @param \TableMap $tableMap
+     * @return \TableMap|null
      */
-    public static function getI18nTableMap(TableMap $tableMap)
+    public static function getI18nTableMap(\TableMap $tableMap)
     {
         if (self::hasI18nBehavior($tableMap)) {
             $i18nTablename = "{$tableMap->getPhpName()}I18n";
-            return PropelQuery::from($i18nTablename)->getTableMap();
+            return \PropelQuery::from($i18nTablename)->getTableMap();
         }
 
         return null;
@@ -172,10 +172,10 @@ class Curry_Propel {
      * Whether $column is an I18n column
      * 
      * @param string $column
-     * @param TableMap $tableMap
+     * @param \TableMap $tableMap
      * @return bool
      */
-    public static function hasI18nColumn($column, TableMap $tableMap)
+    public static function hasI18nColumn($column, \TableMap $tableMap)
     {
         $i18nTableMap = self::getI18nTableMap($tableMap);
         if ($i18nTableMap !== null) {
@@ -189,10 +189,10 @@ class Curry_Propel {
      * Return the ColumnMap for the i18n column
      * 
      * @param string $column
-     * @param TableMap $tableMap
-     * @return ColumnMap|null
+     * @param \TableMap $tableMap
+     * @return \ColumnMap|null
      */
-    public static function getI18nColumn($column, TableMap $tableMap)
+    public static function getI18nColumn($column, \TableMap $tableMap)
     {
         $i18nTableMap = self::getI18nTableMap($tableMap);
         if ($i18nTableMap !== null) {
@@ -204,13 +204,13 @@ class Curry_Propel {
 
 	public static function doMultiInsert($tableName, $values, $dbName = null, $rawValues = false, $method = 'INSERT')
 	{
-		$query = PropelQuery::from($tableName);
+		$query = \PropelQuery::from($tableName);
 		if(!$dbName)
 			$dbName = $query->getDbName();
-		$adapter = Propel::getDB($dbName);
+		$adapter = \Propel::getDB($dbName);
 		$tableMap = $query->getTableMap();
 		$dbMap = $tableMap->getDatabaseMap();
-		$con = Propel::getConnection($dbName, Propel::CONNECTION_WRITE);
+		$con = \Propel::getConnection($dbName, \Propel::CONNECTION_WRITE);
 		try {
 			$sql = '';
 			$p = 1;
@@ -251,28 +251,28 @@ class Curry_Propel {
 			$sql = $method.' INTO ' . $table
 				. ' (' . implode(',', $colNames) . ')'
 				. ' VALUES ' . $sql;
-			$adapter->cleanupSQL($sql, $params, new Criteria($dbName), $dbMap);
+			$adapter->cleanupSQL($sql, $params, new \Criteria($dbName), $dbMap);
 			$stmt = $con->prepare($sql);
 			$adapter->bindValues($stmt, $params, $dbMap, $adapter);
 			$stmt->execute();
 			return $stmt->rowCount();
-		} catch (Exception $e) {
-			Propel::log($e->getMessage(), Propel::LOG_ERR);
-			throw new PropelException(sprintf('Unable to execute INSERT statement [%s]', $sql), $e);
+		} catch (\Exception $e) {
+			\Propel::log($e->getMessage(), \Propel::LOG_ERR);
+			throw new \PropelException(sprintf('Unable to execute INSERT statement [%s]', $sql), $e);
 		}
 	}
 
-	protected static function _getColumnRawValue(ColumnMap $column, $value)
+	protected static function _getColumnRawValue(\ColumnMap $column, $value)
 	{
 		if ($value === null)
 			return null;
 		switch ($column->getType()) {
-			case PropelColumnTypes::ENUM:
+			case \PropelColumnTypes::ENUM:
 				$valueSet = $column->getValueSet();
 				return array_search($value, $valueSet);
-			case PropelColumnTypes::PHP_ARRAY:
+			case \PropelColumnTypes::PHP_ARRAY:
 				return '| ' . implode(' | ', $value) . ' |';
-			case PropelColumnTypes::OBJECT:
+			case \PropelColumnTypes::OBJECT:
 				return serialize($value);
 		}
 		return $value;
@@ -286,7 +286,7 @@ class Curry_Propel {
 		// Check first item to decide if it's an array of objects or pks
 		reset($itemsOrPks);
 		$object = current($itemsOrPks);
-		if (is_object($object) && $object instanceof BaseObject) {
+		if (is_object($object) && $object instanceof \BaseObject) {
 			// Array of objects
 			$objects = $itemsOrPks;
 			if ($modelClass === null)
@@ -294,27 +294,27 @@ class Curry_Propel {
 		} else {
 			// Array of primary keys
 			if ($modelClass === null)
-				throw new Exception('Need to specify modelClass when using primary-keys.');
+				throw new \Exception('Need to specify modelClass when using primary-keys.');
 			// Rely on instance-pooling to fetch items
-			PropelQuery::from($modelClass)->findPks($itemsOrPks);
+			\PropelQuery::from($modelClass)->findPks($itemsOrPks);
 			$objects = array();
 			foreach($itemsOrPks as $pk) {
-				$object = PropelQuery::from($modelClass)->findPk($pk);
+				$object = \PropelQuery::from($modelClass)->findPk($pk);
 				if (!$object)
-					throw new Exception('Unable to find item to sort.');
+					throw new \Exception('Unable to find item to sort.');
 				$objects[] = $object;
 			}
 		}
 
 		// Validate scope
 		$scope = null;
-		$tmp = PropelQuery::from($modelClass)->getTableMap()->getBehaviors();
+		$tmp = \PropelQuery::from($modelClass)->getTableMap()->getBehaviors();
 		$useScope = strtolower($tmp['sortable']['use_scope']) == 'true';
 		if ($useScope) {
 			foreach($objects as $object) {
 				if ($object->getScopeValue() !== null) {
 					if ($scope !== null && $object->getScopeValue() !== $scope)
-						throw new Exception('Unable to sort items in mixed scopes.');
+						throw new \Exception('Unable to sort items in mixed scopes.');
 					$scope = $object->getScopeValue();
 				}
 			}
@@ -339,7 +339,7 @@ class Curry_Propel {
 		// Update ranks
 		if ($con === null) {
 			$peer = constant($modelClass.'::PEER');
-			$con = Propel::getConnection($peer::DATABASE_NAME);
+			$con = \Propel::getConnection($peer::DATABASE_NAME);
 		}
 		$con->beginTransaction();
 		try {
@@ -353,38 +353,38 @@ class Curry_Propel {
 				}
 			}
 			$con->commit();
-		} catch (PropelException $e) {
+		} catch (\PropelException $e) {
 			$con->rollback();
 			throw $e;
 		}
 	}
 
-	public static function toTwig(BaseObject $obj, $checkToTwig = true, $includeRelated = true, $includeVirtual = true, $includeI18n = true)
+	public static function toTwig(\BaseObject $obj, $checkToTwig = true, $includeRelated = true, $includeVirtual = true, $includeI18n = true)
 	{
 		if($checkToTwig && method_exists($obj, 'toTwig'))
 			return $obj->toTwig();
 
-		$tableMap = PropelQuery::from(get_class($obj))->getTableMap();
-		$p = $obj->toArray(BasePeer::TYPE_PHPNAME);
+		$tableMap = \PropelQuery::from(get_class($obj))->getTableMap();
+		$p = $obj->toArray(\BasePeer::TYPE_PHPNAME);
 		if ($includeRelated) {
 			foreach ($tableMap->getRelations() as $relation) {
-				if (in_array($relation->getType(), array(RelationMap::ONE_TO_MANY, RelationMap::MANY_TO_MANY))) {
+				if (in_array($relation->getType(), array(\RelationMap::ONE_TO_MANY, \RelationMap::MANY_TO_MANY))) {
 					$name = $relation->getPluralName();
-					$p[lcfirst($name)] = new Curry_OnDemand(function() use($obj, $name) {
-						return ArrayHelper::objectsToArray($obj->{'get'.$name}(), null, array('Curry_Propel', 'toTwig'));
+					$p[lcfirst($name)] = new \Curry_OnDemand(function() use($obj, $name) {
+						return ArrayHelper::objectsToArray($obj->{'get'.$name}(), null, array('Curry\Util\Propel', 'toTwig'));
 					});
 				} else {
 					$name = $relation->getName();
-					$p[lcfirst($name)] = new Curry_OnDemand(function() use($obj, $name) {
+					$p[lcfirst($name)] = new \Curry_OnDemand(function() use($obj, $name) {
 						$rel = $obj->{'get'.$name}();
-						return $rel ? Curry_Propel::toTwig($rel) : null;
+						return $rel ? Propel::toTwig($rel) : null;
 					});
 				}
 			}
 		}
 
 		// Automatic URL
-		$p['Url'] = new Curry_OnDemand(function() use($obj, $tableMap) {
+		$p['Url'] = new \Curry_OnDemand(function() use($obj, $tableMap) {
 			$params = array();
 			foreach ($tableMap->getPrimaryKeys() as $pk)
 				$params[$pk->getName()] = $obj->{'get'.$pk->getPhpName()}();

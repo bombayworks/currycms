@@ -63,7 +63,7 @@ public function getInheritedProperty($name, $default = null, $cache = true, $for
 public function getModules()
 {
 	$parents = $this->getInheritanceChain(true);
-	$parentIds = Curry_Array::objectsToArray($parents, null, 'getPageRevisionId');
+	$parentIds = \Curry\Util\ArrayHelper::objectsToArray($parents, null, 'getPageRevisionId');
 
 	PageModulePeer::clearInstancePool();
 	RevisionModulePeer::clearInstancePool();
@@ -125,7 +125,7 @@ public function getPageModuleWrappers($langcode = null)
 	// create wrappers
 	$wrappers = array();
 	foreach($this->getModules() as $pageModule)
-		$wrappers[$pageModule->getPageModuleId()] = new Curry_PageModuleWrapper($pageModule, $this, $langcode);
+		$wrappers[$pageModule->getPageModuleId()] = new \Curry\Module\PageModuleWrapper($pageModule, $this, $langcode);
 	
 	return $wrappers;
 }

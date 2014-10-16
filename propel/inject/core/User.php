@@ -209,10 +209,10 @@ public function hasPagePermission(Page $page, $permission = null)
 /**
  * Check if user has access to module, and if content visibility matches.
  *
- * @param Curry_PageModuleWrapper $wrapper
+ * @param \Curry\Module\PageModuleWrapper $wrapper
  * @return bool
  */
-public function hasModuleAccess(Curry_PageModuleWrapper $wrapper)
+public function hasModuleAccess(\Curry\Module\PageModuleWrapper $wrapper)
 {
 	$anyAccess = $this->hasAccess('Curry_Backend_Content/*', false);
 	$moduleClass = $wrapper->getPageModule()->getModuleClass();

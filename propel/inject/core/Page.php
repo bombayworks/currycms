@@ -242,7 +242,7 @@ public function getExpectedUrl($parentUrl = null)
 	}
 	if($parentUrl == '/')
 		$parentUrl = '';
-	return ($parentUrl . Curry_String::getRewriteString($this->getName()) . '/');
+	return ($parentUrl . \Curry\Util\StringHelper::getRewriteString($this->getName()) . '/');
 }
 
 public function getActualRedirectPage()
@@ -312,7 +312,7 @@ public function setAutoName($v)
 
 public function getBodyId()
 {
-	return Curry_String::getRewriteString('page-'.$this->getUrl());
+	return \Curry\Util\StringHelper::getRewriteString('page-'.$this->getUrl());
 }
 
 /**
@@ -340,13 +340,13 @@ public function getDependantPages()
 	$lastPages = array($this->getPageId() => $this);
 	do {
 		$c = count($pages);
-		$pageIds = Curry_Array::objectsToArray($lastPages, null, 'getPageId');
+		$pageIds = \Curry\Util\ArrayHelper::objectsToArray($lastPages, null, 'getPageId');
 		$lastPages = PageQuery::create()
 			->useWorkingPageRevisionQuery('', Criteria::INNER_JOIN)
 				->filterByBasePageId($pageIds)
 			->endUse()
 			->find();
-		$pages += Curry_Array::objectsToArray($lastPages, 'getPageId', null);
+		$pages += \Curry\Util\ArrayHelper::objectsToArray($lastPages, 'getPageId', null);
 	} while(count($pages) != $c);
 	return $pages;
 }
@@ -370,7 +370,7 @@ public function postDelete(PropelPDO $con = null)
 
 public function getPageAccess(User $user = null, UserRole $role = null)
 {
-	$parents = Curry_Array::objectsToArray($this->getAncestors(), null, 'getPageId');
+	$parents = \Curry\Util\ArrayHelper::objectsToArray($this->getAncestors(), null, 'getPageId');
 	$access = PageAccessQuery::create('pa')
 		// User and role condition
 		->_if($user && !$user->isNew())
@@ -402,8 +402,8 @@ public function getMetadata()
 		$metadatas = MetadataQuery::create()->find();
 		
 		$localPageRevisionId = $this->getPageRevisionId();
-		$cascadeIds = Curry_Array::objectsToArray(array_reverse(Page::getCachedPath($this)), null, 'getPageRevisionId');
-		$inheritIds = array_reverse(Curry_Array::objectsToArray($this->getPageRevision()->getInheritanceChain(true), null, 'getPageRevisionId'));
+		$cascadeIds = \Curry\Util\ArrayHelper::objectsToArray(array_reverse(Page::getCachedPath($this)), null, 'getPageRevisionId');
+		$inheritIds = array_reverse(\Curry\Util\ArrayHelper::objectsToArray($this->getPageRevision()->getInheritanceChain(true), null, 'getPageRevisionId'));
 		$pageRevisionIds = array_unique(array_merge($cascadeIds, $inheritIds));
 		$pageMetadatas = PageMetadataQuery::create()->filterByPageRevisionId($pageRevisionIds)->find();
 		
@@ -442,8 +442,8 @@ public function toTwig()
 {
 	$self = $this;
 	$p = $this->toArray();
-	$p['parent'] = new Curry_OnDemand(array($this, 'twigGetParent'));
-	$p['subpages'] = new Curry_OnDemand(function() use ($self) {
+	$p['parent'] = new \Curry\Util\OnDemand(array($this, 'twigGetParent'));
+	$p['subpages'] = new \Curry\Util\OnDemand(function() use ($self) {
 		if ($self->isLeaf())
 			return array();
 		return PageQuery::create()
@@ -451,7 +451,7 @@ public function toTwig()
 			->childrenOf($this)
 			->filterByVisible(true);
 	});
-	$p['allSubpages'] = new Curry_OnDemand(function() use ($self) {
+	$p['allSubpages'] = new \Curry\Util\OnDemand(function() use ($self) {
 		if ($self->isLeaf())
 			return array();
 		return PageQuery::create()
@@ -459,10 +459,10 @@ public function toTwig()
 			->childrenOf($this);
 	});
 	
-	$p['meta'] = new Curry_OnDemand(array($this, 'getMetadata'));
+	$p['meta'] = new \Curry\Util\OnDemand(array($this, 'getMetadata'));
 	
 	$p['FullUrl'] = url($this->getUrl())->getAbsolute();
-	$p['FinalUrl'] = new Curry_OnDemand(array($this, 'getFinalUrl'));
+	$p['FinalUrl'] = new \Curry\Util\OnDemand(array($this, 'getFinalUrl'));
 	$p['BodyId'] = $this->getBodyId();
 
 	$isInternal = $this->getRedirectPageId() !== null;

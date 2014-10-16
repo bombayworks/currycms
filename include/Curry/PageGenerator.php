@@ -15,7 +15,6 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
-use Curry\Controller\Frontend;
 use Curry\Module\AbstractModule;
 use Curry\Module\PageModuleWrapper;
 use Curry\Util\ArrayHelper;
@@ -60,26 +59,38 @@ class Curry_PageGenerator
 	 * @var array
 	 */
 	protected $moduleDebugInfo;
-	
+
 	/**
-	 * Constructor
-	 *
-	 * @param PageRevision $pageRevision
-	 * @param Curry_Request $request
+	 * @var \Curry\App
 	 */
-	public function __construct(PageRevision $pageRevision)
+	protected $app;
+
+	/**
+	 * @param \Curry\App $app
+	 * @param PageRevision $pageRevision
+	 * @return Curry_PageGenerator
+	 * @throws Exception
+	 */
+	public static function create(\Curry\App $app, PageRevision $pageRevision)
 	{
-		$this->pageRevision = $pageRevision;
+		$generatorClass = $pageRevision->getPage()->getInheritedProperty('Generator', $app->config->curry->defaultGeneratorClass);
+		$generator = new $generatorClass($app, $pageRevision);
+		if (!$generator instanceof Curry_PageGenerator) {
+			throw new Exception('Page generator must be of type Curry_PageGenerator');
+		}
+		return $generator;
 	}
 
 	/**
-	 * Return the current Curry_Request object that belongs to the page being generated.
+	 * Constructor
 	 *
-	 * @return Curry_Request
+	 * @param \Curry\App $app
+	 * @param PageRevision $pageRevision
 	 */
-	public function getRequest()
+	public function __construct(\Curry\App $app, PageRevision $pageRevision)
 	{
-		return $this->request;
+		$this->app = $app;
+		$this->pageRevision = $pageRevision;
 	}
 
 	/**

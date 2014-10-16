@@ -488,7 +488,7 @@ public function getSearchDocument()
 		return null;
 	
 	$preventRedirect = Curry_URL::setPreventRedirect(true);
-	$pageGenerator = Curry_Application::getInstance()->createPageGenerator($this->getActivePageRevision(), new Curry_Request('GET', $this->getUrl()));
+	$pageGenerator = Curry_PageGenerator::create(\Curry\App::getInstance(), $this->getActivePageRevision());
 	$language = $this->getInheritedProperty('Language');
 	if($language)
 		Curry_Language::setLanguage($language);

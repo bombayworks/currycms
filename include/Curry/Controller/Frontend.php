@@ -24,6 +24,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
@@ -76,28 +77,20 @@ class Frontend implements EventSubscriberInterface {
 	{
 		// You get the exception object from the received event
 		$exception = $event->getException();
-		$message = sprintf(
-			'Error: %s %s (code: %s)',
-			$exception->getMessage(),
-			"<pre>".$exception->getTraceAsString()."</pre>",
-			$exception->getCode()
-		);
 
-		// Customize your response object to display the exception details
-		$response = new Response();
-		$response->setContent($message);
-
-		// HttpExceptionInterface is a special type of exception that
-		// holds status code and header details
-		if ($exception instanceof HttpExceptionInterface) {
-			$response->setStatusCode($exception->getStatusCode());
-			$response->headers->replace($exception->getHeaders());
-		} else {
-			$response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
+		if ($exception instanceof NotFoundHttpException) {
+			$response = new Response();
+			$response->setContent('Page not found');
+			$event->setResponse($response);
+			if ($this->app->config->curry->errorPage->notFound) {
+				$page = \PageQuery::create()->findPk($this->app->config->curry->errorPage->notFound);
+				if ($page && $page->getEnabled()) {
+					// TODO: Generate error page
+					$generator = \Curry_PageGenerator::create($this->app, $page->getActivePageRevision());
+					$event->setResponse($generator->render());
+				}
+			}
 		}
-
-		// Send the modified response object to the event
-		$event->setResponse($response);
 	}
 	
 	/**
@@ -416,8 +409,7 @@ class Frontend implements EventSubscriberInterface {
 		// Attempt to render page
 		$app->logger->notice('Showing page ' . $page->getName() . ' (PageRevisionId: '.$pageRevision->getPageRevisionId().')');
 
-		$generatorClass = $page->getInheritedProperty('Generator', $app->config->curry->defaultGeneratorClass);
-		$generator = new $generatorClass($pageRevision, $request);
+		$generator = \Curry_PageGenerator::create($app, $pageRevision);
 
 		$app->page = $page;
 		$app->pageRevision = $pageRevision;

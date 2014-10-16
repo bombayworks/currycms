@@ -41,15 +41,12 @@ class Curry_PageGenerator_Html extends Curry_PageGenerator {
 	protected $htmlHead;
 	
 	/**
-	 * Constructor
-	 *
-	 * @param PageRevision $pageRevision
-	 * @param Curry_Request $request
+	 * {@inheritdoc}
 	 */
-	public function __construct(PageRevision $pageRevision)
+	public function __construct(\Curry\App $app, PageRevision $pageRevision)
 	{
+		parent::__construct($app, $pageRevision);
 		$this->htmlHead = new Curry_HtmlHead();
-		parent::__construct($pageRevision);
 	}
 
 	/**

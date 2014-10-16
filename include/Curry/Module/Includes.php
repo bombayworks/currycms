@@ -74,8 +74,8 @@ class Includes extends AbstractModule {
 	public function showFront(\Curry_Twig_Template $template = null)
 	{
 		$pageGenerator = $this->app->generator;
-		if(!($pageGenerator instanceof \Curry_PageGenerator_Html))
-			throw new \Exception('Includes module only works on pages with PageGenerator set to Curry_PageGenerator_Html.');
+		if(!($pageGenerator instanceof \Curry\Generator\HtmlGenerator))
+			throw new \Exception('Includes module only works on pages with PageGenerator set to Curry\Generator\Curry_PageGenerator_Html.');
 		$head = $pageGenerator->getHtmlHead();
 		
 		// Stylesheets

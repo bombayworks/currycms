@@ -15,30 +15,29 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Generator;
 
 /**
  * Page Generator for JSON content.
- * 
- * @package Curry
+ *
+ * @package Curry\Generator
  */
-class Curry_PageGenerator_Json extends Curry_PageGenerator {
+class JsonGenerator extends AbstractGenerator {
 	/**
 	 * Content type is application/json.
 	 *
 	 * @return string
 	 */
-	public function getContentType()
-	{
+	public function getContentType() {
 		return "application/json";
 	}
-	
+
 	/**
 	 * Add additional headers to force no caching of page.
-	 * 
+	 *
 	 * @todo Should we really disable caching here?
 	 */
-	protected function preGeneration()
-	{
+	protected function preGeneration() {
 		parent::preGeneration();
 		header('Cache-Control: no-cache, must-revalidate');
 		header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');

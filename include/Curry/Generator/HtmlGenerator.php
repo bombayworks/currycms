@@ -15,38 +15,38 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
-use Curry\Controller\Frontend;
+namespace Curry\Generator;
 use Curry\Module\PageModuleWrapper;
 
 /**
  * Page Generator for HTML documents.
- * 
+ *
  * Adds support for inline admin and HTML-head.
  *
- * @package Curry
+ * @package Curry\Generator
  */
-class Curry_PageGenerator_Html extends Curry_PageGenerator {
+class HtmlGenerator extends AbstractGenerator {
 	/**
 	 * Is Inline Admin enabled?
 	 *
 	 * @var bool
 	 */
 	protected $inlineAdmin = false;
-	
+
 	/**
 	 * Object to modify HTML-head
 	 *
-	 * @var Curry_HtmlHead
+	 * @var \Curry_HtmlHead
 	 */
 	protected $htmlHead;
-	
+
 	/**
 	 * {@inheritdoc}
 	 */
-	public function __construct(\Curry\App $app, PageRevision $pageRevision)
+	public function __construct(\Curry\App $app, \PageRevision $pageRevision)
 	{
 		parent::__construct($app, $pageRevision);
-		$this->htmlHead = new Curry_HtmlHead();
+		$this->htmlHead = new \Curry_HtmlHead();
 	}
 
 	/**
@@ -58,24 +58,24 @@ class Curry_PageGenerator_Html extends Curry_PageGenerator {
 	{
 		return "text/html";
 	}
-	
+
 	/**
 	 * Get an Curry_HtmlHead object to modify the &lt;head&gt; section of the html-page.
 	 *
-	 * @return Curry_HtmlHead
+	 * @return \Curry_HtmlHead
 	 */
 	public function getHtmlHead()
 	{
 		return $this->htmlHead;
 	}
-	
+
 	/** {@inheritdoc} */
 	public function generate(array $options = array())
 	{
 		$this->inlineAdmin = isset($options['inlineAdmin']) && (bool)$options['inlineAdmin'];
 		return parent::generate($options);
 	}
-	
+
 	/** {@inheritdoc} */
 	protected function insertModule(PageModuleWrapper $pageModuleWrapper)
 	{
@@ -84,14 +84,14 @@ class Curry_PageGenerator_Html extends Curry_PageGenerator {
 			return $this->adminModule(parent::insertModule($pageModuleWrapper), $pageModuleWrapper);
 		return parent::insertModule($pageModuleWrapper);
 	}
-	
+
 	/** {@inheritdoc} */
 	protected function saveModuleCache($cacheName, $lifetime)
 	{
 		$this->moduleCache['head'] = $this->htmlHead->getBacklog();
 		parent::saveModuleCache($cacheName, $lifetime);
 	}
-	
+
 	/** {@inheritdoc} */
 	protected function insertCachedModule($cache)
 	{
@@ -100,15 +100,15 @@ class Curry_PageGenerator_Html extends Curry_PageGenerator {
 		}
 		parent::insertCachedModule($cache);
 	}
-	
+
 	/** {@inheritdoc} */
 	protected function postGeneration()
 	{
 		parent::postGeneration();
-		
+
 		if($this->inlineAdmin)
 			$this->adminPanel();
-		else if (\Curry\App::getInstance()->config->curry->liveEdit && User::getUser()) {
+		else if ($this->app->config->curry->liveEdit && \User::getUser()) {
 			// Add button to toggle live edit
 			$url = json_encode(url('', $_GET)->add(array('curry_inline_admin'=>1))->remove('curry_force_show')->getAbsolute());
 			$htmlHead = $this->getHtmlHead();
@@ -134,14 +134,14 @@ JS
 		}
 
 		// TODO:
-		$appVars = \Curry\App::getInstance()->globals;
+		$appVars = $this->app->globals;
 		$appVars->HtmlHead = $this->htmlHead->getContent();
 	}
 
 	public function renderTemplate($template, $moduleContent)
 	{
 		if ($this->inlineAdmin) {
-			$excluded = \Curry\App::getInstance()->config->curry->backend->placeholderExclude->toArray();
+			$excluded = $this->app->config->curry->backend->placeholderExclude->toArray();
 			$placeholders = array();
 			$tpl = $template;
 			while($tpl) {
@@ -164,20 +164,20 @@ JS
 	 */
 	protected function adminPanel()
 	{
-		$user = User::getUser();
+		$user = \User::getUser();
 		$page = $this->getPage();
 		$commands = array();
-		
+
 		$url = url('admin.php?module=Curry_Backend_Page', array("view"=>"PageProperties", "page_id"=>$this->pageRevision->getPageId() ));
-		if($user->hasPagePermission($page, PageAccessPeer::PERM_PROPERTIES))
+		if($user->hasPagePermission($page, \PageAccessPeer::PERM_PROPERTIES))
 			$commands[] = array('Name' => 'Page properties', 'Url' => $url, 'Class' => 'iframe');
-		
+
 		$url = url('admin.php?module=Curry_Backend_Page', array('module'=>'Curry_Backend_Page', 'view'=>'NewPage', 'page_id' => $this->pageRevision->getPageId()));
-		if($user->hasPagePermission($page, PageAccessPeer::PERM_CREATE_PAGE))
+		if($user->hasPagePermission($page, \PageAccessPeer::PERM_CREATE_PAGE))
 			$commands[] = array('Name' => 'New page', 'Url' => $url, 'Class' => 'iframe');
 
 		$url = url('admin.php?module=Curry_Backend_Page', array('module'=>'Curry_Backend_Page', 'view'=>'PageRevisions', "page_id"=>$this->pageRevision->getPageId()));
-		if($user->hasPagePermission($page, PageAccessPeer::PERM_REVISIONS))
+		if($user->hasPagePermission($page, \PageAccessPeer::PERM_REVISIONS))
 			$commands[] = array('Name' => 'Page revisions', 'Url' => $url, 'Class' => 'iframe');
 
 		if($this->pageRevision->allowEdit()) {
@@ -187,25 +187,25 @@ JS
 			$commands[] = array('Name' => 'Create working revision (TODO)', 'Url' => $url, 'Class' => 'iframe');
 		}
 
-		$view = Curry_Backend_Page::getPageView($page);
+		$view = \Curry_Backend_Page::getPageView($page);
 		$url = url('admin.php?module=Curry_Backend_Page', array('view'=>$view,'page_id'=>$this->pageRevision->getPageId()));
 		$commands[] = array('Name' => 'Curry\Controller\Backend', 'Url' => $url, 'Class' => 'curry-admin-backend');
-		
+
 		$url = (string)url('', $_GET)->add(array('curry_inline_admin'=>0));
 		$commands[] = array('Name' => 'Exit Live Edit', 'Url' => $url, 'Class' => 'curry-admin-logout');
-		
-		$tpl = Curry_Twig_Template::loadTemplateString(Curry_InlineAdmin::getAdminPanelTpl());
+
+		$tpl = \Curry_Twig_Template::loadTemplateString(\Curry_InlineAdmin::getAdminPanelTpl());
 		$content = $tpl->render(array(
 			'commands' => $commands,
 		));
-		
+
 		$htmlHead = $this->getHtmlHead();
 		$htmlHead->addScript(\Curry\Backend\AbstractLegacyBackend::JQUERY_JS);
 		$htmlHead->addInlineScript('window.inlineAdminContent = '.json_encode($content).';');
 		$htmlHead->addScript("shared/backend/common/js/inline-admin.js");
-		$htmlHead->addStyleSheet("shared/backend/".\Curry\App::getInstance()->config->curry->backend->theme."/css/inline-admin.css");
+		$htmlHead->addStyleSheet("shared/backend/".$this->app->config->curry->backend->theme."/css/inline-admin.css");
 	}
-	
+
 	/**
 	 * Wrap placeholder with inline admin controls.
 	 *
@@ -216,18 +216,18 @@ JS
 	 */
 	protected function adminBlock($content, $target, $id)
 	{
-		$user = User::getUser();
+		$user = \User::getUser();
 		$page = $this->getPage();
 		$commands = array();
 
 		$url = url('admin.php', array('module' => 'Curry_Backend_Page', 'view'=>'NewModule', 'page_id'=>$this->pageRevision->getPageId(), 'target'=> $target));
-		if($user->hasPagePermission($page, PageAccessPeer::PERM_CREATE_MODULE))
+		if($user->hasPagePermission($page, \PageAccessPeer::PERM_CREATE_MODULE))
 			$commands['add'] = array('Name' => 'Add content', 'Url' => $url, 'Class' => 'iframe');
 
 		if (!count($commands))
 			return $content;
-		
-		$tpl = Curry_Twig_Template::loadTemplateString(Curry_InlineAdmin::getAdminBlockTpl());
+
+		$tpl = \Curry_Twig_Template::loadTemplateString(\Curry_InlineAdmin::getAdminBlockTpl());
 		return $tpl->render(array(
 			'Id' => $id,
 			'Target' => $target,
@@ -245,23 +245,23 @@ JS
 	 */
 	protected function adminModule($content, PageModuleWrapper $pageModuleWrapper)
 	{
-		$user = User::getUser();
+		$user = \User::getUser();
 		$pageId = $pageModuleWrapper->getPageRevision()->getPageId();
 		$page = $pageModuleWrapper->getPageRevision()->getPage();
 		$pageModuleId = $pageModuleWrapper->getPageModuleId();
 		$commands = array();
 
 		$templatePermission = $user->hasAccess('Curry_Backend_Template');
-		$contentPermission = $user->hasPagePermission($page, PageAccessPeer::PERM_CONTENT);
-		$modulePermission = $user->hasPagePermission($page, PageAccessPeer::PERM_MODULES);
-		$createPermission = $user->hasPagePermission($page, PageAccessPeer::PERM_CREATE_MODULE);
+		$contentPermission = $user->hasPagePermission($page, \PageAccessPeer::PERM_CONTENT);
+		$modulePermission = $user->hasPagePermission($page, \PageAccessPeer::PERM_MODULES);
+		$createPermission = $user->hasPagePermission($page, \PageAccessPeer::PERM_CREATE_MODULE);
 
 		if (!$user->hasModuleAccess($pageModuleWrapper))
 			return $content;
 
 		if ($contentPermission || $modulePermission) {
 			$url = url('admin.php', array('module'=>'Curry_Backend_Page', 'view'=>'Module', 'page_id'=>$pageId, 'page_module_id'=>$pageModuleId));
-			if($user->hasPagePermission($page, PageAccessPeer::PERM_CONTENT))
+			if($user->hasPagePermission($page, \PageAccessPeer::PERM_CONTENT))
 				$commands['edit'] = array('Name' => 'Edit', 'Url' => $url, 'Class' => 'iframe');
 		}
 
@@ -274,20 +274,19 @@ JS
 			$url = url('admin.php', array('module'=>'Curry_Backend_Page', 'view'=>'ModuleProperties', 'page_id'=>$pageId, 'page_module_id'=>$pageModuleId));
 			$commands['properties'] = array('Name' => 'Properties', 'Url' => $url, 'Class' => 'iframe');
 		}
-		
+
 		if($createPermission && (($contentPermission && !$pageModuleWrapper->isInherited()) || $modulePermission)) {
 			$url = url('admin.php', array('module'=>'Curry_Backend_Page', 'view'=>'DeleteModule', 'page_id'=>$pageId, 'page_module_id'=>$pageModuleId));
 			$commands['delete'] = array('Name' => 'Delete', 'Url' => $url, 'Class' => 'iframe');
 		}
-		
+
 		$module = $pageModuleWrapper->createObject();
-		$module->setPageGenerator($this);
 		$commands = $module->getInlineCommands($commands);
 
 		if (!count($commands))
 			return $content;
-		
-		$tpl = Curry_Twig_Template::loadTemplateString(Curry_InlineAdmin::getAdminModuleTpl());
+
+		$tpl = \Curry_Twig_Template::loadTemplateString(\Curry_InlineAdmin::getAdminModuleTpl());
 		return $tpl->render(array(
 			'Id' => $pageModuleId,
 			'Name' => $pageModuleWrapper->getName(),

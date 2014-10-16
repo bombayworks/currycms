@@ -16,6 +16,7 @@
  * @link       http://currycms.com
  */
 use Curry\Controller\Frontend;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Adds input/output encoding to Zend_Mail.
@@ -118,52 +119,33 @@ class Curry_Mail extends Zend_Mail
 	/**
 	 * Create a mail from a URL, Page or PageRevision.
 	 *
-	 * @param string|Page|PageRevision $page
-	 * @param Curry_Request $request
+	 * @param string|Page|PageRevision|Request $page
 	 * @param array $variables Additional template variables.
 	 * @return Curry_Mail
 	 */
-	public static function createFromPage($page, $request = null, array $variables = array())
+	public static function createFromPage($page)
 	{
-		$app = Frontend::getInstance();
-		
-		// If a URL is provided, attempt to find page using route
-		if(is_string($page)) {
-			$r = new Curry_Request('GET', (string)url($page));
-			$page = $app->findPage($r);
-			if(!$request)
-				$request = $r;
-		}
-		
-		// Find PageRevision
-		if($page instanceof PageRevision) {
-			$pageRevision = $page;
-		} elseif($page instanceof Page) {
-			$pageRevision = $page->getPageRevision();
-			if(!$pageRevision)
-				throw new Exception('Page has no active revision.');
+		$app = \Curry\App::getInstance();
+
+		// Make sure we have a request object
+		if (is_string($page)) {
+			$request = Request::create($page);
+		} elseif ($page instanceof Page) {
+			$request = Request::create($page->getUrl());
+		} elseif ($page instanceof PageRevision) {
+			$request = Request::create($page->getPage()->getUrl());
+		} elseif ($page instanceof Request) {
+			$request = $page;
 		} else {
-			throw new Exception('$page is of invalid type, expected Page or PageRevision.');
-		}
-		
-		// Create Curry_Request object if not provided
-		$oldVal = Curry_URL::setPreventRedirect(true);
-		if(!$request) {
-			$url = (string)url($pageRevision->getPage()->getUrl());
-			$request = new Curry_Request('GET', $url);
+			throw new Exception('Expected parameter $page to be one of string|Page|PageRevision|Request.');
 		}
 		
 		// Generate page
-		$pageGenerator = $app->createPageGenerator($pageRevision, $request);
-		$content = $pageGenerator->render($variables);
+		$response = $app->handle($request, \Symfony\Component\HttpKernel\HttpKernelInterface::SUB_REQUEST, false);
 		
 		// Create email
 		$mail = new Curry_Mail();
-		$mail->setBodyHtml($content);
-		$mail->setBodyText(strip_tags($content));
-		
-		// restore redirect status
-		Curry_URL::setPreventRedirect($oldVal);
+		$mail->setBodyHtml($response->getContent());
 
 		return $mail;
 	}

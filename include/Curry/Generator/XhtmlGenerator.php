@@ -16,30 +16,31 @@
  * @link       http://currycms.com
  */
 
+namespace Curry\Generator;
+
 /**
- * PageGenerator for XHTML documents.
- * 
+ * Generator for XHTML documents.
+ *
  * Same as HTML documents except content type.
- * 
- * @package Curry
+ *
+ * @package Curry\Generator
  */
-class Curry_PageGenerator_Xhtml extends Curry_PageGenerator_Html {
+class XhtmlGenerator extends HtmlGenerator {
 	/**
 	 * Set content type for Xhtml
-	 * 
+	 *
 	 * If browser accepts application/xhtml+xml, we use that, otherwise text/html.
 	 *
 	 * @return string
 	 */
-	public function getContentType()
-	{
+	public function getContentType() {
 		$mime = "text/html";
-		if(stristr($_SERVER["HTTP_ACCEPT"],"application/xhtml+xml")) {
-			if(preg_match('/application\/xhtml\+xml;q=0(\.[1-9]+)/i', $_SERVER["HTTP_ACCEPT"], $matches)) {
+		if (stristr($_SERVER["HTTP_ACCEPT"], "application/xhtml+xml")) {
+			if (preg_match('/application\/xhtml\+xml;q=0(\.[1-9]+)/i', $_SERVER["HTTP_ACCEPT"], $matches)) {
 				$xhtml_q = $matches[1];
-				if(preg_match('/text\/html;q=0(\.[1-9]+)/i', $_SERVER["HTTP_ACCEPT"], $matches)) {
+				if (preg_match('/text\/html;q=0(\.[1-9]+)/i', $_SERVER["HTTP_ACCEPT"], $matches)) {
 					$html_q = $matches[1];
-					if($xhtml_q >= $html_q) {
+					if ($xhtml_q >= $html_q) {
 						$mime = "application/xhtml+xml";
 					}
 				}
@@ -47,12 +48,12 @@ class Curry_PageGenerator_Xhtml extends Curry_PageGenerator_Html {
 				$mime = "application/xhtml+xml";
 			}
 		}
-		
+
 		// special check for the W3C_Validator
 		if (stristr($_SERVER["HTTP_USER_AGENT"], "W3C_Validator")) {
 			$mime = "application/xhtml+xml";
 		}
-		
+
 		return $mime;
 	}
 }

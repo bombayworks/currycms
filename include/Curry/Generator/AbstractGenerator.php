@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Generator;
 use Curry\Module\AbstractModule;
 use Curry\Module\PageModuleWrapper;
 use Curry\Util\ArrayHelper;
@@ -23,36 +24,29 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Base class for generating pages.
- * 
+ *
  * This takes a PageRevision and inserts its modules into a template
  * and return the generated content.
- * 
- * @package Curry
+ *
+ * @package Curry\Generator
  *
  */
-class Curry_PageGenerator
+class AbstractGenerator
 {
 	/**
 	 * The pageRevision to generate.
 	 *
-	 * @var PageRevision
+	 * @var \PageRevision
 	 */
 	protected $pageRevision;
-	
-	/**
-	 * The request object.
-	 *
-	 * @var Curry_Request
-	 */
-	protected $request;
-	
+
 	/**
 	 * Keeps track of the cached content when caching a module.
 	 *
 	 * @var array
 	 */
 	protected $moduleCache;
-	
+
 	/**
 	 * Holds module debug info.
 	 *
@@ -67,16 +61,16 @@ class Curry_PageGenerator
 
 	/**
 	 * @param \Curry\App $app
-	 * @param PageRevision $pageRevision
-	 * @return Curry_PageGenerator
-	 * @throws Exception
+	 * @param \PageRevision $pageRevision
+	 * @return AbstractGenerator
+	 * @throws \Exception
 	 */
-	public static function create(\Curry\App $app, PageRevision $pageRevision)
+	public static function create(\Curry\App $app, \PageRevision $pageRevision)
 	{
 		$generatorClass = $pageRevision->getPage()->getInheritedProperty('Generator', $app->config->curry->defaultGeneratorClass);
 		$generator = new $generatorClass($app, $pageRevision);
-		if (!$generator instanceof Curry_PageGenerator) {
-			throw new Exception('Page generator must be of type Curry_PageGenerator');
+		if (!$generator instanceof AbstractGenerator) {
+			throw new \Exception('Page generator must be of type Curry\Generator\AbstractGenerator');
 		}
 		return $generator;
 	}
@@ -85,9 +79,9 @@ class Curry_PageGenerator
 	 * Constructor
 	 *
 	 * @param \Curry\App $app
-	 * @param PageRevision $pageRevision
+	 * @param \PageRevision $pageRevision
 	 */
-	public function __construct(\Curry\App $app, PageRevision $pageRevision)
+	public function __construct(\Curry\App $app, \PageRevision $pageRevision)
 	{
 		$this->app = $app;
 		$this->pageRevision = $pageRevision;
@@ -96,13 +90,13 @@ class Curry_PageGenerator
 	/**
 	 * Return the Page that is being generated.
 	 *
-	 * @return Page
+	 * @return \Page
 	 */
 	public function getPage()
 	{
 		return $this->pageRevision->getPage();
 	}
-	
+
 	/**
 	 * Get the mime-type for this page.
 	 *
@@ -112,7 +106,7 @@ class Curry_PageGenerator
 	{
 		return "text/plain";
 	}
-	
+
 	/**
 	 * Insert module and return generated content.
 	 *
@@ -121,18 +115,18 @@ class Curry_PageGenerator
 	 */
 	protected function insertModule(PageModuleWrapper $pageModuleWrapper)
 	{
-		\Curry\App::getInstance()->logger->debug(($pageModuleWrapper->getEnabled() ? 'Inserting' : 'Skipping').' module "'.$pageModuleWrapper->getName().'" of type "'.$pageModuleWrapper->getClassName() . '" with target "'.$pageModuleWrapper->getTarget().'"');
-		
+		$this->app->logger->debug(($pageModuleWrapper->getEnabled() ? 'Inserting' : 'Skipping').' module "'.$pageModuleWrapper->getName().'" of type "'.$pageModuleWrapper->getClassName() . '" with target "'.$pageModuleWrapper->getTarget().'"');
+
 		if(!$pageModuleWrapper->getEnabled())
 			return "";
 
 		$cached = false;
-		$devMode = \Curry\App::getInstance()->config->curry->developmentMode;
+		$devMode = $this->app->config->curry->developmentMode;
 		if ($devMode) {
 			$time = microtime(true);
 			$sqlQueries = Propel::getQueryCount();
-			$userTime = Curry_Util::getCpuTime('u');
-			$systemTime = Curry_Util::getCpuTime('s');
+			$userTime = \Curry_Util::getCpuTime('u');
+			$systemTime = \Curry_Util::getCpuTime('s');
 			$memoryUsage = memory_get_usage(true);
 		}
 
@@ -143,16 +137,16 @@ class Curry_PageGenerator
 		$cacheName = $this->getModuleCacheName($pageModuleWrapper, $module);
 
 		// try to use cached content
-		if($cp !== null && ($cache = \Curry\App::getInstance()->cache->load($cacheName)) !== false) {
+		if($cp !== null && ($cache = $this->app->cache->load($cacheName)) !== false) {
 			$cached = true;
 			$this->insertCachedModule($cache);
 			$content = $cache['content'];
 		} else {
 			$template = null;
 			if ($pageModuleWrapper->getTemplate())
-				$template = Curry_Twig_Template::loadTemplate($pageModuleWrapper->getTemplate());
+				$template = \Curry_Twig_Template::loadTemplate($pageModuleWrapper->getTemplate());
 			else if ($module->getDefaultTemplate())
-				$template = Curry_Twig_Template::loadTemplateString($module->getDefaultTemplate());
+				$template = \Curry_Twig_Template::loadTemplateString($module->getDefaultTemplate());
 			if($template && $template->getEnvironment()) {
 				$twig = $template->getEnvironment();
 				$twig->addGlobal('module', array(
@@ -164,7 +158,7 @@ class Curry_PageGenerator
 				));
 			}
 			$content = (string)$module->showFront($template);
-			
+
 			if($cp !== null) {
 				$this->moduleCache['content'] = $content;
 				$this->saveModuleCache($cacheName, $cp->getLifetime());
@@ -173,15 +167,15 @@ class Curry_PageGenerator
 
 		if ($devMode) {
 			$time = microtime(true) - $time;
-			$userTime = Curry_Util::getCpuTime('u') - $userTime;
-			$systemTime = Curry_Util::getCpuTime('s') - $systemTime;
+			$userTime = \Curry_Util::getCpuTime('u') - $userTime;
+			$systemTime = \Curry_Util::getCpuTime('s') - $systemTime;
 			$memoryUsage = memory_get_usage(true) - $memoryUsage;
 			$sqlQueries = $sqlQueries !== null ? Propel::getQueryCount() - $sqlQueries : null;
 
-			$cpuLimit = \Curry\App::getInstance()->config->curry->debug->moduleCpuLimit;
-			$timeLimit = \Curry\App::getInstance()->config->curry->debug->moduleTimeLimit;
-			$memoryLimit = \Curry\App::getInstance()->config->curry->debug->moduleMemoryLimit;
-			$sqlLimit = \Curry\App::getInstance()->config->curry->debug->moduleSqlLimit;
+			$cpuLimit = $this->app->config->curry->debug->moduleCpuLimit;
+			$timeLimit = $this->app->config->curry->debug->moduleTimeLimit;
+			$memoryLimit = $this->app->config->curry->debug->moduleMemoryLimit;
+			$sqlLimit = $this->app->config->curry->debug->moduleSqlLimit;
 
 			if (($userTime + $systemTime) > $cpuLimit || $time > $timeLimit)
 				trace_warning('Module generation time exceeded limit');
@@ -199,15 +193,15 @@ class Curry_PageGenerator
 				$cached,
 				round($time * 1000.0),
 				round(($userTime + $systemTime) * 1000.0),
-				Curry_Util::humanReadableBytes($memoryUsage),
-				Curry_Util::humanReadableBytes(memory_get_peak_usage(true)),
+				\Curry_Util::humanReadableBytes($memoryUsage),
+				\Curry_Util::humanReadableBytes(memory_get_peak_usage(true)),
 				$sqlQueries !== null ? $sqlQueries : 'n/a',
 			);
 		}
 
 		return $content;
 	}
-	
+
 	/**
 	 * Save module content to cache.
 	 *
@@ -216,9 +210,9 @@ class Curry_PageGenerator
 	 */
 	protected function saveModuleCache($cacheName, $lifetime)
 	{
-		\Curry\App::getInstance()->cache->save($this->moduleCache, $cacheName, array(), $lifetime);
+		$this->app->cache->save($this->moduleCache, $cacheName, array(), $lifetime);
 	}
-	
+
 	/**
 	 * Inserting cached content.
 	 *
@@ -227,7 +221,7 @@ class Curry_PageGenerator
 	protected function insertCachedModule($cache)
 	{
 	}
-	
+
 	/**
 	 * Get unique name for storing module cache.
 	 *
@@ -241,14 +235,14 @@ class Curry_PageGenerator
 			'_moduleDataId' => $pageModuleWrapper->getModuleDataId(),
 			'_template' => $pageModuleWrapper->getTemplate()
 		);
-		
+
 		$cp = $module->getCacheProperties();
 		if($cp !== null)
 			$params = array_merge($params, $cp->getParams());
-			
-		return __CLASS__.'_Module_'.md5(serialize($params));
+
+		return md5(__CLASS__.'_Module_'.serialize($params));
 	}
-	
+
 	/**
 	 * Function to execute before generating page.
 	 */
@@ -256,22 +250,22 @@ class Curry_PageGenerator
 	{
 		$this->moduleDebugInfo = array();
 	}
-	
+
 	/**
 	 * Function to execute after generating page.
 	 */
 	protected function postGeneration()
 	{
-		if (\Curry\App::getInstance()->config->curry->developmentMode) {
+		if ($this->app->config->curry->developmentMode) {
 			$totalTime = 0;
 			foreach($this->moduleDebugInfo as $mdi)
 				$totalTime += $mdi[5];
 			$labels = array('Name', 'Class', 'Template', 'Target', 'Cached','Time (ms)', 'Cpu (ms)', 'Memory Delta', 'Memory Peak', 'Queries');
-			\Curry\App::getInstance()->logger->debug("Modules(".count($this->moduleDebugInfo)."): ".round($totalTime / 1000.0, 3)."s",
+			$this->app->logger->debug("Modules(".count($this->moduleDebugInfo)."): ".round($totalTime / 1000.0, 3)."s",
 					array_merge(array($labels), $this->moduleDebugInfo));
 		}
 	}
-	
+
 	/**
 	 * Generate a page, and return module content as an associative array.
 	 *
@@ -290,7 +284,7 @@ class Curry_PageGenerator
 				continue;
 			if(isset($options['indexing']) && $options['indexing'] && !$pageModuleWrapper->getPageModule()->getSearchVisibility())
 				continue;
-			
+
 			$target = $pageModuleWrapper->getTarget();
 			$content = $this->insertModule($pageModuleWrapper);
 			if(isset($moduleContent[$target])) {
@@ -299,42 +293,41 @@ class Curry_PageGenerator
 				$moduleContent[$target] = (string)$content;
 			}
 		}
-		
+
 		$this->postGeneration();
 		return $moduleContent;
 	}
 
 	protected function getGlobals()
 	{
-		$lang = Curry_Language::getLanguage();
+		$lang = \Curry_Language::getLanguage();
 		return array(
 			'ContentType' => $this->getContentType(),
 			'Encoding' => $this->getOutputEncoding(),
 			'language' => $lang ? $lang->toArray() : null,
 			'page' => $this->pageRevision->getPage()->toTwig(),
-			'request' => $this->request,
 		);
 	}
-	
+
 	/**
 	 * Render a page and return content.
 	 *
 	 * @param array $vars
 	 * @param array $options
-	 * @return string
+	 * @return Response
 	 */
 	public function render(array $vars = array(), array $options = array())
 	{
-		$twig = Curry_Twig_Template::getSharedEnvironment();
+		$twig = \Curry_Twig_Template::getSharedEnvironment();
 
-		// Todo: Rename curry to app?
-		$appVars = \Curry\App::getInstance()->globals;
+		// TODO: Rename curry to app?
+		$appVars = $this->app->globals;
 		if (isset($vars['curry']))
 			ArrayHelper::extend($appVars, $vars['curry']);
 		$vars['curry'] = ArrayHelper::extend($appVars, $this->getGlobals());
 		foreach($vars as $k => $v)
 			$twig->addGlobal($k, $v);
-		
+
 		$moduleContent = $this->generate($options);
 		if(isset($options['pageModuleId'])) {
 			$pageModuleId = $options['pageModuleId'];
@@ -343,7 +336,7 @@ class Curry_PageGenerator
 				$pageModuleWrapper = $pageModuleWrappers[$pageModuleId];
 				return $moduleContent[$pageModuleWrapper->getTarget()];
 			} else {
-				throw new Exception('PageModule with id = '.$pageModuleId.' not found on page.');
+				throw new \Exception('PageModule with id = '.$pageModuleId.' not found on page.');
 			}
 		}
 		$template = $this->getTemplateObject();
@@ -354,7 +347,7 @@ class Curry_PageGenerator
 	{
 		return $template->render($moduleContent);
 	}
-	
+
 	/**
 	 * Return content to browser.
 	 *
@@ -362,7 +355,7 @@ class Curry_PageGenerator
 	 */
 	protected function sendContent($content)
 	{
-		$internalEncoding = \Curry\App::getInstance()->config->curry->internalEncoding;
+		$internalEncoding = $this->app->config->curry->internalEncoding;
 		$outputEncoding = $this->getOutputEncoding();
 		if ($outputEncoding && $internalEncoding != $outputEncoding) {
 			trace_warning('Converting output from internal coding');
@@ -370,7 +363,7 @@ class Curry_PageGenerator
 		}
 		echo $content;
 	}
-	
+
 	/**
 	 * Set content-type header.
 	 */
@@ -378,7 +371,7 @@ class Curry_PageGenerator
 	{
 		header("Content-Type: ".$this->getContentTypeWithCharset());
 	}
-	
+
 	/**
 	 * Get the output encoding for this page. If the encoding hasnt been set for this page, the encoding set in the configuration will be used.
 	 *
@@ -386,9 +379,9 @@ class Curry_PageGenerator
 	 */
 	public function getOutputEncoding()
 	{
-		return $this->getPage()->getInheritedProperty('Encoding', \Curry\App::getInstance()->config->curry->outputEncoding);
+		return $this->getPage()->getInheritedProperty('Encoding', $this->app->config->curry->outputEncoding);
 	}
-	
+
 	/**
 	 * Get value of HTTP Content-type header.
 	 *
@@ -402,7 +395,7 @@ class Curry_PageGenerator
 			$contentType .= "; charset=" . $outputEncoding;
 		return $contentType;
 	}
-	
+
 	/**
 	 * Get the root template (aka page template) for the PageRevision we are rendering.
 	 *
@@ -412,7 +405,7 @@ class Curry_PageGenerator
 	{
 		return $this->pageRevision->getInheritedProperty('Template');
 	}
-	
+
 	/**
 	 * Get an array of Curry\Module\PageModuleWrapper objects for all modules on the PageRevision we are rendering.
 	 *
@@ -420,27 +413,27 @@ class Curry_PageGenerator
 	 */
 	protected function getPageModuleWrappers()
 	{
-		$langcode = (string)Curry_Language::getLangCode();
-		$cacheName = __CLASS__ . '_ModuleWrappers_' . $this->pageRevision->getPageRevisionId() . '_' . $langcode;
-		
-		if(($moduleWrappers = \Curry\App::getInstance()->cache->load($cacheName)) === false) {
+		$langcode = (string)\Curry_Language::getLangCode();
+		$cacheName = md5(__CLASS__ . '_ModuleWrappers_' . $this->pageRevision->getPageRevisionId() . '_' . $langcode);
+
+		if(($moduleWrappers = $this->app->cache->load($cacheName)) === false) {
 			$moduleWrappers = $this->pageRevision->getPageModuleWrappers($langcode);
-			\Curry\App::getInstance()->cache->save($moduleWrappers, $cacheName);
+			$this->app->cache->save($moduleWrappers, $cacheName);
 		}
-			
+
 		return $moduleWrappers;
 	}
-	
+
 	/**
 	 * Get the template object for this PageRevision.
 	 *
-	 * @return Curry_Twig_Template
+	 * @return \Curry_Twig_Template
 	 */
 	public function getTemplateObject()
 	{
 		$rootTemplate = $this->getRootTemplate();
 		if(!$rootTemplate)
-			throw new Exception("Page has no root template");
-		return Curry_Twig_Template::loadTemplate($rootTemplate);
+			throw new \Exception("Page has no root template");
+		return \Curry_Twig_Template::loadTemplate($rootTemplate);
 	}
 }

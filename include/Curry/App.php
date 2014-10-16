@@ -120,7 +120,7 @@ namespace Curry {
 	 * @property \Monolog\Logger $logger
 	 * @property \Page $page
 	 * @property \PageRevision $pageRevision
-	 * @property \Curry_PageGenerator $generator
+	 * @property \Curry\Generator\AbstractGenerator $generator
 	 *
 	 * @package Curry
 	 */
@@ -358,14 +358,13 @@ namespace Curry {
 					'divertOutMailToAdmin' => false,
 					'statistics' => false,
 					'applicationClass' => 'Curry\App',
-					'defaultGeneratorClass' => 'Curry_PageGenerator_Html',
+					'defaultGeneratorClass' => 'Curry\Generator\HtmlGenerator',
 					'forceDomain' => false,
 					'revisioning' => false,
 					'umask' => 0002,
 					'liveEdit' => true,
 					'secret' => 'SECRET',
 					'errorNotification' => false,
-					'generator' => 'Curry_PageGenerator_Html',
 					'internalEncoding' => 'utf-8',
 					'outputEncoding' => 'utf-8',
 					'basePath' => PathHelper::path(true, dirname(__FILE__), '..', '..'),

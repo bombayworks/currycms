@@ -15,22 +15,22 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Generator;
 
 /**
  * Page generator for XML documents.
- * 
+ *
  * Changes content type to application/xml.
  *
- * @package Curry
+ * @package Curry\Generator
  */
-class Curry_PageGenerator_Xml extends Curry_PageGenerator {
+class XmlGenerator extends AbstractGenerator {
 	/**
 	 * Content type is application/xml
 	 *
 	 * @return string
 	 */
-	public function getContentType()
-	{
+	public function getContentType() {
 		return "application/xml";
 	}
 }

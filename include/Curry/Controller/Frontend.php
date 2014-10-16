@@ -86,7 +86,7 @@ class Frontend implements EventSubscriberInterface {
 				$page = \PageQuery::create()->findPk($this->app->config->curry->errorPage->notFound);
 				if ($page && $page->getEnabled()) {
 					// TODO: Generate error page
-					$generator = \Curry_PageGenerator::create($this->app, $page->getActivePageRevision());
+					$generator = \Curry\Generator\AbstractGenerator::create($this->app, $page->getActivePageRevision());
 					$event->setResponse($generator->render());
 				}
 			}
@@ -409,7 +409,7 @@ class Frontend implements EventSubscriberInterface {
 		// Attempt to render page
 		$app->logger->notice('Showing page ' . $page->getName() . ' (PageRevisionId: '.$pageRevision->getPageRevisionId().')');
 
-		$generator = \Curry_PageGenerator::create($app, $pageRevision);
+		$generator = \Curry\Generator\AbstractGenerator::create($app, $pageRevision);
 
 		$app->page = $page;
 		$app->pageRevision = $pageRevision;

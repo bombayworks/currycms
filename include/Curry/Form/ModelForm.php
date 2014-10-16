@@ -145,7 +145,7 @@ class ModelForm extends Form
 	 * @param \BaseObject $instance
 	 */
 	public function fillModel(\BaseObject $instance) {
-		$values = $this->getValues();
+		$values = $this->getValue();
 		foreach($this->getFieldColumns() as $column) {
 			$field = $this->getField($this->getColumnName($column));
 			if($field)
@@ -237,6 +237,7 @@ class ModelForm extends Form
 				return $value ? $value->getPrimaryKey() : null;
 				break;
 		}
+		return null;
 	}
 
 	/**
@@ -418,7 +419,7 @@ class ModelForm extends Form
 	 * Create form field from foreign key.
 	 *
 	 * @param \ColumnMap $column
-	 * @return \Zend_Form_Field
+	 * @return Entity
 	 */
 	public function createFieldFromForeignKey(\ColumnMap $column) {
 		$options = $this->getColumnOptions($column);
@@ -445,7 +446,7 @@ class ModelForm extends Form
 	 * Create form field from relation.
 	 *
 	 * @param \RelationMap $relation
-	 * @return \Entity
+	 * @return Entity
 	 */
 	public function createFieldFromRelation(\RelationMap $relation) {
 		$name = 'relation__'.strtolower($relation->getName());

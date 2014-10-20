@@ -16,6 +16,7 @@
  * @link       http://currycms.com
  */
 use Curry\Util\ArrayHelper;
+use Curry\Util\Console;
 use Curry\Util\Propel;
 use Curry\Util\StringHelper;
 
@@ -477,7 +478,7 @@ class Curry_Backend_Database extends \Curry\Backend\AbstractLegacyBackend
 		$output = Curry_Backend_DatabaseHelper::propelGen($cmd);
 		$success = Curry_Backend_DatabaseHelper::getPropelGenStatus($output);
 		$this->beginDetails("Running propel-gen $cmd", $success ? self::MSG_SUCCESS : self::MSG_ERROR, !$success);
-		$this->addMainContent('<pre class="console">'.Curry_Console::colorize($output).'</pre>');
+		$this->addMainContent('<pre class="console">'.Console::colorize($output).'</pre>');
 		$this->endDetails();
 		return $success;
 	}

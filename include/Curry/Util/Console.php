@@ -15,13 +15,14 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Util;
 
 /**
  * Static class with utility functions for console output.
  * 
- * @package Curry
+ * @package Curry\Util
  */
-class Curry_Console {
+class Console {
 	/**
 	 * Convert ANSI terminal color codes to HTML-code.
 	 *
@@ -30,7 +31,7 @@ class Curry_Console {
 	 */
 	public static function colorize($text)
 	{
-		return '<span>'.preg_replace_callback("/\033\\[([\\d;]*)m/", function($m) { return '</span>'.Curry_Console::colorizeTag($m[1]); }, $text)."</span>";
+		return '<span>'.preg_replace_callback("/\033\\[([\\d;]*)m/", function($m) { return '</span>'.Console::colorizeTag($m[1]); }, $text)."</span>";
 	}
 	
 	/**

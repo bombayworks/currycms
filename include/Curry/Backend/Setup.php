@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Util\Console;
 use Curry\Util\PathHelper;
 
 /**
@@ -441,7 +442,7 @@ HTML
 		$content = Curry_Backend_DatabaseHelper::propelGen('');
 		if(!Curry_Backend_DatabaseHelper::getPropelGenStatus($content)) {
 			$this->addMessage('It seems there was an error when building propel', self::MSG_ERROR);
-			$this->addMainContent('<pre class="console">'.Curry_Console::colorize($content).'</pre>');
+			$this->addMainContent('<pre class="console">'.Console::colorize($content).'</pre>');
 			return false;
 		}
 
@@ -463,7 +464,7 @@ HTML
 			$content = Curry_Backend_DatabaseHelper::propelGen('insert-sql');
 			if(!Curry_Backend_DatabaseHelper::getPropelGenStatus($content)) {
 				$this->addMessage('It seems there was an error when creating database tables', self::MSG_ERROR);
-				$this->addMainContent('<pre class="console">'.Curry_Console::colorize($content).'</pre>');
+				$this->addMainContent('<pre class="console">'.Console::colorize($content).'</pre>');
 				return false;
 			}
 		}

@@ -43,9 +43,13 @@ class InjectFile extends Behavior
 	 */
 	public function inject($builder, $type) {
 		if(($file = $this->getParameter($type))) {
-			$path = $builder->getBuildProperty('projectDir') . DIRECTORY_SEPARATOR . $file;
-			if(!file_exists($path))
-				throw new Exception('Inject-file doesnt exist: ' . $path);
+			$path = stream_resolve_include_path($file);
+			if ($path === false) {
+				$path = __DIR__ . '/../../../../propel/' . $file;
+				if (!file_exists($path)) {
+					throw new Exception('Inject-file doesnt exist: ' . $path);
+				}
+			}
 			return file_get_contents($path);
 		}
 		return false;

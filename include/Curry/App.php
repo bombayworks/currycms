@@ -238,6 +238,10 @@ namespace Curry {
 
 			$this->dispatcher->addSubscriber(new Frontend($this));
 			$this->dispatcher->addSubscriber($app->backend);
+
+			$this->dispatcher->addSubscriber(new \Curry\Generator\ModuleProfiler($app->logger));
+			$this->dispatcher->addSubscriber(new \Curry\Generator\ModuleCacher($app->cache));
+			$this->dispatcher->addSubscriber(new \Curry\Generator\ModuleHtmlHead());
 		}
 
 		public function run(Request $request = null) {

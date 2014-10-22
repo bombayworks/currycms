@@ -79,26 +79,10 @@ class HtmlGenerator extends AbstractGenerator {
 	/** {@inheritdoc} */
 	protected function insertModule(PageModuleWrapper $pageModuleWrapper)
 	{
-		$this->htmlHead->clearBacklog();
+
 		if($this->inlineAdmin && $this->pageRevision->allowEdit())
 			return $this->adminModule(parent::insertModule($pageModuleWrapper), $pageModuleWrapper);
 		return parent::insertModule($pageModuleWrapper);
-	}
-
-	/** {@inheritdoc} */
-	protected function saveModuleCache($cacheName, $lifetime)
-	{
-		$this->moduleCache['head'] = $this->htmlHead->getBacklog();
-		parent::saveModuleCache($cacheName, $lifetime);
-	}
-
-	/** {@inheritdoc} */
-	protected function insertCachedModule($cache)
-	{
-		if(is_array($cache['head'])) {
-			$this->htmlHead->replay($cache['head']);
-		}
-		parent::insertCachedModule($cache);
 	}
 
 	/** {@inheritdoc} */
@@ -132,10 +116,6 @@ document.addEventListener('DOMContentLoaded', function() {
 JS
 			);
 		}
-
-		// TODO:
-		$appVars = $this->app->globals;
-		$appVars->HtmlHead = $this->htmlHead->getContent();
 	}
 
 	public function renderTemplate($template, $moduleContent)

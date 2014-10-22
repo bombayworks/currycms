@@ -41,20 +41,6 @@ class AbstractGenerator
 	protected $pageRevision;
 
 	/**
-	 * Keeps track of the cached content when caching a module.
-	 *
-	 * @var array
-	 */
-	protected $moduleCache;
-
-	/**
-	 * Holds module debug info.
-	 *
-	 * @var array
-	 */
-	protected $moduleDebugInfo;
-
-	/**
 	 * @var \Curry\App
 	 */
 	protected $app;
@@ -117,89 +103,37 @@ class AbstractGenerator
 	{
 		$this->app->logger->debug(($pageModuleWrapper->getEnabled() ? 'Inserting' : 'Skipping').' module "'.$pageModuleWrapper->getName().'" of type "'.$pageModuleWrapper->getClassName() . '" with target "'.$pageModuleWrapper->getTarget().'"');
 
-		if(!$pageModuleWrapper->getEnabled())
-			return "";
+		/** @var PreModuleEvent $event */
+		$event = $this->app->dispatcher->dispatch(GeneratorEvents::PRE_MODULE, new PreModuleEvent($pageModuleWrapper));
 
-		$cached = false;
-		$devMode = $this->app->config->curry->developmentMode;
-		if ($devMode) {
-			$time = microtime(true);
-			$sqlQueries = Propel::getQueryCount();
-			$userTime = \Curry_Util::getCpuTime('u');
-			$systemTime = \Curry_Util::getCpuTime('s');
-			$memoryUsage = memory_get_usage(true);
-		}
-
-		$this->moduleCache = array();
-		$module = $pageModuleWrapper->createObject();
-
-		$cp = $module->getCacheProperties();
-		$cacheName = $this->getModuleCacheName($pageModuleWrapper, $module);
-
-		// try to use cached content
-		if($cp !== null && ($cache = $this->app->cache->load($cacheName)) !== false) {
-			$cached = true;
-			$this->insertCachedModule($cache);
-			$content = $cache['content'];
-		} else {
+		if ($event->getContent() === null) {
+			// TODO: how do we handle $event->isEnabled() ?
+			/** @var \Curry\Module\AbstractModule $module */
+			$module = $pageModuleWrapper->createObject();
 			$template = null;
-			if ($pageModuleWrapper->getTemplate())
-				$template = \Curry_Twig_Template::loadTemplate($pageModuleWrapper->getTemplate());
+			if ($event->getTemplate() !== null)
+				$template = \Curry_Twig_Template::loadTemplate($event->getTemplate());
 			else if ($module->getDefaultTemplate())
 				$template = \Curry_Twig_Template::loadTemplateString($module->getDefaultTemplate());
-			if($template && $template->getEnvironment()) {
+			if ($template && $template->getEnvironment()) {
 				$twig = $template->getEnvironment();
 				$twig->addGlobal('module', array(
-					'Id' => $pageModuleWrapper->getPageModuleId(),
-					'ClassName' => $pageModuleWrapper->getClassName(),
-					'Name' => $pageModuleWrapper->getName(),
-					'ModuleDataId' => $pageModuleWrapper->getModuleDataId(),
-					'Target' => $pageModuleWrapper->getTarget(),
-				));
+						'Id' => $pageModuleWrapper->getPageModuleId(),
+						'ClassName' => $pageModuleWrapper->getClassName(),
+						'Name' => $pageModuleWrapper->getName(),
+						'ModuleDataId' => $pageModuleWrapper->getModuleDataId(),
+						'Target' => $pageModuleWrapper->getTarget(),
+					));
 			}
 			$content = (string)$module->showFront($template);
-
-			if($cp !== null) {
-				$this->moduleCache['content'] = $content;
-				$this->saveModuleCache($cacheName, $cp->getLifetime());
-			}
+		} else {
+			$content = $event->getContent();
 		}
 
-		if ($devMode) {
-			$time = microtime(true) - $time;
-			$userTime = \Curry_Util::getCpuTime('u') - $userTime;
-			$systemTime = \Curry_Util::getCpuTime('s') - $systemTime;
-			$memoryUsage = memory_get_usage(true) - $memoryUsage;
-			$sqlQueries = $sqlQueries !== null ? Propel::getQueryCount() - $sqlQueries : null;
+		/** @var PostModuleEvent $postEvent */
+		$postEvent = $this->app->dispatcher->dispatch(GeneratorEvents::POST_MODULE, new PostModuleEvent($pageModuleWrapper, $content, $event->getExtras()));
 
-			$cpuLimit = $this->app->config->curry->debug->moduleCpuLimit;
-			$timeLimit = $this->app->config->curry->debug->moduleTimeLimit;
-			$memoryLimit = $this->app->config->curry->debug->moduleMemoryLimit;
-			$sqlLimit = $this->app->config->curry->debug->moduleSqlLimit;
-
-			if (($userTime + $systemTime) > $cpuLimit || $time > $timeLimit)
-				trace_warning('Module generation time exceeded limit');
-			if ($memoryUsage > $memoryLimit)
-				trace_warning('Module memory usage exceeded limit');
-			if ($sqlQueries > $sqlLimit)
-				trace_warning('Module sql query count exceeded limit');
-
-			// add module debug info
-			$this->moduleDebugInfo[] = array(
-				$pageModuleWrapper->getName(),
-				$pageModuleWrapper->getClassName(),
-				$pageModuleWrapper->getTemplate(),
-				$pageModuleWrapper->getTarget(),
-				$cached,
-				round($time * 1000.0),
-				round(($userTime + $systemTime) * 1000.0),
-				\Curry_Util::humanReadableBytes($memoryUsage),
-				\Curry_Util::humanReadableBytes(memory_get_peak_usage(true)),
-				$sqlQueries !== null ? $sqlQueries : 'n/a',
-			);
-		}
-
-		return $content;
+		return $postEvent->getContent();
 	}
 
 	/**
@@ -210,60 +144,7 @@ class AbstractGenerator
 	 */
 	protected function saveModuleCache($cacheName, $lifetime)
 	{
-		$this->app->cache->save($this->moduleCache, $cacheName, array(), $lifetime);
-	}
 
-	/**
-	 * Inserting cached content.
-	 *
-	 * @param array $cache
-	 */
-	protected function insertCachedModule($cache)
-	{
-	}
-
-	/**
-	 * Get unique name for storing module cache.
-	 *
-	 * @param PageModuleWrapper $pageModuleWrapper
-	 * @param AbstractModule $module
-	 * @return string
-	 */
-	private function getModuleCacheName(PageModuleWrapper $pageModuleWrapper, AbstractModule $module)
-	{
-		$params = array(
-			'_moduleDataId' => $pageModuleWrapper->getModuleDataId(),
-			'_template' => $pageModuleWrapper->getTemplate()
-		);
-
-		$cp = $module->getCacheProperties();
-		if($cp !== null)
-			$params = array_merge($params, $cp->getParams());
-
-		return md5(__CLASS__.'_Module_'.serialize($params));
-	}
-
-	/**
-	 * Function to execute before generating page.
-	 */
-	protected function preGeneration()
-	{
-		$this->moduleDebugInfo = array();
-	}
-
-	/**
-	 * Function to execute after generating page.
-	 */
-	protected function postGeneration()
-	{
-		if ($this->app->config->curry->developmentMode) {
-			$totalTime = 0;
-			foreach($this->moduleDebugInfo as $mdi)
-				$totalTime += $mdi[5];
-			$labels = array('Name', 'Class', 'Template', 'Target', 'Cached','Time (ms)', 'Cpu (ms)', 'Memory Delta', 'Memory Peak', 'Queries');
-			$this->app->logger->debug("Modules(".count($this->moduleDebugInfo)."): ".round($totalTime / 1000.0, 3)."s",
-					array_merge(array($labels), $this->moduleDebugInfo));
-		}
 	}
 
 	/**
@@ -274,7 +155,7 @@ class AbstractGenerator
 	 */
 	public function generate(array $options = array())
 	{
-		$this->preGeneration();
+		$this->app->dispatcher->dispatch(GeneratorEvents::PRE_GENERATION);
 
 		// Load page modules
 		$moduleContent = array();
@@ -294,7 +175,8 @@ class AbstractGenerator
 			}
 		}
 
-		$this->postGeneration();
+		$this->app->dispatcher->dispatch(GeneratorEvents::POST_GENERATION);
+
 		return $moduleContent;
 	}
 

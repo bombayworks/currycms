@@ -296,7 +296,7 @@ class Curry_Backend_Page extends \Curry\Backend\AbstractLegacyBackend
 		$disabled = array();
 		$enabled = array();
 		foreach(PageQuery::create()->orderByBranch()->find() as $page) {
-			$options[$page->getPageId()] = str_repeat(Curry_Core::SELECT_TREE_PREFIX, $page->getLevel()).$page->getName();
+			$options[$page->getPageId()] = str_repeat("\xC2\xA0", $page->getLevel() * 3).$page->getName();
 			if(!$page->getWorkingPageRevisionId() || $page->getWorkingPageRevisionId() == $page->getActivePageRevisionId())
 				$disabled[] = $page->getPageId();
 			else
@@ -914,7 +914,7 @@ class Curry_Backend_Page extends \Curry\Backend\AbstractLegacyBackend
 			if (self::isTemplatePage($page))
 				continue;
 			$pages[] = array(
-				str_repeat(Curry_Core::SELECT_TREE_PREFIX, $page->getLevel()) . $page->getName(),
+				str_repeat("\xC2\xA0", $page->getLevel() * 3) . $page->getName(),
 				$page->getUrl(),
 			);
 		}

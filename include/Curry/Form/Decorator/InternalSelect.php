@@ -51,7 +51,7 @@ class Curry_Form_Decorator_InternalSelect extends Zend_Form_Decorator_Abstract
 		foreach(PageQuery::create()->orderByBranch()->find() as $page) {
 			if(Curry_Backend_Page::isTemplatePage($page))
 				continue;
-			$options[$page->getPageId().'|'.$page->getUrl()] = str_repeat(Curry_Core::SELECT_TREE_PREFIX, $page->getLevel()) . $page->getName();
+			$options[$page->getPageId().'|'.$page->getUrl()] = str_repeat("\xC2\xA0", $page->getLevel() * 3) . $page->getName();
 		}
 		$options = Html::createSelectOptions($options, '');
 		$markup = Html::tag('select', $attr, $options);

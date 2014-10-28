@@ -9,7 +9,7 @@ public static function getSelect(Page $rootPage = null)
 	$pages = $rootPage ? $rootPage->getBranch() : PageQuery::create()->orderByBranch()->find();
 	$ret = array();
 	foreach($pages as $page) {
-		$indent = str_repeat(Curry_Core::SELECT_TREE_PREFIX, $page->getLevel() - $offset);
+		$indent = str_repeat("\xC2\xA0", ($page->getLevel() - $offset) * 3);
 		$ret[$page->getPageId()] = $indent . $page->getName();
 	}
 	return $ret;

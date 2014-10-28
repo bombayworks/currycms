@@ -238,7 +238,7 @@ abstract class Curry_Backend_FileEditor extends \Curry\Backend\AbstractLegacyBac
 		$rii = $this->getFileIterator();
 		foreach($rii as $entry) {
 			if($entry->isDir())
-				$dirs[$rii->getSubPathname()] = str_repeat(Curry_Core::SELECT_TREE_PREFIX, $rii->getDepth() + 1) . $entry->getFilename();
+				$dirs[$rii->getSubPathname()] = str_repeat("\xC2\xA0", ($rii->getDepth() + 1) * 3) . $entry->getFilename();
 		}
 		$form = new Curry_Form(array(
 			'action' => url('', $_GET),

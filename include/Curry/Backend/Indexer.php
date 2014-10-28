@@ -66,7 +66,7 @@ class Curry_Backend_Indexer extends \Curry\Backend\AbstractLegacyBackend {
 		if (isPost() && $form->isValid($_POST)) {
 			$this->addMainContent($form);
 			
-			$index = Curry_Core::getSearchIndex();
+			$index = $this->app->index;
 			$hits = $index->find($form->keywords->getValue());
 			
 			$html = "";
@@ -93,7 +93,7 @@ class Curry_Backend_Indexer extends \Curry\Backend\AbstractLegacyBackend {
 	{
 		$this->addMainMenu();
 		
-		Curry_Core::getSearchIndex(true);
+		throw new Exception('Not implemented.');
 		$this->addMessage('Index created', self::MSG_SUCCESS);
 	}
 
@@ -106,8 +106,8 @@ class Curry_Backend_Indexer extends \Curry\Backend\AbstractLegacyBackend {
 	public static function doRebuild($ajax = false)
 	{
 		$ses = new \Zend\Session\Container(__CLASS__);
-		$index = Curry_Core::getSearchIndex();
-		$app = new Frontend();
+		$index = \Curry\App::getInstance()->index;
+		$app = new Frontend(\Curry\App::getInstance());
 		Curry_URL::setReverseRouteCallback(array($app, 'reverseRoute'));
 
 		try {
@@ -189,7 +189,7 @@ class Curry_Backend_Indexer extends \Curry\Backend\AbstractLegacyBackend {
 	{
 		$model = get_class($item);
 		if (!$index)
-			$index = Curry_Core::getSearchIndex();
+			$index = \Curry\App::getInstance()->index;
 		$hits = $index->find("model:$model");
 		$pk = serialize($item->getPrimaryKey());
 		foreach ($hits as $hit) {
@@ -211,7 +211,7 @@ class Curry_Backend_Indexer extends \Curry\Backend\AbstractLegacyBackend {
 		$model = get_class($item);
 		try {
 			if (!$index)
-				$index = Curry_Core::getSearchIndex();
+				$index = \Curry\App::getInstance()->index;
 			if ($removeOld)
 				self::removeItem($item, $index);
 			$hasI18n = in_array('i18n', array_keys(PropelQuery::from($model)->getTableMap()->getBehaviors()));
@@ -362,7 +362,7 @@ HTML;
 	{
 		$this->addMainMenu();
 		
-		$index = Curry_Core::getSearchIndex();
+		$index = $this->app->index;
 		$index->optimize();
 		$this->addMessage('Index successfully optimized', self::MSG_SUCCESS);
 	}
@@ -374,7 +374,7 @@ HTML;
 	{
 		$this->addMainMenu();
 		
-		$index = Curry_Core::getSearchIndex();
+		$index = $this->app->index;
 		$this->addMessage('Number of documents: '.$index->numDocs());
 		$this->addMessage('Number of deleted documents: ' . ($index->count() - $index->numDocs()));
 		$this->addMessage('Number of terms: '.count($index->terms()));

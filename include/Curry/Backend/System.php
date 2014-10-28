@@ -651,7 +651,7 @@ class System extends \Curry\Backend\AbstractLegacyBackend {
 		$contents .= "ini_set('display_errors', 1);\n";
 		$contents .= "umask(0002);\n\n";
 
-		$autoloader = \Curry_Core::getAutoloader();
+		$autoloader = $this->app->autoloader;
 		foreach($classes as $clazz) {
 			$file = $autoloader->findFile($clazz);
 			$contents .= "// $clazz ($file)\n";
@@ -780,7 +780,7 @@ class System extends \Curry\Backend\AbstractLegacyBackend {
 			}
 		}
 		
-		if(!\Curry_Core::requireMigration())
+		if(!$this->app->requireMigration())
 			return;
 		
 		$form = self::getButtonForm('migrate', 'Migrate');

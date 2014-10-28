@@ -132,7 +132,7 @@ class Curry_Backend_Users extends AbstractLegacyBackend
 			$backend[$backendClass] = $backendName;
 			$permissions = method_exists($backendClass, 'getPermissions') ? call_user_func(array($backendClass, 'getPermissions')) : array();
 			foreach($permissions as $permission) {
-				$backend[$backendClass."/".$permission] = Curry_Core::SELECT_TREE_PREFIX . $permission;
+				$backend[$backendClass."/".$permission] = "\xC2\xA0\xC2\xA0\xC2\xA0" . $permission;
 				if (!$user->hasAccess($backendClass."/".$permission))
 					$disable[] = $backendClass."/".$permission;
 			}

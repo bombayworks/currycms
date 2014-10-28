@@ -446,7 +446,7 @@ class Curry_Backend_DatabaseHelper {
 	 */
 	public static function propelGen($cmd = '', $argv = array())
 	{
-		$autoloader = Curry_Core::getAutoloader();
+		$autoloader = App::getInstance()->autoloader;
 		$generatorBase = dirname(dirname(dirname($autoloader->findFile('AbstractPropelDataModelTask'))));
 		$buildXml = $generatorBase . '/build.xml';
 		$projectPath = \Curry\App::getInstance()->config->curry->projectPath . '/propel';

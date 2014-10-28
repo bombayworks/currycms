@@ -136,6 +136,9 @@ $(document).ready(function() {
 		.delegate('a.toggle-show-all-blocks', 'click', function() {
 			$('body').toggleClass('show-all-blocks');
 			return false;
+		})
+		.delegate('a.curry-admin-logout', 'click', function() {
+			document.cookie = "curry_liveedit=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
 		});
 
 	var $c = $('<div id="curry-admin"></div>').appendTo('body');

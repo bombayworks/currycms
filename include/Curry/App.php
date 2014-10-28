@@ -242,6 +242,7 @@ namespace Curry {
 			$this->dispatcher->addSubscriber(new \Curry\Generator\ModuleProfiler($app->logger));
 			$this->dispatcher->addSubscriber(new \Curry\Generator\ModuleCacher($app->cache));
 			$this->dispatcher->addSubscriber(new \Curry\Generator\ModuleHtmlHead());
+			$this->dispatcher->addSubscriber(new \Curry\Generator\LiveEdit($this));
 		}
 
 		public function run(Request $request = null) {

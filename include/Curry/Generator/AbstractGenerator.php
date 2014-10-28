@@ -155,7 +155,7 @@ class AbstractGenerator
 	 */
 	public function generate(array $options = array())
 	{
-		$this->app->dispatcher->dispatch(GeneratorEvents::PRE_GENERATION);
+		$this->app->dispatcher->dispatch(GeneratorEvents::PRE_GENERATE);
 
 		// Load page modules
 		$moduleContent = array();
@@ -175,9 +175,9 @@ class AbstractGenerator
 			}
 		}
 
-		$this->app->dispatcher->dispatch(GeneratorEvents::POST_GENERATION);
-
-		return $moduleContent;
+		$event = new PostGenerateEvent($moduleContent);
+		$this->app->dispatcher->dispatch(GeneratorEvents::POST_GENERATE, $event);
+		return $event->getContent();
 	}
 
 	protected function getGlobals()
@@ -221,13 +221,9 @@ class AbstractGenerator
 				throw new \Exception('PageModule with id = '.$pageModuleId.' not found on page.');
 			}
 		}
-		$template = $this->getTemplateObject();
-		return new Response($this->renderTemplate($template, $moduleContent));
-	}
-
-	public function renderTemplate($template, $moduleContent)
-	{
-		return $template->render($moduleContent);
+		$event = new RenderEvent($this->getTemplateObject(), $moduleContent);
+		$this->app->dispatcher->dispatch(GeneratorEvents::RENDER, $event);
+		return new Response($event->getTemplate()->render($event->getContent()));
 	}
 
 	/**

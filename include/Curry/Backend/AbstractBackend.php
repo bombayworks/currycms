@@ -8,12 +8,6 @@ use Symfony\Component\HttpFoundation\Request;
 
 abstract class AbstractBackend extends \Curry\View {
 	/**
-	 * Path to shared jQuery library.
-	 *
-	 */
-	const JQUERY_JS = 'shared/libs/jquery-ui-1.8.17/js/jquery-1.7.1.min.js';
-
-	/**
 	 * Success message.
 	 */
 	const MSG_SUCCESS = 'success';

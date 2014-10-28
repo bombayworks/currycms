@@ -12,7 +12,7 @@ class ModuleHtmlHead implements EventSubscriberInterface
 		return array(
 			GeneratorEvents::PRE_MODULE => array('preModule'),
 			GeneratorEvents::POST_MODULE => array('postModule'),
-			GeneratorEvents::POST_GENERATION => array('postGeneration'),
+			GeneratorEvents::RENDER => array('render', -1000),
 		);
 	}
 
@@ -33,7 +33,7 @@ class ModuleHtmlHead implements EventSubscriberInterface
 		}
 	}
 
-	public function postGeneration()
+	public function render(RenderEvent $event)
 	{
 		$appVars = App::getInstance()->globals;
 		$htmlHead = App::getInstance()->generator->getHtmlHead();

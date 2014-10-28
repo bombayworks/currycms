@@ -28,19 +28,19 @@ class ModuleProfiler extends Configurable implements EventSubscriberInterface
 	public static function getSubscribedEvents()
 	{
 		return array(
-			GeneratorEvents::PRE_GENERATION => array('preGeneration', 10000),
-			GeneratorEvents::POST_GENERATION => array('postGeneration', -10000),
+			GeneratorEvents::PRE_GENERATE => array('preGenerate', 10000),
+			GeneratorEvents::POST_GENERATE => array('postGenerate', -10000),
 			GeneratorEvents::PRE_MODULE => array('preModule', 10000),
 			GeneratorEvents::POST_MODULE => array('postModule', -1000),
 		);
 	}
 
-	public function preGeneration()
+	public function preGenerate()
 	{
 		$this->moduleDebugInfo = array();
 	}
 
-	public function postGeneration()
+	public function postGenerate()
 	{
 		$totalTime = 0;
 		foreach($this->moduleDebugInfo as $mdi)

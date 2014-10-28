@@ -75,7 +75,7 @@ public function setLoggedIn($setCookie = false)
 	// Create cookie
 	if($setCookie) {
 		$expiration = ($setCookie === true) ? \Curry\App::getInstance()->config->curry->backend->loginTokenExpire : intval($setCookie);
-		setcookie(self::COOKIE_NAME, $this->getLoginToken(), time() + $expiration);
+		setcookie(self::COOKIE_NAME, $this->getLoginToken(), time() + $expiration, '/');
 	}
 }
 

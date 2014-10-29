@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\URL;
 use Curry\Tree\Tree;
 use Curry\Util\ArrayHelper;
 use Curry\Util\Console;
@@ -669,7 +670,7 @@ class Curry_Backend_Database extends \Curry\Backend\AbstractLegacyBackend
 	{
 		// restore from temp file
 		try {
-			if(!Curry_URL::validate())
+			if(!URL::validate())
 				throw new Exception('Invalid hash');
 				
 			if(!Curry_Backend_DatabaseHelper::restoreFromFile($_GET['file']))
@@ -1034,7 +1035,7 @@ class Curry_Backend_Database extends \Curry\Backend\AbstractLegacyBackend
 	 */
 	public function showContinueRestore()
 	{
-		if(!Curry_URL::validate())
+		if(!URL::validate())
 			throw new Exception('Invalid hash');
 		
 		Curry_Backend_DatabaseHelper::restoreFromFile($_GET['file'], $_GET['tables'], $_GET['max_execution_time'], $_GET['line'], $this);

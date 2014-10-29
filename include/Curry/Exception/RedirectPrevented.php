@@ -17,7 +17,7 @@
  */
 
 /**
- * Thrown by Curry_URL when setPreventRedirect() has been enabled.
+ * Thrown by Curry\URL when setPreventRedirect() has been enabled.
  * 
  * @see Curry_URL::setPreventRedirect()
  * 

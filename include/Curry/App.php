@@ -1,5 +1,7 @@
 <?php
 namespace {
+	use Curry\URL;
+
 	/**
 	 * Global helper function for logging messages or objects.
 	 *
@@ -55,7 +57,7 @@ namespace {
 	/**
 	 * Global helper function for creating URLs.
 	 *
-	 * This is a helper function for the Curry_URL-class. The first parameter
+	 * This is a helper function for the Curry\URL-class. The first parameter
 	 * specifies the URL, if empty the current url will be used.
 	 *
 	 * The second parameter is an array of query-string variables to be added
@@ -64,11 +66,11 @@ namespace {
 	 *
 	 * @param string $url	URL path
 	 * @param array $vars	Additional query-string variables
-	 * @return Curry_URL
+	 * @return URL
 	 */
 	function url($url = "", array $vars = array())
 	{
-		$url = new \Curry_URL($url);
+		$url = new \Curry\URL($url);
 		$url->add($vars);
 		return $url;
 	}
@@ -98,6 +100,7 @@ namespace {
 namespace Curry {
 	use Curry\Controller\Backend;
 	use Curry\Controller\Frontend;
+	use Curry\URL;
 	use Curry\Util\Html;
 	use Curry\Util\PathHelper;
 	use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -231,8 +234,8 @@ namespace Curry {
 			self::initErrorHandling();
 			self::initPropel();
 
-			\Curry_URL::setDefaultBaseUrl($this->config->curry->baseUrl);
-			\Curry_URL::setDefaultSecret($this->config->curry->secret);
+			URL::setDefaultBaseUrl($this->config->curry->baseUrl);
+			URL::setDefaultSecret($this->config->curry->secret);
 
 			register_shutdown_function(array($this, 'shutdown'));
 
@@ -712,7 +715,7 @@ namespace Curry {
 				// Create form to recreate error
 				$method = strtoupper($_SERVER['REQUEST_METHOD']);
 				$hidden = Html::createHiddenFields($method == 'POST' ? $_POST : $_GET);
-				$action = url(\Curry_URL::getRequestUri())->getAbsolute();
+				$action = url(URL::getRequestUri())->getAbsolute();
 				$form = '<form action="' . $action . '" method="' . $method . '">' . $hidden . '<button type="submit">Execute</button></form>';
 
 				// Create mail

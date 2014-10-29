@@ -61,11 +61,11 @@ abstract class Curry_ModelView_Abstract {
 			$params = $_GET;
 		try {
 			/*if (isAjax())
-				$pr = Curry_URL::setPreventRedirect(true);*/
+				$pr = Curry\URL::setPreventRedirect(true);*/
 			$action = isset($params['action']) ? explode(".", $params['action']) : array();
 			$this->dispatch($action, $backend, $params);
 			/*if (isAjax())
-				Curry_URL::setPreventRedirect($pr);*/
+				Curry\URL::setPreventRedirect($pr);*/
 		}
 		catch (\Curry_Exception_RedirectPrevented $e) {
 			self::returnPartial('<script type="text/javascript">window.location.href = "'.addcslashes($e->getUrl(), '"').'";</script>');

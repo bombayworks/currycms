@@ -52,7 +52,7 @@ class Frontend implements EventSubscriberInterface {
 		if($app->config->curry->pageCache && class_exists('\\Page')) {
 			\Page::getCachedPages();
 		}
-		//\Curry_URL::setReverseRouteCallback(array($this, 'reverseRoute'));
+		//\Curry\URL::setReverseRouteCallback(array($this, 'reverseRoute'));
 	}
 
 	public static function getSubscribedEvents()
@@ -102,7 +102,7 @@ class Frontend implements EventSubscriberInterface {
 	public function reverseRoute(&$path, &$query)
 	{
 		// remove matching base path
-		$baseUrl = \Curry_URL::getDefaultBaseUrl();
+		$baseUrl = \Curry\URL::getDefaultBaseUrl();
 		$basePath = $baseUrl['path'];
 		$basePathRemoved = false;
 		if (\Curry\Util\StringHelper::startsWith($path, $basePath) && $path !== '/') {
@@ -121,7 +121,7 @@ class Frontend implements EventSubscriberInterface {
 		$requestUri = $request->getPathInfo();
 
 		// remove base path
-		$baseUrl = \Curry_URL::getDefaultBaseUrl();
+		$baseUrl = \Curry\URL::getDefaultBaseUrl();
 		$basePath = $baseUrl['path'];
 		if (strpos($requestUri, $basePath) === 0)
 			$requestUri = substr($requestUri, strlen($basePath));

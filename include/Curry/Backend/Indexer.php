@@ -16,6 +16,7 @@
  * @link       http://currycms.com
  */
 use Curry\Controller\Frontend;
+use Curry\URL;
 use Curry\Util\Propel;
 use Curry\Util\Html;
 
@@ -108,7 +109,7 @@ class Curry_Backend_Indexer extends \Curry\Backend\AbstractLegacyBackend {
 		$ses = new \Zend\Session\Container(__CLASS__);
 		$index = \Curry\App::getInstance()->index;
 		$app = new Frontend(\Curry\App::getInstance());
-		Curry_URL::setReverseRouteCallback(array($app, 'reverseRoute'));
+		URL::setReverseRouteCallback(array($app, 'reverseRoute'));
 
 		try {
 			while ($ses->model < count($ses->models)) {
@@ -335,7 +336,7 @@ HTML;
 	 */
 	public function showRebuildAll()
 	{
-		if (Curry_URL::validate()) {
+		if (URL::validate()) {
 			// Override and increase max execution time if set
 			$timeLimit = ini_get('max_execution_time');
 			if($timeLimit && $timeLimit < 250) {

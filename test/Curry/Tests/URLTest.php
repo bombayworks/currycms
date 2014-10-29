@@ -8,7 +8,7 @@ class URLTest extends \PHPUnit_Framework_TestCase {
 
 	public function testUrlFull()
 	{
-		$url = new \Curry_URL(self::TEST_URL);
+		$url = new \Curry\URL(self::TEST_URL);
 		$this->assertEquals('http', $url->getScheme());
 		$this->assertEquals('user', $url->getUser());
 		$this->assertEquals('password', $url->getPassword());
@@ -22,7 +22,7 @@ class URLTest extends \PHPUnit_Framework_TestCase {
 
 	public function testUris()
 	{
-		\Curry_URL::setDefaultBaseUrl('');
+		\Curry\URL::setDefaultBaseUrl('');
 		$uris = array(
 			'ftp://ftp.is.co.za/rfc/rfc1808.txt',
 			'http://www.ietf.org/rfc/rfc2396.txt',
@@ -34,26 +34,26 @@ class URLTest extends \PHPUnit_Framework_TestCase {
 			'urn:oasis:names:specification:docbook:dtd:xml:4.1.2',
 		);
 		foreach($uris as $uri) {
-			$url = new \Curry_URL($uri);
+			$url = new \Curry\URL($uri);
 			$this->assertEquals($uri, (string)$url);
 		}
 	}
 
 	public function testUrlHost()
 	{
-		$url = new \Curry_URL('//hostname/');
+		$url = new \Curry\URL('//hostname/');
 		$this->assertEquals('hostname', $url->getHost());
 	}
 
 	public function testUrlPath()
 	{
-		$url = new \Curry_URL('/path/to/file');
+		$url = new \Curry\URL('/path/to/file');
 		$this->assertEquals('/path/to/file', $url->getPath());
 	}
 
 	public function testUrlRelativePath()
 	{
-		$url = new \Curry_URL('path/to/file');
+		$url = new \Curry\URL('path/to/file');
 		$this->assertEquals('path/to/file', $url->getPath());
 	}
 
@@ -63,15 +63,15 @@ class URLTest extends \PHPUnit_Framework_TestCase {
 		$baseUrl = 'http://domain.com/sub/';
 		$defaultBaseUrl = 'http://localhost/project/';
 
-		\Curry_URL::setDefaultBaseUrl($defaultBaseUrl);
+		\Curry\URL::setDefaultBaseUrl($defaultBaseUrl);
 
 		// No base specified (should use default)
-		$url = new \Curry_URL($relative);
+		$url = new \Curry\URL($relative);
 		$this->assertEquals('/project/'.$relative, $url->getRelative());
 		$this->assertEquals($defaultBaseUrl.$relative, $url->getAbsolute());
 
 		// Base specified on instance
-		$url = new \Curry_URL('path/to/file');
+		$url = new \Curry\URL('path/to/file');
 		$url->setBaseUrl($baseUrl);
 		$this->assertEquals('/sub/'.$relative, $url->getRelative());
 		$this->assertEquals($baseUrl.$relative, $url->getAbsolute());
@@ -80,7 +80,7 @@ class URLTest extends \PHPUnit_Framework_TestCase {
 	public function testUrlScriptRelativePath()
 	{
 		$_SERVER['REQUEST_URI'] = '/test/index.php';
-		$url = new \Curry_URL('~/path/to/file');
+		$url = new \Curry\URL('~/path/to/file');
 		$this->assertEquals('/test/path/to/file', $url->getRelative());
 	}
 
@@ -90,11 +90,11 @@ class URLTest extends \PHPUnit_Framework_TestCase {
 		$vars = array('☃' => '☀');
 		$encoded = '%E2%98%83=%E2%98%80';
 
-		$url = new \Curry_URL();
+		$url = new \Curry\URL();
 		$url->add($vars);
 		$this->assertEquals($encoded, $url->getQueryString());
 
-		$url = new \Curry_URL('?'.$encoded);
+		$url = new \Curry\URL('?'.$encoded);
 		$this->assertEquals($vars, $url->getVars());
 	}
 
@@ -103,7 +103,7 @@ class URLTest extends \PHPUnit_Framework_TestCase {
 		$unencoded = '/☀';
 		$encoded = '/%E2%98%80';
 
-		$url = new \Curry_URL();
+		$url = new \Curry\URL();
 		$url->setPath($unencoded);
 		$this->assertEquals($encoded, $url->getRelative());
 
@@ -114,37 +114,37 @@ class URLTest extends \PHPUnit_Framework_TestCase {
 	public function testSecure()
 	{
 		$secret = sha1(self::TEST_URL);
-		$url = new \Curry_URL(self::TEST_URL);
+		$url = new \Curry\URL(self::TEST_URL);
 		$secureUrl = $url->getAbsolute('&', $secret);
 
-		$url = new \Curry_URL($secureUrl);
+		$url = new \Curry\URL($secureUrl);
 		$this->assertNotEmpty($url->getVar('hash'));
 		$this->assertTrue($url->isValid($secret));
 
-		\Curry_URL::setDefaultSecret(sha1($secret));
-		$url = new \Curry_URL(self::TEST_URL);
+		\Curry\URL::setDefaultSecret(sha1($secret));
+		$url = new \Curry\URL(self::TEST_URL);
 		$secureUrl = $url->getAbsolute('&', true);
 
-		$url = new \Curry_URL($secureUrl);
+		$url = new \Curry\URL($secureUrl);
 		$this->assertNotEmpty($url->getVar('hash'));
 		$this->assertTrue($url->isValid());
 	}
 
 	public function testAbsolute()
 	{
-		$url = new \Curry_URL(self::TEST_URL);
+		$url = new \Curry\URL(self::TEST_URL);
 		$this->assertEquals(self::TEST_URL, $url->getAbsolute());
 	}
 
 	public function testToString()
 	{
-		$url = new \Curry_URL(self::TEST_URL);
+		$url = new \Curry\URL(self::TEST_URL);
 		$this->assertEquals(self::TEST_URL, (string)$url);
 	}
 
 	public function testEmpty()
 	{
-		$url = new \Curry_URL();
+		$url = new \Curry\URL();
 		$this->assertEquals('', $url->getScheme());
 		$this->assertEquals('', $url->getUser());
 		$this->assertEquals('', $url->getPassword());
@@ -158,7 +158,7 @@ class URLTest extends \PHPUnit_Framework_TestCase {
 
 	public function testSetters()
 	{
-		$url = new \Curry_URL();
+		$url = new \Curry\URL();
 		$url->setScheme('http')
 			->setUser('user')
 			->setPassword('password')
@@ -175,7 +175,7 @@ class URLTest extends \PHPUnit_Framework_TestCase {
 		$varString = "foobar";
 		$varArray = array($varString => '');
 
-		$url = new \Curry_URL();
+		$url = new \Curry\URL();
 		$url->setQueryString($varString);
 		$this->assertEquals($varString, $url->getQueryString());
 		$this->assertEquals($varArray, $url->getVars());
@@ -187,13 +187,13 @@ class URLTest extends \PHPUnit_Framework_TestCase {
 		$varString = "foo=bar&baz=qux";
 
 		// Set query string using array
-		$url = new \Curry_URL();
+		$url = new \Curry\URL();
 		$url->setQueryString($varArray);
 		$this->assertEquals($varArray, $url->getVars());
 		$this->assertEquals($varString, $url->getQueryString());
 
 		// Set query string using string
-		$url = new \Curry_URL();
+		$url = new \Curry\URL();
 		$url->setQueryString($varString);
 		$this->assertEquals($varArray, $url->getVars());
 		$this->assertEquals($varString, $url->getQueryString());
@@ -201,7 +201,7 @@ class URLTest extends \PHPUnit_Framework_TestCase {
 
 	public function testNoScheme()
 	{
-		$url = new \Curry_URL(str_replace('http:', '', self::TEST_URL));
+		$url = new \Curry\URL(str_replace('http:', '', self::TEST_URL));
 		$this->assertEquals('', $url->getScheme());
 	}
 }

@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\URL;
 use Curry\Util\Console;
 use Curry\Util\PathHelper;
 
@@ -485,7 +486,7 @@ HTML
 			$contentTemplates = array('backup' => '[ Restore from backup ]') + $contentTemplates;
 		}
 
-		$scriptPath = Curry_URL::getScriptPath();
+		$scriptPath = URL::getScriptPath();
 		if (($pos = strrpos($scriptPath, '/')) !== false)
 			$scriptPath = substr($scriptPath, 0, $pos + 1);
 		else

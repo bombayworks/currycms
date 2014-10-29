@@ -42,7 +42,7 @@ abstract class AbstractBackend extends \Curry\View {
 	/**
 	 * Object to modify HTML head section.
 	 *
-	 * @var \Curry_HtmlHead
+	 * @var \Curry\Util\HtmlHead
 	 */
 	protected $htmlHead;
 
@@ -103,7 +103,7 @@ abstract class AbstractBackend extends \Curry\View {
 	public function __construct(\Curry\App $app)
 	{
 		$this->app = $app;
-		$this->htmlHead = new \Curry_HtmlHead();
+		$this->htmlHead = new \Curry\Util\HtmlHead();
 	}
 
 	/**
@@ -176,7 +176,7 @@ abstract class AbstractBackend extends \Curry\View {
 	/**
 	 * Get the object used to modify the HTML head section for the backend.
 	 *
-	 * @return \Curry_HtmlHead
+	 * @return \Curry\Util\HtmlHead
 	 */
 	public function getHtmlHead()
 	{

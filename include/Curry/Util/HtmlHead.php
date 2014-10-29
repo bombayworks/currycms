@@ -15,13 +15,14 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Util;
 
 /**
  * Modify elements of the HTML <code><head></code>.
  * 
- * @package Curry
+ * @package Curry\Util
  */
-class Curry_HtmlHead {
+class HtmlHead {
 	/**
 	 * Content as an array, each line as one element.
 	 *
@@ -91,7 +92,7 @@ class Curry_HtmlHead {
 		$this->backlog[] = array('method' => __METHOD__, 'args' => func_get_args());
 		
 		if ($this->conditional)
-			throw new Exception('Cannot create nested conditionals.');
+			throw new \Exception('Cannot create nested conditionals.');
 			
 		$this->content[] = "<!--[if $condition]>";
 		$this->conditional = true;
@@ -107,7 +108,7 @@ class Curry_HtmlHead {
 		$this->backlog[] = array('method' => __METHOD__, 'args' => func_get_args());
 		
 		if (!$this->conditional)
-			throw new Exception('endConditional called without beginConditional');
+			throw new \Exception('endConditional called without beginConditional');
 		
 		$this->content[] = "<![endif]-->";
 		$this->conditional = false;

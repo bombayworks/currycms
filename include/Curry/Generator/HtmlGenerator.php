@@ -28,7 +28,7 @@ class HtmlGenerator extends AbstractGenerator {
 	/**
 	 * Object to modify HTML-head
 	 *
-	 * @var \Curry_HtmlHead
+	 * @var \Curry\Util\HtmlHead
 	 */
 	protected $htmlHead;
 
@@ -38,7 +38,7 @@ class HtmlGenerator extends AbstractGenerator {
 	public function __construct(\Curry\App $app, \PageRevision $pageRevision)
 	{
 		parent::__construct($app, $pageRevision);
-		$this->htmlHead = new \Curry_HtmlHead();
+		$this->htmlHead = new \Curry\Util\HtmlHead();
 	}
 
 	/**
@@ -52,9 +52,9 @@ class HtmlGenerator extends AbstractGenerator {
 	}
 
 	/**
-	 * Get an Curry_HtmlHead object to modify the &lt;head&gt; section of the html-page.
+	 * Get an Curry\Util\HtmlHead object to modify the &lt;head&gt; section of the html-page.
 	 *
-	 * @return \Curry_HtmlHead
+	 * @return \Curry\Util\HtmlHead
 	 */
 	public function getHtmlHead()
 	{

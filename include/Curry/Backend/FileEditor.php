@@ -17,6 +17,8 @@
  */
 use Curry\Controller\Backend;
 use Curry\Controller\Frontend;
+use Curry\Tree\FilesystemTree;
+use Curry\Tree\Tree;
 use Curry\Util\PathHelper;
 
 /**
@@ -55,11 +57,11 @@ abstract class Curry_Backend_FileEditor extends \Curry\Backend\AbstractLegacyBac
 	/**
 	 * Get folder tree used by addMenu.
 	 *
-	 * @return Curry_Tree_Filesystem
+	 * @return FilesystemTree
 	 */
 	protected function getTree()
 	{
-		return new Curry_Tree_Filesystem($this->root, array(
+		return new FilesystemTree($this->root, array(
 			'ajaxUrl' => (string)url('', $_GET)->add(array('json'=>1)),
 			'nodeCallback' => array($this, 'getNodeJson'),
 		));
@@ -69,7 +71,7 @@ abstract class Curry_Backend_FileEditor extends \Curry\Backend\AbstractLegacyBac
 	 * Get file node properties.
 	 *
 	 * @param string $path
-	 * @param Curry_Tree $tree
+	 * @param Tree $tree
 	 * @param int $depth
 	 * @return array
 	 */

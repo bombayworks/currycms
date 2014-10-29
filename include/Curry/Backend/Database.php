@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Tree\Tree;
 use Curry\Util\ArrayHelper;
 use Curry\Util\Console;
 use Curry\Util\Propel;
@@ -107,7 +108,7 @@ class Curry_Backend_Database extends \Curry\Backend\AbstractLegacyBackend
 		$this->addMenuItem("Propel", url('', array("module", "view"=>"Propel")));
 		$this->addMenuItem("SQL", url('', array("module", "view"=>"SQL")));
 
-		$tree = new Curry_Tree(array(
+		$tree = new Tree(array(
 			'persist' => false,
 			'ajaxUrl' => (string)url('', array('module','view'=>'Main', 'json' => 1)),
 			'nodeCallback' => array($this, 'getTreeJson'),

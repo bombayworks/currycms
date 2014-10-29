@@ -15,13 +15,14 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Tree;
 
 /**
  * Create tree from Propel nested set.
  * 
- * @package Curry
+ * @package Curry\Tree
  */
-class Curry_Tree_Propel extends Curry_Tree {
+class PropelTree extends Tree {
 	/**
 	 * Model class.
 	 *
@@ -32,7 +33,7 @@ class Curry_Tree_Propel extends Curry_Tree {
 	/**
 	 * Query object.
 	 *
-	 * @var ModelCriteria
+	 * @var \ModelCriteria
 	 */
 	protected $query;
 	
@@ -46,19 +47,19 @@ class Curry_Tree_Propel extends Curry_Tree {
 	/**
 	 * Constructor
 	 *
-	 * @param ModelCriteria|string $modelOrQuery A query object, or model class as string.
+	 * @param \ModelCriteria|string $modelOrQuery A query object, or model class as string.
 	 * @param array $options
 	 */
 	public function __construct($modelOrQuery, array $options = array())
 	{
 		if(is_string($modelOrQuery)) {
 			$this->model = $modelOrQuery;
-			$this->query = PropelQuery::from($this->model);
-		} else if($modelOrQuery instanceof ModelCriteria) {
+			$this->query = \PropelQuery::from($this->model);
+		} else if($modelOrQuery instanceof \ModelCriteria) {
 			$this->query = $modelOrQuery;
 			$this->model = $this->query->getModelName();
 		} else {
-			throw new Exception('Invalid argument');
+			throw new \Exception('Invalid argument');
 		}
 		parent::__construct($options);
 	}
@@ -76,12 +77,12 @@ class Curry_Tree_Propel extends Curry_Tree {
 	/**
 	 * Get node properties from propel object.
 	 *
-	 * @param mixed|BaseObject $instance
-	 * @param Curry_Tree $tree
+	 * @param mixed|\BaseObject $instance
+	 * @param Tree $tree
 	 * @param int $depth
 	 * @return array
 	 */
-	public function objectToJson($instance, Curry_Tree $tree, $depth = 0)
+	public function objectToJson($instance, Tree $tree, $depth = 0)
 	{
 		$p = array(
 			'title' => (string)$instance,
@@ -98,13 +99,13 @@ class Curry_Tree_Propel extends Curry_Tree {
 	/**
 	 * Internal helper function to get node with children.
 	 *
-	 * @param BaseObject $instance
+	 * @param \BaseObject $instance
 	 * @return array
 	 */
-	protected function _objectToJson(BaseObject $instance)
+	protected function _objectToJson(\BaseObject $instance)
 	{
 		$nodes = $this->lazy ? $instance->getChildren($this->query) : $instance->getDescendants($this->query);
-		if($nodes instanceof PropelCollection)
+		if($nodes instanceof \PropelCollection)
 			$nodes = $nodes->getArrayCopy();
 		array_unshift($nodes, $instance);
 		$level = array();
@@ -126,18 +127,18 @@ class Curry_Tree_Propel extends Curry_Tree {
 	 */
 	public function actionMove($params)
 	{
-		$nodes = PropelQuery::from($this->model)->findPks($params['node_id']);
-		$parent = PropelQuery::from($this->model)->findPk($params['parent_id']);
+		$nodes = \PropelQuery::from($this->model)->findPks($params['node_id']);
+		$parent = \PropelQuery::from($this->model)->findPk($params['parent_id']);
 		$after = null;
 		if($params['after'] !== 'null') {
-			$after = PropelQuery::from($this->model)
+			$after = \PropelQuery::from($this->model)
 				->childrenOf($parent)
 				->orderByBranch()
 				->offset($params['after'])
 				->findOne();
 		}
 		if(!$parent)
-			throw new Exception('Unable to find parent');
+			throw new \Exception('Unable to find parent');
 		foreach($nodes as $node) {
 			// Move node
 			if($after)
@@ -158,9 +159,9 @@ class Curry_Tree_Propel extends Curry_Tree {
 	 */
 	public function actionDelete($params)
 	{
-		$node = PropelQuery::from($this->model)->findPk($params['node_id']);
+		$node = \PropelQuery::from($this->model)->findPk($params['node_id']);
 		if(!$node)
-			throw new Exception('Unable to find instance to remove');
+			throw new \Exception('Unable to find instance to remove');
 		$node->delete();
 		return true;
 	}
@@ -176,10 +177,10 @@ class Curry_Tree_Propel extends Curry_Tree {
 			return $this->runAction($_POST['action']);
 		
 		if(!isset($_GET['key'])) {
-			$root = PropelQuery::from($this->model)->findRoot();
+			$root = \PropelQuery::from($this->model)->findRoot();
 			return $root ? array($this->_objectToJson($root)) : array();
 		} else {
-			$parent = PropelQuery::from($this->model)->findPk($_GET['key']);
+			$parent = \PropelQuery::from($this->model)->findPk($_GET['key']);
 			if(!$parent)
 				return array();
 			$p = $this->_objectToJson($parent);

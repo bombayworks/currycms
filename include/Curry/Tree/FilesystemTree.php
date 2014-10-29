@@ -15,13 +15,14 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Tree;
 
 /**
  * Tree view based on filesystem.
  * 
- * @package Curry
+ * @package Curry\Tree
  */
-class Curry_Tree_Filesystem extends Curry_Tree {
+class FilesystemTree extends Tree {
 	/**
 	 * Top node path.
 	 *
@@ -86,19 +87,18 @@ class Curry_Tree_Filesystem extends Curry_Tree {
 	{
 		return $this->iteratorFunction ?
 			call_user_func($this->iteratorFunction, $path) :
-			new FilesystemIterator($path);
-
+			new \FilesystemIterator($path);
 	}
 	
 	/**
 	 * Default callback to get node properties for path.
 	 *
 	 * @param string $path
-	 * @param Curry_Tree $tree
+	 * @param Tree $tree
 	 * @param int $depth
 	 * @return array
 	 */
-	public function objectToJson($path, Curry_Tree $tree, $depth = 0)
+	public function objectToJson($path, Tree $tree, $depth = 0)
 	{
 		if($path === null)
 			$path = '';

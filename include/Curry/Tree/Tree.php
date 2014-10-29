@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Tree;
 use Curry\Controller\Frontend;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,9 +25,9 @@ use Symfony\Component\HttpFoundation\Response;
  * 
  * @link http://code.google.com/p/dynatree/
  * 
- * @package Curry
+ * @package Curry\Tree
  */
-class Curry_Tree extends \Curry\View {
+class Tree extends \Curry\View {
 	/**
 	 * id of tree container.
 	 *
@@ -69,14 +70,14 @@ class Curry_Tree extends \Curry\View {
 		$this->options['cookieId'] = $this->id;
 		$this->options['imagePath'] = 'shared/images/icons/';
 		$this->options['initAjax'] = array();
-		$this->options['onActivate'] = new Zend_Json_Expr('function(node) {
+		$this->options['onActivate'] = new \Zend_Json_Expr('function(node) {
 			if(node.data.href)
 				window.location.href = node.data.href;
 		}');
-		$this->options['onLazyRead'] = new Zend_Json_Expr('function(node) {
+		$this->options['onLazyRead'] = new \Zend_Json_Expr('function(node) {
 			node.appendAjax({url: node.tree.options.initAjax.url, data: {"key": node.data.key}});
 		}');
-		$this->options['onPostInit'] = new Zend_Json_Expr('function(isReloading, isError, xhr, textStatus, errorThrown) {
+		$this->options['onPostInit'] = new \Zend_Json_Expr('function(isReloading, isError, xhr, textStatus, errorThrown) {
 			this.activateKey(null);
 		}');
 		$this->nodeCallback = array($this, 'objectToJson');
@@ -142,20 +143,20 @@ class Curry_Tree extends \Curry\View {
 	public function setDndCallback($callback)
 	{
 		$this->options['dnd'] = array(
-			'onDragStart' => new Zend_Json_Expr('function(node) {
+			'onDragStart' => new \Zend_Json_Expr('function(node) {
 				return true;
 			}'),
 			'autoExpandMS' => 1000,
 			'preventVoidMoves' => true,
 			// Prevent dropping a parent below it's own child
-			'onDragEnter' => new Zend_Json_Expr('function(node, sourceNode) {
+			'onDragEnter' => new \Zend_Json_Expr('function(node, sourceNode) {
 				return true;
 			}'),
-			'onDragOver' => new Zend_Json_Expr('function(node, sourceNode, hitMode) {
+			'onDragOver' => new \Zend_Json_Expr('function(node, sourceNode, hitMode) {
 				if(node.isDescendantOf(sourceNode))
 					return false;
 			}'),
-			'onDrop' => new Zend_Json_Expr('function(node, sourceNode, hitMode, ui, draggable) {
+			'onDrop' => new \Zend_Json_Expr('function(node, sourceNode, hitMode, ui, draggable) {
 				$.post(node.tree.options.initAjax.url, {action: "dnd", target: node.data.key, source: sourceNode.data.key, mode: hitMode}, function(result) {
 					if(result && result.success) {
 						sourceNode.move(node, hitMode);
@@ -240,7 +241,7 @@ JS;
 	 */
 	public function getJavaScript()
 	{
-		$treeConfig = Zend_Json::encode($this->options, false, array('enableJsonExprFinder' => true));
+		$treeConfig = \Zend_Json::encode($this->options, false, array('enableJsonExprFinder' => true));
 		return "$('#{$this->id}').dynatree($treeConfig);";
 	}
 	
@@ -248,11 +249,11 @@ JS;
 	 * Create object from node.
 	 *
 	 * @param mixed $id
-	 * @param Curry_Tree $tree
+	 * @param Tree $tree
 	 * @param int $depth
 	 * @return array
 	 */
-	public function objectToJson($id, Curry_Tree $tree, $depth = 0)
+	public function objectToJson($id, Tree $tree, $depth = 0)
 	{
 		return array();
 	}
@@ -271,7 +272,7 @@ JS;
 		// call instance method
 		$method = 'action'.$action;
 		if(!method_exists($this, $method))
-			throw new Curry_Exception('Action does not exist.');
+			throw new \Curry_Exception('Action does not exist.');
 		return $this->$method($_POST);
 	}
 	

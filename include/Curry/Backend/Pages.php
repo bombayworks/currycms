@@ -14,7 +14,7 @@ class Pages extends AbstractBackend {
 	protected function getMenu()
 	{
 		$query = \PageQuery::create();
-		$tree = new \Curry_Tree_Propel($query, array(
+		$tree = new \Curry\Tree\PropelTree($query, array(
 			'minExpandLevel' => 2,
 			'autoFocus' => false,
 			'selectMode' => 1, // single
@@ -33,11 +33,11 @@ class Pages extends AbstractBackend {
 	 * Get page tree node properties.
 	 *
 	 * @param \Page $page
-	 * @param \Curry_Tree $tree
+	 * @param \Curry\Tree\Tree $tree
 	 * @param int $depth
 	 * @return array
 	 */
-	public function getPageTreeNode($page, \Curry_Tree $tree, $depth = 0)
+	public function getPageTreeNode($page, \Curry\Tree\Tree $tree, $depth = 0)
 	{
 		$p = $tree->objectToJson($page, $tree, $depth);
 

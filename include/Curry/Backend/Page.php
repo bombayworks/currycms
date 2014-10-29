@@ -17,6 +17,8 @@
  */
 use Curry\Controller\Backend;
 use Curry\Controller\Frontend;
+use Curry\Tree\PropelTree;
+use Curry\Tree\Tree;
 use Curry\Util\ArrayHelper;
 
 /**
@@ -182,7 +184,7 @@ class Curry_Backend_Page extends \Curry\Backend\AbstractLegacyBackend
 		}
 		$query = PageQuery::create()
 			->filterByPageId($access);
-		$tree = new Curry_Tree_Propel($query, array(
+		$tree = new PropelTree($query, array(
 			'ajaxUrl' => (string)url('', array('module', 'view'=>'Menu', 'page_id', 'json'=>1)),
 			'minExpandLevel' => 2,
 			'autoFocus' => false,
@@ -202,11 +204,11 @@ class Curry_Backend_Page extends \Curry\Backend\AbstractLegacyBackend
 	 * Get page tree node properties.
 	 *
 	 * @param Page $page
-	 * @param Curry_Tree $tree
+	 * @param Tree $tree
 	 * @param int $depth
 	 * @return array
 	 */
-	public function getPageTreeNode($page, Curry_Tree $tree, $depth = 0)
+	public function getPageTreeNode($page, Tree $tree, $depth = 0)
 	{
 		$p = $tree->objectToJson($page, $tree, $depth);
 

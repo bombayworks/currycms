@@ -15,7 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
-namespace Curry\Module;
+namespace Curry\Backend;
 
 /**
  * Base class for "model backend modules".

@@ -126,7 +126,7 @@ class Backend extends \Curry\Backend\AbstractBackend implements EventSubscriberI
 		$view = $app->request->attributes->get('_view');
 		$response = $view->show($app->request);
 		if (!$response instanceof Response)
-			$response = new Response(\Curry_Util::stringify($response));
+			$response = new Response(\Curry\Util\Helper::stringify($response));
 		return $response;
 	}
 

@@ -109,7 +109,7 @@ namespace Curry {
 	use Symfony\Component\HttpKernel\HttpKernelInterface;
 	use Symfony\Component\HttpKernel\TerminableInterface;
 	use Exception;
-	use Curry_Util;
+	use Curry\Util\Helper;
 	use Curry\Util\ArrayHelper;
 	use Zend\Config\Config;
 
@@ -764,7 +764,7 @@ namespace Curry {
 			if ($this['debug']) {
 				$queryCount = Util\Propel::getQueryCount();
 				$this->logger->debug("Generation time: " . round($this->getExecutionTime(), 3) . "s");
-				$this->logger->debug("Peak memory usage: " . Curry_Util::humanReadableBytes(memory_get_peak_usage()));
+				$this->logger->debug("Peak memory usage: " . Helper::humanReadableBytes(memory_get_peak_usage()));
 				$this->logger->debug("SQL query count: " . ($queryCount !== null ? $queryCount : 'n/a'));
 			}
 		}

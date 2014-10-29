@@ -17,6 +17,7 @@
  */
 use Curry\Module\PageModuleWrapper;
 use Curry\Util\ArrayHelper;
+use Curry\Util\Helper;
 
 /**
  * Helper functions for copy-paste and page-sync functionality.
@@ -143,7 +144,7 @@ class Curry_Backend_PageSyncHelper
 				if ($pm && !in_array($pm->getPageId(), $parentPages)) {
 					// Page module exists, but is not in our "inheritance chain"
 					// Give the module a new unique-id, and create the module here
-					$pm->setUid(Curry_Util::getUniqueId());
+					$pm->setUid(Helper::getUniqueId());
 					$pm->save();
 					$pm = null;
 				}

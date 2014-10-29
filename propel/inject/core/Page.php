@@ -354,7 +354,7 @@ public function getDependantPages()
 public function preInsert(PropelPDO $con = null)
 {
 	if ($this->getUid() === null)
-		$this->setUid(Curry_Util::getUniqueId());
+		$this->setUid(\Curry\Util\Helper::getUniqueId());
 	return true;
 }
 
@@ -573,10 +573,10 @@ public static function migrateData(&$table, array &$data, $version)
 			$rm->setPageRevisionId($data['PageRevisionId']);
 			$rm->save();
 			$data['PageId'] = 0;
-			$data['Uid'] = Curry_Util::getUniqueId();
+			$data['Uid'] = \Curry\Util\Helper::getUniqueId();
 			self::$migrate0Modules[$data['PageModuleId']] = $data['PageRevisionId'];
 		} else if ($table == 'Page') {
-			$data['Uid'] = Curry_Util::getUniqueId();
+			$data['Uid'] = \Curry\Util\Helper::getUniqueId();
 			switch ($data['RedirectMethod']) {
 				case 'clone': break;
 				case 'subpage': break;

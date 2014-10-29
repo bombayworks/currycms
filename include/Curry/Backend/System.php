@@ -638,7 +638,7 @@ class System extends \Curry\Backend\AbstractLegacyBackend {
 		$classes = array(
 			'Curry_Install',
 			'Curry\Util\StringHelper',
-			'Curry_Util',
+			'Curry\Util\Helper',
 			'Curry_Archive_FileInfo',
 			'Curry_Archive_Reader',
 			'Curry_Archive_Iterator',

@@ -72,7 +72,7 @@ class Curry_ModelView_Csv extends Curry_ModelView_Abstract {
 			$headers[] = $opts['label'];
 		}
 		if ($this->includeHeaders) {
-			Curry_Util::fputcsv($fp, $headers);
+			self::fputcsv($fp, $headers);
 		}
 
 		// Print rows
@@ -82,9 +82,33 @@ class Curry_ModelView_Csv extends Curry_ModelView_Abstract {
 		do {
 			$results = $view->getJson(array('p'=>++$page));
 			foreach($results['rows'] as $row)
-				Curry_Util::fputcsv($fp, $row);
+				self::fputcsv($fp, $row);
 		} while(count($results['rows']) == $maxPerPage);
 		fclose($fp);
 		exit;
+	}
+
+	/**
+	 * This is a replacement function for php's built-in fputcsv(). This
+	 * function should work better with excel and allows exported csv's to
+	 * be opened directly.
+	 *
+	 * @param $fp
+	 * @param $values
+	 */
+	public static function fputcsv($fp, $values)
+	{
+		$eol = "\r\n";
+		$first = "";
+		foreach($values as $value) {
+			$value = utf8_decode($value);
+			$value = str_replace(array('"', $eol), array('""', "\n"), $value);
+			if (strpos($value, "\n") !== false || strpos($value, ";") !== false) {
+				$value = '"'.$value.'"';
+			}
+			fwrite($fp, $first.$value);
+			$first = ";";
+		}
+		fwrite($fp, $eol);
 	}
 }

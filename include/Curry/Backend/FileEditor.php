@@ -19,6 +19,7 @@ use Curry\Controller\Backend;
 use Curry\Controller\Frontend;
 use Curry\Tree\FilesystemTree;
 use Curry\Tree\Tree;
+use Curry\Util\Helper;
 use Curry\Util\PathHelper;
 
 /**
@@ -136,7 +137,7 @@ abstract class Curry_Backend_FileEditor extends \Curry\Backend\AbstractLegacyBac
 				// Save content and preserve EOL style
 				$values = $form->getValues();
 				$code = $values['content'];
-				$eol = Curry_Util::getStringEol($code);
+				$eol = Helper::getStringEol($code);
 				$targetEol = urldecode($values['eol']);
 				if($eol !== $targetEol)
 					$code = str_replace($eol, $targetEol, $code);
@@ -172,7 +173,7 @@ abstract class Curry_Backend_FileEditor extends \Curry\Backend\AbstractLegacyBac
 	protected function getEditForm(SplFileInfo $file)
 	{
 		$content = file_get_contents($file->getPathname());
-		$eol = Curry_Util::getStringEol($content);
+		$eol = Helper::getStringEol($content);
 		$form = new Curry_Form(array(
 			'action' => url('', $_GET),
 			'method' => 'post',

@@ -3,6 +3,7 @@
 namespace Curry\Generator;
 
 use Curry\Configurable;
+use Curry\Util\Helper;
 use Curry\Util\Propel;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -55,8 +56,8 @@ class ModuleProfiler extends Configurable implements EventSubscriberInterface
 	{
 		$event->setExtra('module_profiler.time', microtime(true));
 		$event->setExtra('module_profiler.query_count', Propel::getQueryCount());
-		$event->setExtra('module_profiler.user_time', \Curry_Util::getCpuTime('u'));
-		$event->setExtra('module_profiler.system_time', \Curry_Util::getCpuTime('s'));
+		$event->setExtra('module_profiler.user_time', Helper::getCpuTime('u'));
+		$event->setExtra('module_profiler.system_time', Helper::getCpuTime('s'));
 		$event->setExtra('module_profiler.memory_usage', memory_get_usage(true));
 	}
 
@@ -68,8 +69,8 @@ class ModuleProfiler extends Configurable implements EventSubscriberInterface
 		$queryCount = $event->getExtra('module_profiler.query_count');
 
 		$time = microtime(true) - $event->getExtra('module_profiler.time');
-		$userTime = \Curry_Util::getCpuTime('u') - $event->getExtra('module_profiler.user_time');
-		$systemTime = \Curry_Util::getCpuTime('s') - $event->getExtra('module_profiler.system_time');
+		$userTime = Helper::getCpuTime('u') - $event->getExtra('module_profiler.user_time');
+		$systemTime = Helper::getCpuTime('s') - $event->getExtra('module_profiler.system_time');
 		$memoryUsage = memory_get_usage(true) - $event->getExtra('module_profiler.memory_usage');
 		$sqlQueries = $queryCount !== null ? Propel::getQueryCount() - $queryCount : null;
 
@@ -94,8 +95,8 @@ class ModuleProfiler extends Configurable implements EventSubscriberInterface
 			(bool)$event->getExtra('module_cacher.cached'),
 			round($time * 1000.0),
 			round(($userTime + $systemTime) * 1000.0),
-			\Curry_Util::humanReadableBytes($memoryUsage),
-			\Curry_Util::humanReadableBytes(memory_get_peak_usage(true)),
+			Helper::humanReadableBytes($memoryUsage),
+			Helper::humanReadableBytes(memory_get_peak_usage(true)),
 			$sqlQueries !== null ? $sqlQueries : 'n/a',
 		);
 

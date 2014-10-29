@@ -392,7 +392,7 @@ abstract class AbstractBackend extends \Curry\View {
 	 */
 	public function addMainContent($content)
 	{
-		$this->mainContent .= \Curry_Util::stringify($content);
+		$this->mainContent .= \Curry\Util\Helper::stringify($content);
 	}
 
 	/**
@@ -402,6 +402,6 @@ abstract class AbstractBackend extends \Curry\View {
 	 */
 	public function addMenuContent($content)
 	{
-		$this->menuContent .= \Curry_Util::stringify($content);
+		$this->menuContent .= \Curry\Util\Helper::stringify($content);
 	}
 }

@@ -15,14 +15,14 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
-use Curry\Util\PathHelper;
+namespace Curry\Util;
 
 /**
  * Static utility class.
  *
- * @package Curry
+ * @package Curry\Util
  */
-class Curry_Util {
+class Helper {
 	
 	/**
 	 * Get a string from the error code provided by $_FILES[x]['error']
@@ -98,51 +98,24 @@ class Curry_Util {
 	 * Get number of bytes from human readable string.
 	 * 
 	 * This is the reverse of humanReadableBytes.
-	 * 
-	 * @todo Unfinished and buggy, feel free to fix
-	 * 
+	 *
 	 * @param string $size
-	 * @param string $format
 	 * @return int
 	 */
-	public static function computerReadableBytes($size, $format = "en"){
-		switch ($format) {
-			case "sv":
-				$dec_separator = ",";
-				$thousands_separator = " ";
-				break;
-			default:
-			case "en":
-				$dec_separator = ".";
-				$thousands_separator = ",";
-				break;
-		}
-
-		$char = '';
-		for ($i = 0; $i < strlen($size); $i++) {
-			$char = $size[$i];
-			if ($char < '0' || $char > '9')
-				break;
-		}
-		
-		$size = substr($size, 0, $i);
-		
-		switch ($char) {
-			case 'K':
+	public static function computerReadableBytes($size) {
+		$size = preg_replace('/[^tgmk0-9.-]/i', '', $size);
+		$last = strtolower($size[strlen($size)-1]);
+		switch($last) {
+			case 't':
 				$size *= 1024;
-				break;
-			case 'M':
-				$size *= 1048576;
-				break;
-			case 'G':
-				$size *= 1073741824;
-				break;
-			case 'T':
-				$size *= 1099511627776;
-				break;
+			case 'g':
+				$size *= 1024;
+			case 'm':
+				$size *= 1024;
+			case 'k':
+				$size *= 1024;
 		}
-		
-		return $size;
+		return intval($size);
 	}
 	
 	/**
@@ -165,7 +138,7 @@ class Curry_Util {
 	public static function getProperty($object, $name)
 	{
 		// Array
-		if ((is_array($object) || is_object($object) && $object instanceof ArrayAccess) && isset($object[$name]))
+		if ((is_array($object) || is_object($object) && $object instanceof \ArrayAccess) && isset($object[$name]))
 			return $object[$name];
 		if(is_object($object)) {
 			// Object property
@@ -179,14 +152,14 @@ class Curry_Util {
 			if (method_exists($object, 'get'.$name))
 				return $object->{'get'.$name}();
 			// Propel virtual columns
-			if($object instanceof BaseObject && $object->hasVirtualColumn($name))
+			if($object instanceof \BaseObject && $object->hasVirtualColumn($name))
 				return $object->getVirtualColumn($name);
 			// Attempt to call function (__call)
 			if(method_exists($object, '__call')) {
 				try {
 					return $object->$name();
 				}
-				catch (Exception $e) { trace_error($e->getMessage()); }
+				catch (\Exception $e) { trace_error($e->getMessage()); }
 			}
 		}
 		return null;
@@ -219,30 +192,6 @@ class Curry_Util {
 			$uid .= $chars{$r};
 		}
 		return $uid;
-	}
-
-	/**
-	 * This is a replacement function for php's built-in fputcsv(). This
-	 * function should work better with excel and allows exported csv's to
-	 * be opened directly.
-	 *
-	 * @param $fp
-	 * @param $values
-	 */
-	public static function fputcsv($fp, $values)
-	{
-		$eol = "\r\n";
-		$first = true;
-		foreach($values as $value) {
-			$value = utf8_decode($value);
-			$value = str_replace(array('"', $eol), array('""', "\n"), $value);
-			if (strpos($value, "\n") !== false || strpos($value, ";") !== false) {
-				$value = '"'.$value.'"';
-			}
-			fwrite($fp, ($first?"":";").$value);
-			$first = false;
-		}
-		fwrite($fp, $eol);
 	}
 
 	/**

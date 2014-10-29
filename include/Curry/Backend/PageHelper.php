@@ -18,6 +18,7 @@
 use Curry\Module\AbstractModule;
 use Curry\Module\PageModuleWrapper;
 use Curry\Util\ArrayHelper;
+use Curry\Util\Helper;
 use Curry\Util\Html;
 
 /**
@@ -115,7 +116,7 @@ class Curry_Backend_PageHelper {
 	public static function saveNewPage(array $values)
 	{
 		$subpage = new Page();
-		$subpage->setUid(Curry_Util::getUniqueId());
+		$subpage->setUid(Helper::getUniqueId());
 		$subpage->setVisible($values['visible']);
 		$subpage->setEnabled($values['enabled']);
 		$subpage->setIncludeInIndex($values['index']);
@@ -811,7 +812,7 @@ class Curry_Backend_PageHelper {
 	public static function saveNewModule(PageRevision $pageRevision, array $values)
 	{
 		$pageModule = new PageModule();
-		$pageModule->setUid(Curry_Util::getUniqueId());
+		$pageModule->setUid(Helper::getUniqueId());
 		$pageModule->setPageId($pageRevision->getPageId());
 		if (ctype_digit($values['module_class'])) {
 			$module = ModuleQuery::create()->findPk($values['module_class']);
@@ -850,7 +851,7 @@ class Curry_Backend_PageHelper {
 				throw new Exception('Module target not set');
 
 			$pageModule = new PageModule();
-			$pageModule->setUid(Curry_Util::getUniqueId());
+			$pageModule->setUid(Helper::getUniqueId());
 			$pageModule->setPageId($pageRevision->getPageId());
 			$pageModule->setModuleClass($values['module_class']);
 			$pageModule->setName($values['name']);

@@ -18,6 +18,7 @@
 use Curry\Tree\Tree;
 use Curry\Util\ArrayHelper;
 use Curry\Util\Console;
+use Curry\Util\Helper;
 use Curry\Util\Propel;
 use Curry\Util\StringHelper;
 
@@ -946,7 +947,7 @@ class Curry_Backend_Database extends \Curry\Backend\AbstractLegacyBackend
 		);
 		$path = Curry_Backend_DatabaseHelper::createBackupName('*.txt');
 		foreach(array_reverse(glob($path)) as $file)
-			$files[$file] = basename($file). ' ('.Curry_Util::humanReadableBytes(filesize($file)).')';
+			$files[$file] = basename($file). ' ('.Helper::humanReadableBytes(filesize($file)).')';
 			
 		$form = new Curry_Form(array(
 			'action' => url('', array("module","view","page_id")),

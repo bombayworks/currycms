@@ -17,6 +17,7 @@
  */
 use Curry\Controller\Frontend;
 use Curry\Util\ArrayHelper;
+use Curry\Util\Helper;
 use Curry\Util\Html;
 use Curry\Util\StringHelper;
 use Curry\Util\Flash;
@@ -336,7 +337,7 @@ TPL
 		if(isAjax()) {
 			self::returnJson(array(
 				'content' => $content,
-				'maxUploadSize' => Curry_Util::computerReadableBytes(get_cfg_var('upload_max_filesize')),
+				'maxUploadSize' => Helper::computerReadableBytes(get_cfg_var('upload_max_filesize')),
 				'path' => $selected,
 			));
 		} else {
@@ -537,7 +538,7 @@ TPL
 		$overwrite = array();
 		foreach((array)$_FILES['file']['error'] as $key => $error) {
 			if($error)
-				throw new Exception('Upload error: '.Curry_Util::uploadCodeToMessage($error));
+				throw new Exception('Upload error: '.Helper::uploadCodeToMessage($error));
 			$name = self::filterFilename($_FILES['file']['name'][$key]);
 			$source = $_FILES['file']['tmp_name'][$key];
 			$target = $targetPath . '/' . $name;
@@ -738,7 +739,7 @@ TPL
 				$fi = array(
 					'Name' => '<h2>'.basename($physical).'</h2>',
 					'Preview' => '',
-					'Size' => '<strong>Size: </strong>' . Curry_Util::humanReadableBytes(filesize($physical)),
+					'Size' => '<strong>Size: </strong>' . Helper::humanReadableBytes(filesize($physical)),
 					'Writable' => '<strong>Writable: </strong>'.(self::isWritable($physical)?'Yes':'No'),
 					'Permissions' => '<strong>Permissions: </strong>' . PathHelper::getFilePermissions($physical),
 					'Owner' => '<strong>Owner: </strong>' . $owner . ' / ' . $group,
@@ -787,7 +788,7 @@ TPL
 			}
 			return array(
 				'Name' => '<h2>'.count($selected).' files</h2>',
-				'Size' => '<strong>Size: </strong>' . Curry_Util::humanReadableBytes($totalSize),
+				'Size' => '<strong>Size: </strong>' . Helper::humanReadableBytes($totalSize),
 			);
 		}
 		return null;

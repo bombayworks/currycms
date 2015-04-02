@@ -22,6 +22,11 @@ class ModuleProfiler extends Configurable implements EventSubscriberInterface
 	 */
 	protected $moduleDebugInfo;
 
+	protected $cpuLimit = 0.25;
+	protected $timeLimit = 0.5;
+	protected $memoryLimit = 5e6;
+	protected $sqlLimit = 8;
+
 	public function __construct(LoggerInterface $logger) {
 		$this->logger = $logger;
 	}
@@ -74,16 +79,11 @@ class ModuleProfiler extends Configurable implements EventSubscriberInterface
 		$memoryUsage = memory_get_usage(true) - $event->getExtra('module_profiler.memory_usage');
 		$sqlQueries = $queryCount !== null ? Propel::getQueryCount() - $queryCount : null;
 
-		$cpuLimit = $app->config->curry->debug->moduleCpuLimit;
-		$timeLimit = $app->config->curry->debug->moduleTimeLimit;
-		$memoryLimit = $app->config->curry->debug->moduleMemoryLimit;
-		$sqlLimit = $app->config->curry->debug->moduleSqlLimit;
-
-		if (($userTime + $systemTime) > $cpuLimit || $time > $timeLimit)
+		if (($userTime + $systemTime) > $this->cpuLimit || $time > $this->timeLimit)
 			trace_warning('Module generation time exceeded limit');
-		if ($memoryUsage > $memoryLimit)
+		if ($memoryUsage > $this->memoryLimit)
 			trace_warning('Module memory usage exceeded limit');
-		if ($sqlQueries > $sqlLimit)
+		if ($sqlQueries > $this->sqlLimit)
 			trace_warning('Module sql query count exceeded limit');
 
 		// add module debug info

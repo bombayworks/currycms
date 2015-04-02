@@ -370,12 +370,12 @@ class Propel {
 			foreach ($tableMap->getRelations() as $relation) {
 				if (in_array($relation->getType(), array(\RelationMap::ONE_TO_MANY, \RelationMap::MANY_TO_MANY))) {
 					$name = $relation->getPluralName();
-					$p[lcfirst($name)] = new \Curry\Util\OnDemand(function() use($obj, $name) {
+					$p[lcfirst($name)] = new OnDemand(function() use($obj, $name) {
 						return ArrayHelper::objectsToArray($obj->{'get'.$name}(), null, array('Curry\Util\Propel', 'toTwig'));
 					});
 				} else {
 					$name = $relation->getName();
-					$p[lcfirst($name)] = new \Curry\Util\OnDemand(function() use($obj, $name) {
+					$p[lcfirst($name)] = new OnDemand(function() use($obj, $name) {
 						$rel = $obj->{'get'.$name}();
 						return $rel ? Propel::toTwig($rel) : null;
 					});
@@ -384,7 +384,7 @@ class Propel {
 		}
 
 		// Automatic URL
-		$p['Url'] = new \Curry\Util\OnDemand(function() use($obj, $tableMap) {
+		$p['Url'] = new OnDemand(function() use($obj, $tableMap) {
 			$params = array();
 			foreach ($tableMap->getPrimaryKeys() as $pk)
 				$params[$pk->getName()] = $obj->{'get'.$pk->getPhpName()}();

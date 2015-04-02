@@ -18,7 +18,9 @@
 
 namespace Curry\Controller;
 use Curry\App;
+use Curry\URL;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
@@ -59,7 +61,6 @@ class Frontend implements EventSubscriberInterface {
 	{
 		return array(
 			KernelEvents::REQUEST => 'onKernelRequest',
-			KernelEvents::EXCEPTION => 'onKernelException',
 		);
 	}
 
@@ -68,28 +69,100 @@ class Frontend implements EventSubscriberInterface {
 		$request = $event->getRequest();
 		$page = $this->findPage($request);
 		if ($page) {
-			$request->attributes->set('_page', $page);
-			$request->attributes->set('_controller', array($this, 'index'));
-		}
-	}
 
-	public function onKernelException(GetResponseForExceptionEvent $event)
-	{
-		// You get the exception object from the received event
-		$exception = $event->getException();
+			$forceShow = false;
+			$showWorking = false;
 
-		if ($exception instanceof NotFoundHttpException) {
-			$response = new Response();
-			$response->setContent('Page not found');
-			$event->setResponse($response);
-			if ($this->app->config->curry->errorPage->notFound) {
-				$page = \PageQuery::create()->findPk($this->app->config->curry->errorPage->notFound);
-				if ($page && $page->getEnabled()) {
-					// TODO: Generate error page
-					$generator = \Curry\Generator\AbstractGenerator::create($this->app, $page->getActivePageRevision());
-					$event->setResponse($generator->render());
+			//if($app->config->curry->setup) {
+			//	die('Site is not yet configured, go to admin.php and configure your site.');
+			//}
+
+			// check if we have a valid backend-user logged in
+			$validUser = !!\User::getUser();
+			if($validUser) {
+				/*
+				// check for inline-admin
+				$adminNamespace = new \Zend\Session\Container('Curry\Controller\Backend');
+				if($app->config->curry->liveEdit && !$request->getParam('curry_force_show')) {
+					if($request->query->has('curry_inline_admin'))
+						$adminNamespace->inlineAdmin = (bool)$request->query->get('curry_inline_admin');
+					if($adminNamespace->inlineAdmin) {
+						$options['inlineAdmin'] = true;
+						$forceShow = true;
+						$showWorking = true;
+						\Curry_InlineAdmin::$active = true;
+					}
+				}
+				*/
+
+				// show working revision? (default is published)
+				if($request->query->get('curry_show_working')) {
+					$forceShow = true;
+					$showWorking = true;
+				}
+
+				// show inactive pages?
+				if($request->query->get('curry_force_show')) {
+					$forceShow = true;
+				}
+
+				if($showWorking)
+					\Page::setRevisionType(\Page::WORKING_REVISION);
+			}
+
+			// Show maintenance page?
+			if($this->app->config->curry->maintenance->enabled && !$forceShow) {
+				$this->app->logger->debug("Maintenance enabled");
+
+				$message = 'Page is down for maintenance, please check back later.';
+				if($this->app->config->curry->maintenance->message)
+					$message = $this->app->config->curry->maintenance->message;
+
+				$request->attributes->set('message', $message);
+				$request->attributes->set('page', $this->app->config->curry->maintenance->page);
+				$request->attributes->set('_controller', new Maintenance($this->app));
+				return;
+			}
+
+			// Force domain redirect
+			// @todo force scheme?
+			if($this->app->config->curry->maintenance->enabled && !$forceShow) {
+				$base = URL::getDefaultBaseUrl();
+				$baseHost = strtolower($base['host']);
+				$httpHost = strtolower($request->server->get('HTTP_HOST'));
+				if ($httpHost !== $baseHost) {
+					$target = url($request->getRequestUri())->getAbsolute();
+					$event->setResponse(RedirectResponse::create($target));
+					$event->stopPropagation();
 				}
 			}
+
+			// Follow page redirects...
+			while($page && $page->getRedirectMethod()) {
+				switch($page->getRedirectMethod()) {
+					case \PagePeer::REDIRECT_METHOD_CLONE:
+						if($page->getRedirectUrl() !== null) {
+							$event->setResponse(Response::create(file_get_contents($page->getRedirectUrl())));
+							return;
+						}
+						$redirectPage = $page->getActualRedirectPage();
+						if ($redirectPage && $redirectPage !== $page) {
+							$page = $redirectPage;
+						} else {
+							break 2;
+						}
+						break;
+
+					default:
+						$code = ($page->getRedirectMethod() == \PagePeer::REDIRECT_METHOD_PERMANENT ? 301 : 302);
+						// @todo should this append query string? it used to...
+						$event->setResponse(RedirectResponse::create($page->getFinalUrl(), $code));
+						return;
+				}
+			}
+
+			$request->attributes->set('page', $page);
+			$request->attributes->set('_controller', new Page($this->app));
 		}
 	}
 	
@@ -115,7 +188,12 @@ class Frontend implements EventSubscriberInterface {
 			$path = $basePath . $path;
 		}
 	}
-	
+
+	/**
+	 * @param Request $request
+	 * @return \Page|null
+	 * @throws \Exception
+	 */
 	public function findPage(Request $request)
 	{
 		$requestUri = $request->getPathInfo();
@@ -133,7 +211,7 @@ class Frontend implements EventSubscriberInterface {
 		// use domain mapping to restrict page to a certain page-branch
 		$rootPage = null;
 		if($this->app->config->curry->domainMapping->enabled){
-			$currentDomain = strtolower($_SERVER['HTTP_HOST']);
+			$currentDomain = strtolower($request->server->get('HTTP_HOST'));
 			foreach ($this->app->config->curry->domainMapping->domains as $domain) {
 				if(strtolower($domain->domain) === $currentDomain
 					|| ($domain->include_www && strtolower('www.'.$domain->domain) === $currentDomain)){
@@ -173,251 +251,6 @@ class Frontend implements EventSubscriberInterface {
 			return $pages[0];
 		return null;
 	}
-	
-	/**
-	 * Handle page redirection.
-	 *
-	 * @param \Page $page
-	 * @param \Curry_Request $r
-	 * @return \Page
-	 */
-	public function redirectPage(\Page $page, \Curry_Request $r)
-	{
-		while($page && $page->getRedirectMethod()) {
-			switch($page->getRedirectMethod()) {
-				case \PagePeer::REDIRECT_METHOD_CLONE:
-					if($page->getRedirectUrl() !== null) {
-						readfile($page->getRedirectUrl());
-						exit;
-					}
-					$redirectPage = $page->getActualRedirectPage();
-					if ($redirectPage && $redirectPage !== $page) {
-						$page = $redirectPage;
-					} else {
-						return $page;
-					}
-					break;
-					
-				default:
-					$code = ($page->getRedirectMethod() == \PagePeer::REDIRECT_METHOD_PERMANENT ? 301 : 302);
-					url($page->getFinalUrl(), $r->get)->redirect($code);
-					break;
-			}
-		}
-		
-		return $page;
-	}
-
-	/**
-	 * Do automatic publishing of pages.
-	 */
-	public function autoPublish()
-	{
-		$cacheName = strtr(__CLASS__, '\\', '_') . '_' . 'AutoPublish';
-		if(($nextPublish = $this->app->cache->load($cacheName)) === false) {
-			$this->app->logger->notice('Doing auto-publish');
-			$revisions = \PageRevisionQuery::create()
-				->filterByPublishDate(null, \Criteria::ISNOTNULL)
-				->orderByPublishDate()
-				->find();
-			$nextPublish = time() + 86400;
-			foreach($revisions as $revision) {
-				if($revision->getPublishDate('U') <= time()) {
-					// publish revision
-					$page = $revision->getPage();
-					$this->app->logger->notice('Publishing page: ' . $page->getUrl());
-					$page->setActivePageRevision($revision);
-					$revision->setPublishedDate(time());
-					$revision->setPublishDate(null);
-					$page->save();
-					$revision->save();
-				} else {
-					$nextPublish = $revision->getPublishDate('U');
-					break;
-				}
-			}
-			$revisions->clearIterator();
-			$this->app->logger->info('Next publish is in '.($nextPublish - time()) . ' seconds.');
-			$this->app->cache->save(true, $cacheName, array(), $nextPublish - time());
-		}
-	}
-	
-	/**
-	 * Change the active language.
-	 *
-	 * @param string|\Language $language
-	 */
-	public function setLanguage($language)
-	{
-		$locale = \Curry_Language::setLanguage($language);
-		$language = \Curry_Language::getLanguage();
-		if($language)
-			$this->app->logger->info('Current language is now '.$language->getName().' (with locale '.$locale.')');
-	}
-	
-	public function index()
-	{
-		$app = $this->app;
-		$request = $app->request;
-		$page = $request->attributes->get('_page');
-		$pageRevision = $page->getPageRevision();
-
-		$app->logger->info('Starting request at '.$request->getUri());
-
-		/*
-		
-		if($app->config->curry->autoPublish)
-			$this->autoPublish();
-		
-		$page = null;
-		$vars = array('curry' => array());
-		$options = array();
-		$forceShow = false;
-		$showWorking = false;
-
-		if($app->config->curry->setup) {
-			die('Site is not yet configured, go to admin.php and configure your site.');
-		}
-		
-		// check if we have a valid backend-user logged in
-		$validUser = null;//!!\User::getUser();
-		if($validUser) {
-			
-			// check for inline-admin
-			$adminNamespace = new \Zend\Session\Container('Curry\Controller\Backend');
-			if($app->config->curry->liveEdit && !$request->getParam('curry_force_show')) {
-				if($request->hasParam('curry_inline_admin'))
-					$adminNamespace->inlineAdmin = $request->getParam('curry_inline_admin') ? true : false;
-				if($adminNamespace->inlineAdmin) {
-					$options['inlineAdmin'] = true;
-					$forceShow = true;
-					$showWorking = true;
-					\Curry_InlineAdmin::$active = true;
-				}
-			}
-
-			// show working revision? (default is published)
-			if($request->getParam('curry_show_working')) {
-				$forceShow = true;
-				$showWorking = true;
-			}
-
-			// show inactive pages?
-			if($request->getParam('curry_force_show'))
-				$forceShow = true;
-				
-			if($showWorking)
-				\Page::setRevisionType(Page::WORKING_REVISION);
-		}
-		
-		// Maintenance enabled?
-		if($app->config->curry->maintenance->enabled && !$forceShow) {
-			$app->logger->debug("Maintenance enabled");
-			
-			header('HTTP/1.1 503 Service Temporarily Unavailable');
-			header('Status: 503 Service Temporarily Unavailable');
-			header('Retry-After: 3600');
-			
-			$message = 'Page is down for maintenance, please check back later.';
-			if($app->config->curry->maintenance->message)
-				$message = $app->config->curry->maintenance->message;
-			
-			$page = $app->config->curry->maintenance->page;
-			if($page !== null)
-				$page = \PageQuery::create()->findPk((int)$page);
-			if(!$page)
-				die($message);
-				
-			$vars['curry']['MaintenanceMessage'] = $message;
-		}
-		
-		// Check force domain?
-		if($app->config->curry->forceDomain && !$forceShow) {
-			$uri = $request->getUri();
-			$url = parse_url($app->config->curry->baseUrl);
-			if(strcasecmp($_SERVER['HTTP_HOST'], $url['host']) !== 0) {
-				$location = substr($app->config->curry->baseUrl, 0, -1) . $uri;
-				header("Location: " . $location, true, 301);
-				exit;
-			}
-		}
-		
-		// Parameters to show a single module
-		if($request->getParam('curry_show_page_module_id'))
-			$options['pageModuleId'] = $request->getParam('curry_show_page_module_id');
-		if(isAjax() && $request->getParam('curry_ajax_page_module_id'))
-			$options['pageModuleId'] = $request->getParam('curry_ajax_page_module_id');
-		
-		// Attempt to find cached page
-		if($request->getMethod() === 'GET') {
-			$time = microtime(true);
-			$cacheName = strtr(__CLASS__, '\\', '_') . '_Page_' . md5($request->getUri());
-			if(($cache = $app->cache->load($cacheName)) !== false) {
-				$app->logger->info('Using cached page content');
-				foreach($cache['headers'] as $header)
-					header($header);
-				echo $cache['content'];
-				//Curry_Core::triggerHook('Curry\Controller\Frontend::render', $cache['page_id'], $cache['page_revision_id'], microtime(true) - $time, 0);
-				return;
-			}
-		}
-			
-		// attempt to find the requested page
-		if(!$page) {
-			try {
-				$page = $this->findPage($request);
-				$page = $this->redirectPage($page, $request);
-			}
-			catch(\Exception $e) {
-				$app->logger->notice('Error when trying to find page: ' . $e->getMessage());
-				$page = null;
-			}
-			// make sure page is enabled
-			if(($page instanceof \Page) && !$forceShow && !$page->getEnabled()) {
-				$app->logger->notice('Page is not accessible');
-				$page = null;
-			}
-		}
-		
-		// Page was not found, attempt to find 404 page
-		if(!$page) {
-			header("HTTP/1.1 404 Not Found");
-			if($app->config->curry->errorPage->notFound) {
-				$page = PageQuery::create()->findPk($app->config->curry->errorPage->notFound);
-				if(!$page || !$page->getEnabled())
-					throw new \Exception('Page not found, additionally the page-not-found page could not be found.');
-			} else {
-				die('Page not found');
-			}
-		}
-		*/
-		$vars = array();
-		$options = array();
-		
-		// Set language
-		$language = $page->getInheritedProperty('Language');
-		$fallbackLanguage = $app->config->curry->fallbackLanguage;
-		if($language) {
-			$this->setLanguage($language);
-		} else if($fallbackLanguage) {
-			$app->logger->info('Using fallback language');
-			$this->setLanguage($fallbackLanguage);
-		} else {
-			$app->logger->notice('Language not set for page');
-		}
-		
-		// Attempt to render page
-		$app->logger->notice('Showing page ' . $page->getName() . ' (PageRevisionId: '.$pageRevision->getPageRevisionId().')');
-
-		$generator = \Curry\Generator\AbstractGenerator::create($app, $pageRevision);
-
-		$app->page = $page;
-		$app->pageRevision = $pageRevision;
-		$app->generator = $generator;
-
-		return $generator->render($vars, $options);
-	}
-
 
 	/**
 	 * Cached map of Page URL to Model.

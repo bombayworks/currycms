@@ -15,8 +15,6 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
-use Curry\Controller\Backend;
-use Curry\Controller\Frontend;
 use Curry\Tree\PropelTree;
 use Curry\Tree\Tree;
 use Curry\Util\ArrayHelper;
@@ -189,7 +187,7 @@ class Curry_Backend_Page extends \Curry\Backend\AbstractLegacyBackend
 			'minExpandLevel' => 2,
 			'autoFocus' => false,
 			'selectMode' => 1, // single
-			'dndCallback' => array(__CLASS__, 'movePage'),
+			'dndCallback' => array($this, 'movePage'),
 			'nodeCallback' => array($this, 'getPageTreeNode'),
 		));
 		// Override tree cookies to force tree selection
@@ -249,13 +247,13 @@ class Curry_Backend_Page extends \Curry\Backend\AbstractLegacyBackend
 	 * @param array $params
 	 * @return array|bool
 	 */
-	public static function movePage($params)
+	public function movePage($params)
 	{
 		$page = PageQuery::create()->findPk($params['source']);
 		$target = PageQuery::create()->findPk($params['target']);
 		$mode = $params['mode'];
 		if($page && $target) {
-			trace('Moving '.$page->getName().' '.$mode.' '.$target->getName());
+			$this->logger->notice('Moving '.$page->getName().' '.$mode.' '.$target->getName());
 
 			// Remember if we have a custom url
 			$isCustomUrl = $page->isCustomUrl();

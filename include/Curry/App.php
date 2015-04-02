@@ -99,8 +99,9 @@ namespace {
 
 namespace Curry {
 	use Curry\Controller\Backend;
+	use Curry\Controller\FileNotFound;
 	use Curry\Controller\Frontend;
-	use Curry\URL;
+	use Curry\Controller\StaticContent;
 	use Curry\Util\Html;
 	use Curry\Util\PathHelper;
 	use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -124,6 +125,7 @@ namespace Curry {
 	 * @property \Page $page
 	 * @property \PageRevision $pageRevision
 	 * @property \Curry\Generator\AbstractGenerator $generator
+	 * @property EventDispatcher $dispatcher
 	 *
 	 * @package Curry
 	 */
@@ -239,8 +241,17 @@ namespace Curry {
 
 			register_shutdown_function(array($this, 'shutdown'));
 
-			$this->dispatcher->addSubscriber(new Frontend($this));
+			if ($this->config->curry->autoPublish)
+				$this->autoPublish();
+
+			/**
+			 * @todo only add this listener when symlink is missing, or config options forces it
+			 */
+			$this->dispatcher->addSubscriber(new StaticContent('/shared/', $app->config->curry->basePath.'/shared'));
+
 			$this->dispatcher->addSubscriber($app->backend);
+			$this->dispatcher->addSubscriber(new Frontend($this));
+			$this->dispatcher->addSubscriber(new FileNotFound($this));
 
 			$this->dispatcher->addSubscriber(new \Curry\Generator\ModuleProfiler($app->logger));
 			$this->dispatcher->addSubscriber(new \Curry\Generator\ModuleCacher($app->cache));
@@ -395,12 +406,6 @@ namespace Curry {
 							'cost' => 10, //value between 4 to 31
 						),
 					),
-					'debug' => array(
-						'moduleTimeLimit' => 0.5,
-						'moduleCpuLimit' => 0.25,
-						'moduleMemoryLimit' => 5 * 1024 * 1024,
-						'moduleSqlLimit' => 8,
-					),
 				),
 			);
 
@@ -420,7 +425,6 @@ namespace Curry {
 					'vendorPath' => PathHelper::path($config['curry']['basePath'], 'vendor'),
 					'tempPath' => self::getTempDir($config['curry']['projectPath']),
 					'trashPath' => PathHelper::path($config['curry']['projectPath'], 'data', 'trash'),
-					'hooksPath' => PathHelper::path($config['curry']['projectPath'], 'config', 'hooks.php'),
 					'autoBackup' => $config['curry']['developmentMode'] ? 0 : 86400,
 					'errorReporting' => $config['curry']['developmentMode'] ? -1 : false,
 					'propel' => array(
@@ -786,6 +790,42 @@ namespace Curry {
 		 */
 		public function requireMigration() {
 			return $this->config->curry->migrationVersion < self::MIGRATION_VERSION;
+		}
+
+		/**
+		 * Do automatic publishing of pages.
+		 * @todo rewrite this so it stores the time of next publish in the cache instead of using ttl
+		 */
+		public function autoPublish()
+		{
+			$cacheName = strtr(__CLASS__, '\\', '_') . '_' . 'AutoPublish';
+			if(($nextPublish = $this->cache->load($cacheName)) === false) {
+				$this->logger->notice('Doing auto-publish');
+				/** @var \PropelObjectCollection|\PageRevision[] $revisions */
+				$revisions = \PageRevisionQuery::create()
+					->filterByPublishDate(time(), \Criteria::LESS_EQUAL)
+					->orderByPublishDate()
+					->find();
+				$nextPublish = time() + 86400;
+				foreach($revisions as $revision) {
+					if($revision->getPublishDate('U') <= time()) {
+						// publish revision
+						$page = $revision->getPage();
+						$this->logger->notice('Publishing page: ' . $page->getUrl());
+						$page->setActivePageRevision($revision);
+						$revision->setPublishedDate(time());
+						$revision->setPublishDate(null);
+						$page->save();
+						$revision->save();
+					} else {
+						$nextPublish = $revision->getPublishDate('U');
+						break;
+					}
+				}
+				$revisions->clearIterator();
+				$this->logger->info('Next publish is in '.($nextPublish - time()) . ' seconds.');
+				$this->cache->save(true, $cacheName, array(), $nextPublish - time());
+			}
 		}
 	}
 }

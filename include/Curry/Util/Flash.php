@@ -135,14 +135,14 @@ class Flash {
 		
 		$paramHtml = "";
 		foreach($params as $k => $v)
-			$paramHtml .= \Curry\Util\Html::tag("param", array('name' => $k, 'value' => $v), '', true);
+			$paramHtml .= Html::tag("param", array('name' => $k, 'value' => $v), '', true);
 		
 		return array(
-			'html' => \Curry\Util\Html::tag("object", array_merge($objectAttr, $attributes),
-				\Curry\Util\Html::tag("param", array('name' => 'movie', 'value' => $source), '', true).
+			'html' => Html::tag("object", array_merge($objectAttr, $attributes),
+				Html::tag("param", array('name' => 'movie', 'value' => $source), '', true).
 				$paramHtml.
 				'<!--[if !IE]>-->'.
-				\Curry\Util\Html::tag("object", array_merge($object2Attr, $attributes2),
+				Html::tag("object", array_merge($object2Attr, $attributes2),
 					$paramHtml.
 					'<!--<![endif]-->'.
 					$options['alternativeContent'].

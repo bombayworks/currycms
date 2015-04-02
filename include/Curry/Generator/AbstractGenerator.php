@@ -202,6 +202,13 @@ class AbstractGenerator
 	{
 		$twig = \Curry_Twig_Template::getSharedEnvironment();
 
+		$prevPage = isset($this->app->page) ? $this->app->page : null;
+		$prevPageRevision = isset($this->app->pageRevision) ? $this->app->pageRevision : null;
+		$prevGenerator = isset($this->app->generator) ? $this->app->generator : null;
+		$this->app->page = $this->getPage();
+		$this->app->pageRevision = $this->pageRevision;
+		$this->app->generator = $this;
+
 		// TODO: Rename curry to app?
 		$appVars = $this->app->globals;
 		if (isset($vars['curry']))
@@ -223,7 +230,14 @@ class AbstractGenerator
 		}
 		$event = new RenderEvent($this->getTemplateObject(), $moduleContent);
 		$this->app->dispatcher->dispatch(GeneratorEvents::RENDER, $event);
-		return new Response($event->getTemplate()->render($event->getContent()));
+		$response = new Response($event->getTemplate()->render($event->getContent()));
+
+		// restore app variables
+		$this->app->page = $prevPage;
+		$this->app->pageRevision = $prevPageRevision;
+		$this->app->generator = $prevGenerator;
+
+		return $response;
 	}
 
 	/**

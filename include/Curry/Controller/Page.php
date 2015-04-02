@@ -18,6 +18,7 @@
 
 namespace Curry\Controller;
 use Curry\App;
+use Curry\Generator\AbstractGenerator;
 use Symfony\Component\HttpFoundation\Request;
 
 class Page {
@@ -62,7 +63,7 @@ class Page {
 
         // Attempt to render page
         $app->logger->notice('Showing page ' . $page->getName() . ' (PageRevisionId: '.$pageRevision->getPageRevisionId().')');
-        $generator = \Curry\Generator\AbstractGenerator::create($app, $pageRevision);
+        $generator = AbstractGenerator::create($app, $pageRevision);
 
         return $generator->render($vars, $options);
     }

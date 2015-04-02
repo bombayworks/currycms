@@ -679,7 +679,7 @@ class Curry_Backend_PageHelper {
 				}
 			}
 			catch (Exception $e) {
-				trace_warning('Error in template: ' . $e->getMessage());
+				\Curry\App::getInstance()->logger->warning('Error in template: ' . $e->getMessage());
 			}
 			if(count($targets))
 				$targets = array_combine(array_values($targets), array_values($targets));

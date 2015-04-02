@@ -80,11 +80,11 @@ class ModuleProfiler extends Configurable implements EventSubscriberInterface
 		$sqlQueries = $queryCount !== null ? Propel::getQueryCount() - $queryCount : null;
 
 		if (($userTime + $systemTime) > $this->cpuLimit || $time > $this->timeLimit)
-			trace_warning('Module generation time exceeded limit');
+			$this->logger->warning('Module generation time exceeded limit');
 		if ($memoryUsage > $this->memoryLimit)
-			trace_warning('Module memory usage exceeded limit');
+			$this->logger->warning('Module memory usage exceeded limit');
 		if ($sqlQueries > $this->sqlLimit)
-			trace_warning('Module sql query count exceeded limit');
+			$this->logger->warning('Module sql query count exceeded limit');
 
 		// add module debug info
 		$this->moduleDebugInfo[] = array(

@@ -17,6 +17,7 @@
  */
 
 namespace Curry\Archive;
+use Curry\Util\StringHelper;
 
 /**
  * Read/write Tar archives.
@@ -535,7 +536,7 @@ class Archive implements \IteratorAggregate
 		$pathOptions = Archive::$defaultOptions;
 		foreach ($options as $o) {
 			$p = isset($o['path']) ? $o['path'] : '';
-			if ($p === $path || $p === '' || (\Curry\Util\StringHelper::endsWith($p, '/') && \Curry\Util\StringHelper::startsWith($path, $p))) {
+			if ($p === $path || $p === '' || (StringHelper::endsWith($p, '/') && StringHelper::startsWith($path, $p))) {
 				if (isset($o['pattern'])) {
 					$subject = $basename;
 					if (isset($o['pattern_subject'])) {

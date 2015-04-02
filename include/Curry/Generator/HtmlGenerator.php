@@ -16,6 +16,8 @@
  * @link       http://currycms.com
  */
 namespace Curry\Generator;
+use Curry\App;
+use Curry\Util\HtmlHead;
 
 /**
  * Page Generator for HTML documents.
@@ -28,17 +30,17 @@ class HtmlGenerator extends AbstractGenerator {
 	/**
 	 * Object to modify HTML-head
 	 *
-	 * @var \Curry\Util\HtmlHead
+	 * @var HtmlHead
 	 */
 	protected $htmlHead;
 
 	/**
 	 * {@inheritdoc}
 	 */
-	public function __construct(\Curry\App $app, \PageRevision $pageRevision)
+	public function __construct(App $app, \PageRevision $pageRevision)
 	{
 		parent::__construct($app, $pageRevision);
-		$this->htmlHead = new \Curry\Util\HtmlHead();
+		$this->htmlHead = new HtmlHead();
 	}
 
 	/**
@@ -54,7 +56,7 @@ class HtmlGenerator extends AbstractGenerator {
 	/**
 	 * Get an Curry\Util\HtmlHead object to modify the &lt;head&gt; section of the html-page.
 	 *
-	 * @return \Curry\Util\HtmlHead
+	 * @return HtmlHead
 	 */
 	public function getHtmlHead()
 	{

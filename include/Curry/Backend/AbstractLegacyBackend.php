@@ -16,7 +16,9 @@
  * @link       http://currycms.com
  */
 namespace Curry\Backend;
+use Curry\App;
 use Curry\Exception\ResponseException;
+use Curry\Util\StringHelper;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,7 +28,8 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * @package Curry\Backend
  */
-abstract class AbstractLegacyBackend extends \Curry\Backend\AbstractBackend {
+abstract class AbstractLegacyBackend extends AbstractBackend
+{
 	/**
 	 * Redirect to URL or close dialog.
 	 *
@@ -94,9 +97,9 @@ abstract class AbstractLegacyBackend extends \Curry\Backend\AbstractBackend {
 		catch (\Exception $e) {
 			if(!headers_sent())
 				header("HTTP/1.0 500 Internal server error: ".str_replace("\n", "  ", $e->getMessage()));
-			\Curry\App::getInstance()->logger->error($e->getMessage());
+			$this->app->logger->error($e->getMessage());
 			$this->addMessage($e->getMessage(), self::MSG_ERROR);
-			if(\Curry\App::getInstance()->config->curry->developmentMode)
+			if($this->app->config->curry->developmentMode)
 				$this->addMainContent("<pre>" . htmlspecialchars($e->getTraceAsString()) . "</pre>");
 		}
 
@@ -192,7 +195,7 @@ abstract class AbstractLegacyBackend extends \Curry\Backend\AbstractBackend {
 	{
 		header('Content-Description: File Transfer');
 		header('Content-Transfer-Encoding: binary');
-		header("Content-Disposition: attachment; filename=". \Curry\Util\StringHelper::escapeQuotedString($filename));
+		header("Content-Disposition: attachment; filename=". StringHelper::escapeQuotedString($filename));
 		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 		header('Pragma: public');
 		header("Content-type: $contentType");
@@ -235,7 +238,7 @@ abstract class AbstractLegacyBackend extends \Curry\Backend\AbstractBackend {
 			$filename = basename($file);
 		header('Content-Description: File Transfer');
 		header('Content-Transfer-Encoding: binary');
-		header('Content-Disposition: attachment; filename='. \Curry\Util\StringHelper::escapeQuotedString($filename));
+		header('Content-Disposition: attachment; filename='. StringHelper::escapeQuotedString($filename));
 		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 		header('Pragma: public');
 		header('Content-type: '.$contentType);

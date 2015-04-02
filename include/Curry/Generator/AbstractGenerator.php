@@ -16,6 +16,7 @@
  * @link       http://currycms.com
  */
 namespace Curry\Generator;
+use Curry\App;
 use Curry\Module\AbstractModule;
 use Curry\Module\PageModuleWrapper;
 use Curry\Util\ArrayHelper;
@@ -41,17 +42,17 @@ class AbstractGenerator
 	protected $pageRevision;
 
 	/**
-	 * @var \Curry\App
+	 * @var App
 	 */
 	protected $app;
 
 	/**
-	 * @param \Curry\App $app
+	 * @param App $app
 	 * @param \PageRevision $pageRevision
 	 * @return AbstractGenerator
 	 * @throws \Exception
 	 */
-	public static function create(\Curry\App $app, \PageRevision $pageRevision)
+	public static function create(App $app, \PageRevision $pageRevision)
 	{
 		$generatorClass = $pageRevision->getPage()->getInheritedProperty('Generator', $app->config->curry->defaultGeneratorClass);
 		$generator = new $generatorClass($app, $pageRevision);
@@ -64,10 +65,10 @@ class AbstractGenerator
 	/**
 	 * Constructor
 	 *
-	 * @param \Curry\App $app
+	 * @param App $app
 	 * @param \PageRevision $pageRevision
 	 */
-	public function __construct(\Curry\App $app, \PageRevision $pageRevision)
+	public function __construct(App $app, \PageRevision $pageRevision)
 	{
 		$this->app = $app;
 		$this->pageRevision = $pageRevision;
@@ -301,7 +302,7 @@ class AbstractGenerator
 	/**
 	 * Get an array of Curry\Module\PageModuleWrapper objects for all modules on the PageRevision we are rendering.
 	 *
-	 * @return array
+	 * @return \Curry\Module\PageModuleWrapper[]
 	 */
 	protected function getPageModuleWrappers()
 	{

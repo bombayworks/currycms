@@ -16,7 +16,10 @@
  * @link       http://currycms.com
  */
 namespace Curry\Tree;
+use Curry\App;
 use Curry\Controller\Frontend;
+use Curry\Exception\ResponseException;
+use Curry\View;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -27,7 +30,7 @@ use Symfony\Component\HttpFoundation\Response;
  * 
  * @package Curry\Tree
  */
-class Tree extends \Curry\View {
+class Tree extends View {
 	/**
 	 * id of tree container.
 	 *
@@ -208,7 +211,7 @@ class Tree extends \Curry\View {
 			$this->setAjaxUrl($this->parent ? $this->url() : array('url' => (string)url('', $_GET)->add(array('json'=>'1'))));
 		}
 		if (isset($_GET['json'])) {
-			throw new \Curry\Exception\ResponseException($this->show(\Curry\App::getInstance()->request));
+			throw new ResponseException($this->show(App::getInstance()->request));
 		}
 		return $this->getHtml();
 	}

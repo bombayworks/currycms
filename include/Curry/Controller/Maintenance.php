@@ -18,6 +18,7 @@
 
 namespace Curry\Controller;
 use Curry\App;
+use Curry\Generator\AbstractGenerator;
 use Symfony\Component\HttpFoundation\Response;
 
 class Maintenance {
@@ -33,7 +34,7 @@ class Maintenance {
         if($page !== null && ($page = \PageQuery::create()->findPk($page))) {
             // @todo set global maintenance message variable
             //$vars['curry']['MaintenanceMessage'] = $message;
-            $generator = \Curry\Generator\AbstractGenerator::create($this->app, $page->getActivePageRevision());
+            $generator = AbstractGenerator::create($this->app, $page->getActivePageRevision());
             $response = $generator->render();
         } else {
             $response = Response::create($message);

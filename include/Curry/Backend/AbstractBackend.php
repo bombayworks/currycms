@@ -3,10 +3,15 @@
 namespace Curry\Backend;
 
 use Curry\App;
+use Curry\Util\Helper;
+use Curry\Util\HtmlHead;
 use Curry\Util\PathHelper;
+use Curry\Util\StringHelper;
+use Curry\View;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
-abstract class AbstractBackend extends \Curry\View {
+abstract class AbstractBackend extends View {
 	/**
 	 * Success message.
 	 */
@@ -42,7 +47,7 @@ abstract class AbstractBackend extends \Curry\View {
 	/**
 	 * Object to modify HTML head section.
 	 *
-	 * @var \Curry\Util\HtmlHead
+	 * @var HtmlHead
 	 */
 	protected $htmlHead;
 
@@ -100,10 +105,10 @@ abstract class AbstractBackend extends \Curry\View {
 	 */
 	protected $app;
 
-	public function __construct(\Curry\App $app)
+	public function __construct(App $app)
 	{
 		$this->app = $app;
-		$this->htmlHead = new \Curry\Util\HtmlHead();
+		$this->htmlHead = new HtmlHead();
 	}
 
 	/**
@@ -176,7 +181,7 @@ abstract class AbstractBackend extends \Curry\View {
 	/**
 	 * Get the object used to modify the HTML head section for the backend.
 	 *
-	 * @return \Curry\Util\HtmlHead
+	 * @return HtmlHead
 	 */
 	public function getHtmlHead()
 	{
@@ -284,7 +289,7 @@ abstract class AbstractBackend extends \Curry\View {
 			list($view, $route) = $viewAndRoute;
 			//if(!$user->hasAccess(get_class($view)))
 			//	continue;
-			$active = \Curry\Util\StringHelper::startsWith($app->request->getPathInfo(), $view->url());
+			$active = StringHelper::startsWith($app->request->getPathInfo(), $view->url());
 			$group = $view->getGroup();
 			$moduleProperties = array(
 				'Module' => $viewName,
@@ -392,7 +397,7 @@ abstract class AbstractBackend extends \Curry\View {
 	 */
 	public function addMainContent($content)
 	{
-		$this->mainContent .= \Curry\Util\Helper::stringify($content);
+		$this->mainContent .= Helper::stringify($content);
 	}
 
 	/**
@@ -402,6 +407,6 @@ abstract class AbstractBackend extends \Curry\View {
 	 */
 	public function addMenuContent($content)
 	{
-		$this->menuContent .= \Curry\Util\Helper::stringify($content);
+		$this->menuContent .= Helper::stringify($content);
 	}
 }

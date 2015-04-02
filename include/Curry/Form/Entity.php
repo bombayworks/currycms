@@ -2,7 +2,9 @@
 
 namespace Curry\Form;
 
-abstract class Entity extends \Curry\Configurable {
+use Curry\Configurable;
+
+abstract class Entity extends Configurable {
 	protected static $classMap = array(
 		'form' => '\\Curry\\Form\\Form',
 		'container' => '\\Curry\\Form\\Container',
@@ -52,7 +54,7 @@ abstract class Entity extends \Curry\Configurable {
 	protected $defaultWidget = '\\Curry\\Form\\Widget\\HiddenInput';
 
 	/**
-	 * @var \Curry\Form\Widget\AbstractWidget
+	 * @var Widget\AbstractWidget
 	 */
 	protected $widget;
 
@@ -277,7 +279,7 @@ abstract class Entity extends \Curry\Configurable {
 	}
 
 	/**
-	 * @param \Curry\Form\Widget\AbstractWidget $widget
+	 * @param Widget\AbstractWidget $widget
 	 */
 	public function setWidget($widget)
 	{
@@ -299,7 +301,7 @@ abstract class Entity extends \Curry\Configurable {
 	}
 
 	/**
-	 * @return \Curry\Form\Widget\AbstractWidget
+	 * @return Widget\AbstractWidget
 	 */
 	public function getWidget()
 	{
@@ -309,7 +311,7 @@ abstract class Entity extends \Curry\Configurable {
 				$widgetClass = $this->defaultWidget;
 			$this->widget = new $widgetClass;
 		}
-		if (!$this->widget instanceof \Curry\Form\Widget\AbstractWidget) {
+		if (!$this->widget instanceof Widget\AbstractWidget) {
 			throw new \Exception('Widget is not of type \Curry\Form\Widget\AbstractWidget');
 		}
 		return $this->widget;

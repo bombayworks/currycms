@@ -185,7 +185,7 @@ public function getInheritedProperty($name, $default = null, $cache = true, $for
         	if($value !== false) {
 				$app->cache->save($value, $cacheName);
         	} else {
-        		trace_warning("Unable to store $name for {$this->getUrl()}");
+        		$app->logger->notice("Unable to store $name for {$this->getUrl()}");
         	}
         }
 	}
@@ -522,7 +522,7 @@ public static function postMigrate($version)
 				$pm->setPageId($pr->getPageId());
 				$pm->save();
 			} else {
-				trace_warning('Unable to migrate page module.');
+				\Curry\App::getInstance()->logger->notice('Unable to migrate page module.');
 			}
 		}
 	}

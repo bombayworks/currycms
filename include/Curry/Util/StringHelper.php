@@ -16,6 +16,7 @@
  * @link       http://currycms.com
  */
 namespace Curry\Util;
+use Curry\App;
 
 /**
  * A static class with utility string functions.
@@ -60,7 +61,7 @@ class StringHelper
 	 */
 	public static function getRewriteString($sString)
 	{
-		 $string = strtolower(htmlentities($sString, null, \Curry\App::getInstance()->config->curry->internalEncoding));
+		 $string = strtolower(htmlentities($sString, null, App::getInstance()->config->curry->internalEncoding));
 		 $string = preg_replace("/&(.)(uml);/", "$1e", $string);
 		 $string = preg_replace("/&(.)(acute|cedil|circ|ring|tilde|uml);/", "$1", $string);
 		 //$string = strtolower(iconv(\Curry\App::getInstance()->config->curry->internalEncoding, 'ASCII//TRANSLIT', $sString));
@@ -139,7 +140,7 @@ class StringHelper
 	 */
 	public static function toEncoding($str, $encoding, $unhandledChars = self::ICONV_TRANSLIT)
 	{
-		$internalEncoding = \Curry\App::getInstance()->config->curry->internalEncoding;
+		$internalEncoding = App::getInstance()->config->curry->internalEncoding;
 		
 		if($encoding == $internalEncoding)
 			return $str;
@@ -166,7 +167,7 @@ class StringHelper
 	 */
 	public static function toInternalEncoding($str, $encoding, $unhandledChars = self::ICONV_TRANSLIT)
 	{
-		$internalEncoding = \Curry\App::getInstance()->config->curry->internalEncoding;
+		$internalEncoding = App::getInstance()->config->curry->internalEncoding;
 		
 		if($encoding == $internalEncoding)
 			return $str;
@@ -193,9 +194,9 @@ class StringHelper
 	 */
 	public static function toOutputEncoding($str, $encoding = null, $unhandledChars = self::ICONV_TRANSLIT)
 	{
-		$outputEncoding = \Curry\App::getInstance()->config->curry->outputEncoding;
+		$outputEncoding = App::getInstance()->config->curry->outputEncoding;
 		if(!$encoding)
-			$encoding = \Curry\App::getInstance()->config->curry->internalEncoding;
+			$encoding = App::getInstance()->config->curry->internalEncoding;
 			
 		if($encoding == $outputEncoding)
 			return $str;

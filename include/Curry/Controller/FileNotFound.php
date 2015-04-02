@@ -18,6 +18,7 @@
 
 namespace Curry\Controller;
 use Curry\App;
+use Curry\Generator\AbstractGenerator;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
@@ -52,7 +53,7 @@ class FileNotFound implements EventSubscriberInterface {
 			// we don't need to explicitly set 404 status, HttpKernel will do this for us.
 			if ($this->app->config->curry->errorPage->notFound
 					&& ($page = \PageQuery::create()->findPk($this->app->config->curry->errorPage->notFound))) {
-				$generator = \Curry\Generator\AbstractGenerator::create($this->app, $page->getActivePageRevision());
+				$generator = AbstractGenerator::create($this->app, $page->getActivePageRevision());
 				$event->setResponse($generator->render());
 			} else {
 				$event->setResponse(new Response('Page not found'));

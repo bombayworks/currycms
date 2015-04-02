@@ -228,7 +228,7 @@ class Curry_Backend_Indexer extends \Curry\Backend\AbstractLegacyBackend {
 			return true;
 		}
 		catch (Exception $e) {
-			trace_error($model.'('.(string)$item.'): '.$e->getMessage());
+			\Curry\App::getInstance()->logger->error($model.'('.(string)$item.'): '.$e->getMessage());
 			return false;
 		}
 	}

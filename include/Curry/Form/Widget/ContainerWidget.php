@@ -2,6 +2,7 @@
 
 namespace Curry\Form\Widget;
 
+use Curry\Form\Container;
 use Curry\Form\Entity;
 
 class ContainerWidget extends AbstractWidget {
@@ -12,7 +13,7 @@ class ContainerWidget extends AbstractWidget {
 
 	public function renderChildren(Entity $entity)
 	{
-		if (!$entity instanceof \Curry\Form\Container)
+		if (!$entity instanceof Container)
 			throw new \Exception('ContainerWidget requires entities to be a subclass of \\Curry\\Form\\Container');
 		$normal = array();
 		$hidden = array();

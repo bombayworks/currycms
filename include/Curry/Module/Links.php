@@ -16,6 +16,7 @@
  * @link       http://currycms.com
  */
 namespace Curry\Module;
+use Curry\Util\ArrayHelper;
 
 /**
  * Module to show a set of links.
@@ -42,7 +43,7 @@ class Links extends AbstractModule {
 	public function toTwig()
 	{
 		return array(
-			'links' => \Curry\Util\ArrayHelper::objectsToArray($this->links, null, array($this, 'getLinkProperties')),
+			'links' => ArrayHelper::objectsToArray($this->links, null, array($this, 'getLinkProperties')),
 		);
 	}
 	

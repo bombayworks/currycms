@@ -778,7 +778,7 @@ TPL
 				return $fi;
 			}
 			catch (Exception $e) {
-				trace_error($e->getMessage());
+				$this->app->logger->error($e->getMessage());
 			}
 		} else {
 			$totalSize = 0;

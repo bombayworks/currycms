@@ -16,6 +16,8 @@
  * @link       http://currycms.com
  */
 namespace Curry\Module;
+use Curry\App;
+use Curry\Util\ArrayHelper;
 
 /**
  * Helper class to manage inheritance for page modules.
@@ -319,7 +321,7 @@ class PageModuleWrapper {
 	{
 		// get PageRevision ancestors
 		$ancestors = array_reverse($this->getPageRevision()->getInheritanceChain(true));
-		$ancestors = \Curry\Util\ArrayHelper::objectsToArray($ancestors, null, 'getPageRevisionId');
+		$ancestors = ArrayHelper::objectsToArray($ancestors, null, 'getPageRevisionId');
 		$ancestors = array_flip($ancestors);
 
 		$keys = array();
@@ -471,12 +473,12 @@ class PageModuleWrapper {
 			try {
 				$obj = unserialize($data);
 				if ($obj && !($obj instanceof $className)) {
-					trace_warning('Module class mismatch '.$className);
+					App::getInstance()->logger->warning('Module class mismatch '.$className);
 					$obj = null;
 				}
 			}
 			catch(\Exception $e) {
-				trace_warning('Failed to unserialize module of class '.$className);
+				App::getInstance()->logger->warning('Failed to unserialize module of class '.$className);
 			}
 		}
 

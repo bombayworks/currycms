@@ -880,9 +880,7 @@ class URL {
 			$urlInfo = parse_url(self::getRequestUri());
 			return $urlInfo['path'];
 		}
-		catch (\Exception $e) {
-			//trace_warning($e->getMessage());
-		}
+		catch (\Exception $e) { }
 		return "/";
 	}
 	

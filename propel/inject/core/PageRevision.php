@@ -53,7 +53,7 @@ public function getInheritedProperty($name, $default = null, $cache = true, $for
         	if($value !== false) {
         		\Curry\App::getInstance()->cache->save($value, $cacheName);
         	} else {
-        		trace_warning("Unable to store $name for $this->getUrl()");
+        		\Curry\App::getInstance()->logger->notice("Unable to store $name for $this->getUrl()");
         	}
         }
 	}

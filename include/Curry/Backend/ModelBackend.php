@@ -16,13 +16,15 @@
  * @link       http://currycms.com
  */
 namespace Curry\Backend;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Base class for "model backend modules".
  * 
  * @package Curry\Backend
  */
-abstract class ModelBackend extends \Curry\Backend\AbstractLegacyBackend {
+abstract class ModelBackend extends AbstractLegacyBackend
+{
 	/**
 	 * Array of allowed model classes.
 	 *
@@ -102,7 +104,7 @@ abstract class ModelBackend extends \Curry\Backend\AbstractLegacyBackend {
 	 *
 	 * @return string
 	 */
-	public function show(\Symfony\Component\HttpFoundation\Request $request)
+	public function show(Request $request)
 	{
 		try {
 			$this->preShow();

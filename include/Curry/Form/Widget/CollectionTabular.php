@@ -2,6 +2,7 @@
 
 namespace Curry\Form\Widget;
 
+use Curry\Form\Container;
 use Curry\Form\Entity;
 
 class CollectionTabular extends CollectionWidget {
@@ -23,7 +24,7 @@ class CollectionTabular extends CollectionWidget {
 	public function renderNormal(Entity $entity) {
 		$markup = "";
 		foreach($entity as $columnEntity) {
-			if (!$entity instanceof \Curry\Form\Container)
+			if (!$entity instanceof Container)
 				throw new \Exception('CollectionTabular requires entities to be subclass of \\Curry\\Form\\Container');
 			$attr = array('class' => $columnEntity->getWrapperClass());
 			$markup .= Entity::html('td', $attr, $columnEntity->render());

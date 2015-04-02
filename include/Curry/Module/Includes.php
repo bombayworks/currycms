@@ -17,6 +17,7 @@
  */
 namespace Curry\Module;
 
+use Curry\Generator\HtmlGenerator;
 use Curry\Util\PathHelper;
 
 /**
@@ -74,7 +75,7 @@ class Includes extends AbstractModule {
 	public function showFront(\Curry_Twig_Template $template = null)
 	{
 		$pageGenerator = $this->app->generator;
-		if(!($pageGenerator instanceof \Curry\Generator\HtmlGenerator))
+		if(!($pageGenerator instanceof HtmlGenerator))
 			throw new \Exception('Includes module only works on pages with PageGenerator set to Curry\Generator\Curry_PageGenerator_Html.');
 		$head = $pageGenerator->getHtmlHead();
 		
@@ -144,10 +145,10 @@ class Includes extends AbstractModule {
 			$lastModified = self::getLastModified($files);
 			$targetModified = filemtime($target);
 			if($targetModified >= $lastModified) {
-				trace_notice('Using cached js minification file');
+				$this->app->logger->info('Using cached js minification file');
 				return $target . '?' . $targetModified;
 			}
-			trace_notice('Updating js minification file');
+			$this->app->logger->notice('Updating js minification file');
 		}
 		
 		// Combine and minify files
@@ -177,10 +178,10 @@ class Includes extends AbstractModule {
 		if(file_exists($target)) {
 			$data = self::readMinificationHeader($target);
 			if(self::getLastModified($data['files']) == $data['modified']) {
-				trace_notice('Using cached css minification file');
+				$this->app->logger->info('Using cached css minification file');
 				return $target . '?' . $data['modified'];
 			}
-			trace_notice('Updating css minification file');
+			$this->app->logger->notice('Updating css minification file');
 		}
 		
 		// Combine files (and process imports)

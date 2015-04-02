@@ -16,6 +16,8 @@
  * @link       http://currycms.com
  */
 namespace Curry\Module;
+use Curry\Util\OnDemand;
+use Curry\Util\ArrayHelper;
 
 /**
  * Navigation module.
@@ -215,12 +217,12 @@ TPL
 	public function twigGetPage(\Page $page)
 	{
 		$p = $page->toTwig();
-		$p['parent'] = new \Curry\Util\OnDemand(array($this, 'twigGetParent'), $page);
-		$p['subpages'] = new \Curry\Util\OnDemand(array($this, 'twigGetSubpages'), $page);
+		$p['parent'] = new OnDemand(array($this, 'twigGetParent'), $page);
+		$p['subpages'] = new OnDemand(array($this, 'twigGetSubpages'), $page);
 		
 		$activePage = $this->app->page;
 		$p['IsActive'] = $activePage->getUrl() === $page->getUrl();
-		$p['IsActiveSubpage'] = new \Curry\Util\OnDemand(array($this, 'twigGetActiveSubpage'), $page, $activePage);
+		$p['IsActiveSubpage'] = new OnDemand(array($this, 'twigGetActiveSubpage'), $page, $activePage);
 		
 		return $p;
 	}
@@ -263,13 +265,13 @@ TPL
 		// set order
 		switch($this->sortOrder) {
 			case self::ORDER_SORTINDEX_DESC:
-				\Curry\Util\ArrayHelper::sortOn($subpages, 'getTreeLeft', \Curry\Util\ArrayHelper::SORT_REVERSE);
+				ArrayHelper::sortOn($subpages, 'getTreeLeft', ArrayHelper::SORT_REVERSE);
 				break;
 			case self::ORDER_NAME_ASC:
-				\Curry\Util\ArrayHelper::sortOn($subpages, 'getName');
+				ArrayHelper::sortOn($subpages, 'getName');
 				break;
 			case self::ORDER_NAME_DESC:
-				\Curry\Util\ArrayHelper::sortOn($subpages, 'getName', \Curry\Util\ArrayHelper::SORT_REVERSE);
+				ArrayHelper::sortOn($subpages, 'getName', ArrayHelper::SORT_REVERSE);
 				break;
 		}
 		

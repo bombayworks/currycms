@@ -16,6 +16,7 @@
  * @link       http://currycms.com
  */
 namespace Curry\Util;
+use Curry\App;
 
 /**
  * Static utility class.
@@ -159,7 +160,7 @@ class Helper {
 				try {
 					return $object->$name();
 				}
-				catch (\Exception $e) { trace_error($e->getMessage()); }
+				catch (\Exception $e) { App::getInstance()->logger->error($e->getMessage()); }
 			}
 		}
 		return null;

@@ -16,6 +16,7 @@
  * @link       http://currycms.com
  */
 namespace Curry\Module;
+use Curry\Util\ArrayHelper;
 
 /**
  * Module to show a set of images.
@@ -44,7 +45,7 @@ class Images extends AbstractModule {
 	public function toTwig()
 	{
 		return array(
-			'images' => \Curry\Util\ArrayHelper::objectsToArray($this->images, null, array($this, 'getImageProperties')),
+			'images' => ArrayHelper::objectsToArray($this->images, null, array($this, 'getImageProperties')),
 		);
 	}
 	

@@ -20,14 +20,27 @@ use Curry\App;
 use Curry\Archive\Archive;
 use Curry\Controller\Frontend;
 use Curry\Util\PathHelper;
+use Curry\Util\StringHelper;
+use Symfony\Component\HttpFoundation\Request;
+use Zend\Config\Config;
 
 /**
  * Change system settings.
  * 
  * @package Curry\Backend
  */
-class System extends \Curry\Backend\AbstractLegacyBackend {
-	
+class System extends AbstractBackend
+{
+
+	public function initialize() {
+		$this->addViewFunction('bundle', array($this, 'showBundle'));
+		$this->addViewFunction('cache', array($this, 'showClearCache'));
+		$this->addViewFunction('info', array($this, 'showInfo'))
+			->addViewFunction('phpinfo', array($this, 'showPhpInfo'));
+		$this->addViewFunction('upgrade', array($this, 'showUpgrade'));
+	}
+
+
 	/** {@inheritdoc} */
 	public function getGroup()
 	{
@@ -390,7 +403,7 @@ class System extends \Curry\Backend\AbstractLegacyBackend {
 	/**
 	 * Save the config file.
 	 *
-	 * @param \Zend\Config\Config $config
+	 * @param Config $config
 	 * @param array $values
 	 */
 	private function saveSettings(&$config, array $values)
@@ -491,13 +504,13 @@ class System extends \Curry\Backend\AbstractLegacyBackend {
 	/**
 	 * Set configuration variable. If value is an empty string, the variable will be unset.
 	 *
-	 * @param \Zend\Config\Config $config
+	 * @param Config $config
 	 * @param string $name
 	 * @param string $value
 	 */
 	private static function setvar(&$config, $name, $value)
 	{
-		if($config instanceof \Zend\Config\Config) {
+		if($config instanceof Config) {
 			if($value != '')
 				$config->$name = $value;
 			else
@@ -617,7 +630,7 @@ class System extends \Curry\Backend\AbstractLegacyBackend {
 			
 			$filename = str_replace(" ", "_", $this->app->config->curry->name)."-bundle-".date("Ymd").".tar" . ($compression ? ".$compression" : '');
 			header("Content-type: " . Archive::getCompressionMimeType($compression));
-			header("Content-disposition: attachment; filename=" . \Curry\Util\StringHelper::escapeQuotedString($filename));
+			header("Content-disposition: attachment; filename=" . StringHelper::escapeQuotedString($filename));
 			
 			// do not use output buffering
 			while(ob_end_clean())
@@ -737,7 +750,7 @@ class System extends \Curry\Backend\AbstractLegacyBackend {
 			return $versions;
 		}
 		catch (\Exception $e) {
-			trace_warning('Failed to fetch release list: '.$e->getMessage());
+			App::getInstance()->logger->warning('Failed to fetch release list: '.$e->getMessage());
 			return null;
 		}
 	}

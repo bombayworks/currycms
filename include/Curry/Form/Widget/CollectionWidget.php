@@ -2,6 +2,7 @@
 
 namespace Curry\Form\Widget;
 
+use Curry\Form\Collection;
 use Curry\Form\Entity;
 
 class CollectionWidget extends ContainerWidget {
@@ -28,7 +29,7 @@ class CollectionWidget extends ContainerWidget {
 
 	protected function addCloneInfo(Entity $entity)
 	{
-		if (!$entity instanceof \Curry\Form\Collection)
+		if (!$entity instanceof Collection)
 			throw new \Exception('Expected \Curry\Form\Collection, got '.get_class($entity).' when rendering field');
 		$name = uniqid('formhelper');
 		$entity->addExtra($name);

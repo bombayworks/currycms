@@ -2,6 +2,9 @@
 
 namespace Curry\Backend;
 
+use Curry\Form\ModelForm;
+use Curry\Tree\PropelTree;
+use Curry\Tree\Tree;
 use Symfony\Component\HttpFoundation\Request;
 
 class Pages extends AbstractBackend {
@@ -14,7 +17,7 @@ class Pages extends AbstractBackend {
 	protected function getMenu()
 	{
 		$query = \PageQuery::create();
-		$tree = new \Curry\Tree\PropelTree($query, array(
+		$tree = new PropelTree($query, array(
 			'minExpandLevel' => 2,
 			'autoFocus' => false,
 			'selectMode' => 1, // single
@@ -33,11 +36,11 @@ class Pages extends AbstractBackend {
 	 * Get page tree node properties.
 	 *
 	 * @param \Page $page
-	 * @param \Curry\Tree\Tree $tree
+	 * @param Tree $tree
 	 * @param int $depth
 	 * @return array
 	 */
-	public function getPageTreeNode($page, \Curry\Tree\Tree $tree, $depth = 0)
+	public function getPageTreeNode($page, Tree $tree, $depth = 0)
 	{
 		$p = $tree->objectToJson($page, $tree, $depth);
 

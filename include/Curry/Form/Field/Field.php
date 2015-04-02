@@ -2,7 +2,9 @@
 
 namespace Curry\Form\Field;
 
-class Field extends \Curry\Form\Entity {
+use Curry\Form\Entity;
+
+class Field extends Entity {
 	/**
 	 * @var bool
 	 */

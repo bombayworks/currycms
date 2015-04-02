@@ -18,7 +18,10 @@
 
 namespace Curry\Controller;
 use Curry\App;
+use Curry\Backend\AbstractBackend;
 use Curry\Exception;
+use Curry\Util\ClassEnumerator;
+use Curry\Util\Helper;
 use Curry\View;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -32,16 +35,16 @@ use Symfony\Component\HttpKernel\KernelEvents;
  *
  * @package Curry\Controller\Backend
  */
-class Backend extends \Curry\Backend\AbstractBackend implements EventSubscriberInterface {
+class Backend extends AbstractBackend implements EventSubscriberInterface {
 	public function initialize()
 	{
-		$app = \Curry\App::getInstance();
+		$app = App::getInstance();
 
 		$cacheName = sha1(__CLASS__.'_backendClasses');
 		$backendClasses = $app->cache->load($cacheName);
 		if ($backendClasses === false) {
 			$backendClasses = array();
-			$classes = \Curry\Util\ClassEnumerator::findClasses(__DIR__.'/../Backend');
+			$classes = ClassEnumerator::findClasses(__DIR__.'/../Backend');
 			foreach($classes as $className) {
 				if (class_exists($className) && $className !== __CLASS__) {
 					$r = new \ReflectionClass($className);
@@ -88,7 +91,7 @@ class Backend extends \Curry\Backend\AbstractBackend implements EventSubscriberI
 	{
 		$response = $view->show($request);
 		if (!$response instanceof Response)
-			$response = new Response(\Curry\Util\Helper::stringify($response));
+			$response = new Response(Helper::stringify($response));
 		return $response;
 	}
 

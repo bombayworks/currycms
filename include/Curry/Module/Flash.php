@@ -17,6 +17,7 @@
  */
 namespace Curry\Module;
 
+use Curry\Util\ArrayHelper;
 use Curry\Util\Flash as FlashUtil;
 
 /**
@@ -167,11 +168,11 @@ class Flash extends AbstractModule {
 		}
 		
 		if(in_array("get", $this->addToFlashvars))
-			\Curry\Util\ArrayHelper::extend($flashvars, $_GET);
+			ArrayHelper::extend($flashvars, $_GET);
 		if(in_array("post", $this->addToFlashvars))
-			\Curry\Util\ArrayHelper::extend($flashvars, $_POST);
+			ArrayHelper::extend($flashvars, $_POST);
 		if(in_array("cookie", $this->addToFlashvars))
-			\Curry\Util\ArrayHelper::extend($flashvars, $_COOKIE);
+			ArrayHelper::extend($flashvars, $_COOKIE);
 		
 		$options = array();
 		$options['expressInstall'] = $this->expressInstall;

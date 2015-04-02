@@ -2,8 +2,9 @@
 namespace Curry\Generator;
 
 use Curry\Module\PageModuleWrapper;
+use Symfony\Component\EventDispatcher\Event;
 
-class PreModuleEvent extends \Symfony\Component\EventDispatcher\Event
+class PreModuleEvent extends Event
 {
 
 	/**

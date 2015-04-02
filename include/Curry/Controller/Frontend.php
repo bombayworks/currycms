@@ -19,6 +19,7 @@
 namespace Curry\Controller;
 use Curry\App;
 use Curry\URL;
+use Curry\Util\StringHelper;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -165,29 +166,6 @@ class Frontend implements EventSubscriberInterface {
 			$request->attributes->set('_controller', new Page($this->app));
 		}
 	}
-	
-	/**
-	 * Handler for reverse-routing.
-	 *
-	 * @param string $path
-	 * @param string|array $query
-	 */
-	public function reverseRoute(&$path, &$query)
-	{
-		// remove matching base path
-		$baseUrl = \Curry\URL::getDefaultBaseUrl();
-		$basePath = $baseUrl['path'];
-		$basePathRemoved = false;
-		if (\Curry\Util\StringHelper::startsWith($path, $basePath) && $path !== '/') {
-			$path = substr($path, strlen($basePath));
-			$basePathRemoved = true;
-		}
-		//\Curry_Route_ModelRoute::reverse($path, $query);
-		// re-add base path if it was removed
-		if ($basePathRemoved) {
-			$path = $basePath . $path;
-		}
-	}
 
 	/**
 	 * @param Request $request
@@ -199,7 +177,7 @@ class Frontend implements EventSubscriberInterface {
 		$requestUri = $request->getPathInfo();
 
 		// remove base path
-		$baseUrl = \Curry\URL::getDefaultBaseUrl();
+		$baseUrl = URL::getDefaultBaseUrl();
 		$basePath = $baseUrl['path'];
 		if (strpos($requestUri, $basePath) === 0)
 			$requestUri = substr($requestUri, strlen($basePath));
@@ -269,15 +247,38 @@ class Frontend implements EventSubscriberInterface {
 	{
 		if(self::$urlToModel === null) {
 			$cacheName = __CLASS__ . '_' . 'UrlToModel';
-			if((self::$urlToModel = \Curry\App::getInstance()->cache->load($cacheName)) === false) {
-				self::$urlToModel = PageQuery::create()
-					->filterByModelRoute(null, Criteria::ISNOTNULL)
+			if((self::$urlToModel = App::getInstance()->cache->load($cacheName)) === false) {
+				self::$urlToModel = \PageQuery::create()
+					->filterByModelRoute(null, \Criteria::ISNOTNULL)
 					->find()
 					->toKeyValue('Url', 'ModelRoute');
-				\Curry\App::getInstance()->cache->save(self::$urlToModel, $cacheName);
+				App::getInstance()->cache->save(self::$urlToModel, $cacheName);
 			}
 		}
 		return isset(self::$urlToModel[$url]) ? self::$urlToModel[$url] : null;
+	}
+
+	/**
+	 * Handler for reverse-routing.
+	 *
+	 * @param string $path
+	 * @param string|array $query
+	 */
+	public function reverseRoute(&$path, &$query)
+	{
+		// remove matching base path
+		$baseUrl = URL::getDefaultBaseUrl();
+		$basePath = $baseUrl['path'];
+		$basePathRemoved = false;
+		if (StringHelper::startsWith($path, $basePath) && $path !== '/') {
+			$path = substr($path, strlen($basePath));
+			$basePathRemoved = true;
+		}
+		//\Curry_Route_ModelRoute::reverse($path, $query);
+		// re-add base path if it was removed
+		if ($basePathRemoved) {
+			$path = $basePath . $path;
+		}
 	}
 
 	/**

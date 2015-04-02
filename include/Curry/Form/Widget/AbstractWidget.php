@@ -2,6 +2,7 @@
 
 namespace Curry\Form\Widget;
 
+use Curry\Configurable;
 use Curry\Form\Entity;
 
 /**
@@ -13,7 +14,7 @@ use Curry\Form\Entity;
  *
  * @package Curry\Form
  */
-abstract class AbstractWidget extends \Curry\Configurable {
+abstract class AbstractWidget extends Configurable {
 	protected $attributes = array();
 
 	protected function setOptionFallback($name, $value)

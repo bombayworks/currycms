@@ -1,7 +1,9 @@
 <?php
 namespace Curry\Generator;
 
-class RenderEvent extends \Symfony\Component\EventDispatcher\Event
+use Symfony\Component\EventDispatcher\Event;
+
+class RenderEvent extends Event
 {
 	/**
 	 * @var

@@ -1,7 +1,9 @@
 <?php
 namespace Curry\Generator;
 
-class PostGenerateEvent extends \Symfony\Component\EventDispatcher\Event
+use Symfony\Component\EventDispatcher\Event;
+
+class PostGenerateEvent extends Event
 {
 	/**
 	 * @var array

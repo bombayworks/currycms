@@ -90,12 +90,7 @@ abstract class AbstractModule {
 		if (!$dirs) {
 			$dirs = array();
 		}
-		$dirs[] = PathHelper::path(
-			App::getInstance()->config->curry->basePath,
-			'include',
-			'Curry',
-			'Module'
-		);
+		$dirs[] = __DIR__;
 
 		// find all php files in the directories
 		$modules = array();

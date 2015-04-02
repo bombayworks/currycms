@@ -16,6 +16,8 @@
  * @link       http://currycms.com
  */
 namespace Curry\Module;
+use Curry\Util\StringHelper;
+use Curry\Util\OnDemand;
 
 /**
  * Search in the search-index and show matching results.
@@ -125,24 +127,24 @@ TPL
 	public function getHitProperties(\Zend_Search_Lucene_Search_QueryHit $hit)
 	{
 		$r = $this->app->request;
-		$snippet = \Curry\Util\StringHelper::toInternalEncoding($hit->body, 'utf-8');
+		$snippet = StringHelper::toInternalEncoding($hit->body, 'utf-8');
 		$snippet = self::createSearchSnippet($snippet, $r->query->get('query'), $this->snippetLength);
 		
 		$relatedObject = null;
-		$model = \Curry\Util\StringHelper::toInternalEncoding($hit->model, 'utf-8');
+		$model = StringHelper::toInternalEncoding($hit->model, 'utf-8');
 
 		$fields = array();
 		foreach($hit->getDocument()->getFieldNames() as $fieldName)
 			$fields[$fieldName] = $hit->{$fieldName};
 
 		return array(
-			'Title' => \Curry\Util\StringHelper::toInternalEncoding($hit->title, 'utf-8'),
-			'Description' => \Curry\Util\StringHelper::toInternalEncoding($hit->description, 'utf-8'),
-			'Url' => \Curry\Util\StringHelper::toInternalEncoding($hit->url, 'utf-8'),
+			'Title' => StringHelper::toInternalEncoding($hit->title, 'utf-8'),
+			'Description' => StringHelper::toInternalEncoding($hit->description, 'utf-8'),
+			'Url' => StringHelper::toInternalEncoding($hit->url, 'utf-8'),
 			'Snippet' => $snippet,
 			'Score' => $hit->score,
 			'Fields' => $fields,
-			'RelatedObject' => new \Curry\Util\OnDemand(array($this, 'getRelatedObject'), $model, unserialize($hit->model_id)),
+			'RelatedObject' => new OnDemand(array($this, 'getRelatedObject'), $model, unserialize($hit->model_id)),
 		);
 	}
 	

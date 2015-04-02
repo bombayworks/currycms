@@ -3,46 +3,6 @@ namespace {
 	use Curry\URL;
 
 	/**
-	 * Global helper function for logging messages or objects.
-	 *
-	 * @param mixed $value
-	 */
-	function trace($value)
-	{
-		\Curry\App::getInstance()->logger->debug($value);
-	}
-
-	/**
-	 * Global helper function for logging messages or objects, with level set to notice (aka info).
-	 *
-	 * @param mixed $value
-	 */
-	function trace_notice($value)
-	{
-		\Curry\App::getInstance()->logger->notice($value);
-	}
-
-	/**
-	 * Global helper function for logging messages or objects, with level set to warning.
-	 *
-	 * @param mixed $value
-	 */
-	function trace_warning($value)
-	{
-		\Curry\App::getInstance()->logger->warning($value);
-	}
-
-	/**
-	 * Global helper function for logging messages or objects, with level set to error.
-	 *
-	 * @param mixed $value
-	 */
-	function trace_error($value)
-	{
-		\Curry\App::getInstance()->logger->error($value);
-	}
-
-	/**
 	 * Global helper function for getting language variables. Alias for Curry_Language::get().
 	 *
 	 * @param string $variableName
@@ -98,12 +58,17 @@ namespace {
 }
 
 namespace Curry {
+	use Composer\Autoload\ClassLoader;
 	use Curry\Controller\Backend;
 	use Curry\Controller\FileNotFound;
 	use Curry\Controller\Frontend;
 	use Curry\Controller\StaticContent;
 	use Curry\Util\Html;
 	use Curry\Util\PathHelper;
+	use Monolog\Handler\FirePHPHandler;
+	use Monolog\Handler\NullHandler;
+	use Monolog\Handler\StreamHandler;
+	use Monolog\Logger;
 	use Symfony\Component\EventDispatcher\EventDispatcher;
 	use Symfony\Component\HttpFoundation\Request;
 	use Symfony\Component\HttpFoundation\RequestStack;
@@ -121,7 +86,7 @@ namespace Curry {
 	 * Class App
 	 *
 	 * @property \Symfony\Component\HttpFoundation\Request $request
-	 * @property \Monolog\Logger $logger
+	 * @property Logger $logger
 	 * @property \Page $page
 	 * @property \PageRevision $pageRevision
 	 * @property \Curry\Generator\AbstractGenerator $generator
@@ -141,7 +106,7 @@ namespace Curry {
 		const MIGRATION_VERSION = 1;
 
 		/**
-		 * @var \Curry\App;
+		 * @var App;
 		 */
 		protected static $instance;
 
@@ -253,10 +218,10 @@ namespace Curry {
 			$this->dispatcher->addSubscriber(new Frontend($this));
 			$this->dispatcher->addSubscriber(new FileNotFound($this));
 
-			$this->dispatcher->addSubscriber(new \Curry\Generator\ModuleProfiler($app->logger));
-			$this->dispatcher->addSubscriber(new \Curry\Generator\ModuleCacher($app->cache));
-			$this->dispatcher->addSubscriber(new \Curry\Generator\ModuleHtmlHead());
-			$this->dispatcher->addSubscriber(new \Curry\Generator\LiveEdit($this));
+			$this->dispatcher->addSubscriber(new Generator\ModuleProfiler($app->logger));
+			$this->dispatcher->addSubscriber(new Generator\ModuleCacher($app->cache));
+			$this->dispatcher->addSubscriber(new Generator\ModuleHtmlHead());
+			$this->dispatcher->addSubscriber(new Generator\LiveEdit($this));
 		}
 
 		public function run(Request $request = null) {
@@ -284,32 +249,32 @@ namespace Curry {
 		/**
 		 * Get a configuration object with the default configuration-options.
 		 *
-		 * @return \Zend\Config\Config
+		 * @return Config
 		 */
 		public function getDefaultConfiguration() {
-			return new \Zend\Config\Config(self::getConfig($this->config->curry->configPath, false));
+			return new Config(self::getConfig($this->config->curry->configPath, false));
 		}
 
 		/**
 		 * Open configuration for changes.
 		 *
 		 * @param string|null $file
-		 * @return \Zend\Config\Config
+		 * @return Config
 		 */
 		public function openConfiguration($file = null) {
 			if ($file === null) {
 				$file = $this->config->curry->configPath;
 			}
-			return new \Zend\Config\Config($file ? require($file) : array(), true);
+			return new Config($file ? require($file) : array(), true);
 		}
 
 		/**
 		 * Write configuration.
 		 *
-		 * @param \Zend\Config\Config $config
+		 * @param Config $config
 		 * @param string|null $file
 		 */
-		public function writeConfiguration(\Zend\Config\Config $config, $file = null) {
+		public function writeConfiguration(Config $config, $file = null) {
 			if ($file === null) {
 				$file = $this->config->curry->configPath;
 			}
@@ -509,20 +474,20 @@ namespace Curry {
 		 */
 		protected function getLogger() {
 			$log = $this->config->curry->log;
-			$logger = new \Monolog\Logger('currycms');
+			$logger = new Logger('currycms');
 			switch ($log->method) {
 				case 'firebug':
 					ob_start();
-					$logger->pushHandler(new \Monolog\Handler\FirePHPHandler());
+					$logger->pushHandler(new FirePHPHandler());
 					break;
 
 				case 'file':
-					$logger->pushHandler(new \Monolog\Handler\StreamHandler($log->file));
+					$logger->pushHandler(new StreamHandler($log->file));
 					break;
 
 				case 'none':
 				default:
-					$logger->pushHandler(new \Monolog\Handler\NullHandler());
+					$logger->pushHandler(new NullHandler());
 					break;
 			}
 
@@ -627,11 +592,11 @@ namespace Curry {
 		/**
 		 * Return composer autoloader instance.
 		 *
-		 * @return \Composer\Autoload\ClassLoader
+		 * @return ClassLoader
 		 */
 		protected function getAutoloader() {
 			foreach (spl_autoload_functions() as $callback) {
-				if (is_array($callback) && is_object($callback[0]) && $callback[0] instanceof \Composer\Autoload\ClassLoader) {
+				if (is_array($callback) && is_object($callback[0]) && $callback[0] instanceof ClassLoader) {
 					return $callback[0];
 				}
 			}
@@ -747,9 +712,9 @@ namespace Curry {
 					'</body></html>'
 				);
 				$mail->send();
-				\Curry\App::getInstance()->logger->info('Sent error notification');
+				App::getInstance()->logger->info('Sent error notification');
 			} catch (Exception $e) {
-				\Curry\App::getInstance()->logger->error('Failed to send error notification');
+				App::getInstance()->logger->error('Failed to send error notification');
 			}
 		}
 

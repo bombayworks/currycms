@@ -27,7 +27,7 @@ use Curry\Util\Html;
  *
  * @package Curry\Backend
  */
-class Curry_Backend_ContentList extends Curry_ModelView_List {
+class Curry_Backend_ContentList {
 	/**
 	 * @var PageRevision
 	 */

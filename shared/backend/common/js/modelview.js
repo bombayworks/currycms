@@ -272,8 +272,9 @@
 		}
 
 		base.actionLink = function(action, id) {
-			var uri = URI(action.href);
-			if (typeof id !== "undefined")
+			var href = action.href.replace(':id', id),
+				uri = URI(href);
+			if (href == action.href && typeof id !== "undefined")
 				uri.addSearch({item: id});
 			return uri;
 		}
@@ -406,7 +407,7 @@ $(document).delegate('.modelview .inline', 'click', function() {
 	$content.data('mv-href', $a.attr('href'));
 	var $div = $content.find('div').addClass('inline-wrapper-hide');
 	$tr.after($content);
-	$div.load($a.attr('href')+'&curry_context=main', function() {
+	$div.load($a.attr('href')+'?curry_context=main', function() {
 		if($siblings)
 			$siblings.remove();
 		$('<a href="#" class="inline-close">✖</a>').prependTo(this).click(function(){

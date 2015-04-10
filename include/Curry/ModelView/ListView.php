@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\ModelView;
 use Curry\Controller\Frontend;
 use Curry\Util\ArrayHelper;
 use Curry\Util\Propel;
@@ -26,8 +27,12 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * @package Curry\ModelView
  */
-class Curry_ModelView_List extends \Curry\View {
+class ListView extends AbstractBackend {
 	protected $id;
+
+	/**
+	 * @var \ModelCriteria
+	 */
 	protected $query;
 	protected $columns = array();
 	protected $actions = array();
@@ -64,11 +69,11 @@ class Curry_ModelView_List extends \Curry\View {
 	public function __construct($modelClassOrQuery, array $options = array())
 	{
 		if(is_string($modelClassOrQuery))
-			$query = PropelQuery::from($modelClassOrQuery);
-		else if($modelClassOrQuery instanceof ModelCriteria)
+			$query = \PropelQuery::from($modelClassOrQuery);
+		else if($modelClassOrQuery instanceof \ModelCriteria)
 			$query = $modelClassOrQuery;
 		else
-			throw new Curry_Exception('Invalid argument');
+			throw new \Exception('Invalid argument');
 
 		// Set options
 		$bt = debug_backtrace();
@@ -93,15 +98,22 @@ class Curry_ModelView_List extends \Curry\View {
 		if ($actions !== null) {
 			$this->setOptions(array('actions' => $actions));
 		}
+		parent::__construct(\Curry\App::getInstance());
 	}
 
 	public function initialize()
 	{
+		$this->addViewFunction('json', array($this, 'showJson'));
+
 		foreach($this->actions as $name => $action) {
+			$route = isset($action['route']) ? $action['route'] : null;
+			if ($route === null) {
+				$route = ':id/'.$name.'/';
+			}
 			if (isset($action['action']) && $action['action'] instanceof \Curry\View) {
-				$this->addView($name, $action['action']);
+				$this->addView($name, $action['action'], $route);
 			} else if (isset($action['action']) && is_callable($action['action'])) {
-				$this->actions[$name]['action'] = $this->addViewFunction($name, $action['action']);
+				$this->actions[$name]['action'] = $this->addViewFunction($name, $action['action'], $route);
 			}
 		}
 	}
@@ -115,11 +127,17 @@ class Curry_ModelView_List extends \Curry\View {
 		return $this->getHtml($request->query->all());
 	}
 
-	public function show(Request $request)
+	public function showJson(Request $request)
 	{
 		$response = new Response(json_encode($this->getJson($request->query->all())));
 		$response->headers->set('Content-Type', 'application/json');
 		return $response;
+	}
+
+	public function show(Request $request)
+	{
+		$this->addMainContent($this->getHtml($request->query->all()));
+		return parent::render();
 	}
 
 	public function getModelClass()
@@ -194,7 +212,7 @@ class Curry_ModelView_List extends \Curry\View {
 		unset($this->actions[$name]);
 	}
 
-	public function setQuery(ModelCriteria $query, $addColumns = false)
+	public function setQuery(\ModelCriteria $query, $addColumns = false)
 	{
 		$this->query = $query;
 		if ($addColumns) {
@@ -248,7 +266,7 @@ class Curry_ModelView_List extends \Curry\View {
 
 		$i18nTableName = $this->getI18nTableName($tableMap);
 		if($i18nTableName !== null && $this->query->getJoin($i18nTableName) !== null) {
-			$i18nTableMap = PropelQuery::from($i18nTableName)->getTableMap();
+			$i18nTableMap = \PropelQuery::from($i18nTableName)->getTableMap();
 			foreach($i18nTableMap->getColumns() as $column) {
 				if ($column->isPrimaryKey())
 					continue;
@@ -260,7 +278,7 @@ class Curry_ModelView_List extends \Curry\View {
 		}
 	}
 
-	protected function getI18nTableName($tableMap)
+	protected function getI18nTableName(\TableMap $tableMap)
 	{
 		$behaviors = $tableMap->getBehaviors();
 		if (!array_key_exists('i18n', $behaviors))
@@ -273,12 +291,12 @@ class Curry_ModelView_List extends \Curry\View {
 		// Get primary keys
 		$items = $_POST['item'];
 		if (!is_array($items))
-			throw new Exception('Expected array POST variable `item`.');
+			throw new \Exception('Expected array POST variable `item`.');
 		$pks = array();
 		foreach($items as $item) {
 			$pk = json_decode($item, true);
 			if ($pk === null)
-				throw new Exception('Invalid primary key for item: '.$item);
+				throw new \Exception('Invalid primary key for item: '.$item);
 			$pks[] = $pk;
 		}
 		Propel::sortableReorder($pks, $this->getModelClass());
@@ -286,9 +304,9 @@ class Curry_ModelView_List extends \Curry\View {
 
 	protected function addDefaultActions()
 	{
-		$modelForm = isset($this->options['modelForm']) ? $this->options['modelForm'] : new Curry_ModelView_Form($this->query->getModelName());
+		$modelForm = isset($this->options['modelForm']) ? $this->options['modelForm'] : new Form($this->getModelClass());
 		if($modelForm instanceof \Curry\Form\ModelForm)
-			$modelForm = new Curry_ModelView_Form($modelForm);
+			$modelForm = new Form($modelForm);
 		$actions = array(
 			'edit' => array(
 				'label' => 'Edit',
@@ -299,22 +317,23 @@ class Curry_ModelView_List extends \Curry\View {
 			),
 			'new' => array(
 				'label' => 'Create new',
-				'action' => $modelForm,
+				'action' => clone $modelForm,
 				'general' => true,
 				'class' => 'dialog',
+				'route' => 'new/',
 			),
-			/*'delete' => array(
+			'delete' => array(
 				'label' => 'Delete',
-				'action' => new Curry_ModelView_Delete($this->query->getModelName()),
+				'action' => new Delete($this->query->getModelName()),
 				'single' => true,
 				'multi' => true,
 				'class' => 'inline modelview-delete',
-			),*/
+			),
 		);
 		$this->actions = ArrayHelper::extend($actions, $this->actions);
 	}
 
-	public function sortI18nColumn($query, $colName, $order)
+	public function sortI18nColumn(\ModelCriteria $query, $colName, $order)
 	{
 		$column = $this->columns[$colName]['phpName'];
 		$i18nTableName = $this->getI18nTableName($this->query->getTableMap());
@@ -382,7 +401,7 @@ class Curry_ModelView_List extends \Curry\View {
 	{
 		$options = $this->options;
 		if (!isset($options['url']))
-			$options['url'] = $this->parent ? $this->url() : (string)(url('', $_GET)->add(array('json'=>true)));
+			$options['url'] = $this->parent ? $this->json->url() : (string)(url('', $_GET)->add(array('json'=>true)));
 
 		if ($options['sortable']) {
 			$options['sortable'] = 'TODO';
@@ -393,7 +412,7 @@ class Curry_ModelView_List extends \Curry\View {
 		foreach($this->actions as $name => $action) {
 			if (isset($action['action']) && !isset($action['href'])) {
 				if (!$action['action'] instanceof \Curry\View)
-					throw new Exception("$name action is not of type View");
+					throw new \Exception("$name action is not of type View");
 				$action['href'] = $this->$name->url();
 				unset($action['action']);
 			}
@@ -410,14 +429,14 @@ class Curry_ModelView_List extends \Curry\View {
 		$allowed = array('title', 'url', 'model', 'paginate', 'maxPerPage', 'currentPage', 'numItems', 'sortable', 'quickSearch', 'actions', 'columns', 'idColumn');
 		$options = array_intersect_key($options, array_flip($allowed));
 
-		$options = Zend_Json::encode($options, false, array('enableJsonExprFinder' => true));
+		$options = \Zend_Json::encode($options, false, array('enableJsonExprFinder' => true));
 		return Html::tag('div', array('class' => 'modelview', 'data-modelview' => $options));
 	}
 
 	public function getJson($params)
 	{
 		$query = clone $this->query;
-		//$this->filterBySelection($query, $params);
+		$this->filterBySelection($query);
 		$this->filterByParams($query, $params);
 		$this->filterByKeyword($query, $params);
 		$this->sort($query, $params);
@@ -461,7 +480,7 @@ class Curry_ModelView_List extends \Curry\View {
 		return $pager;
 	}
 
-	protected function filterByKeyword($query, $params)
+	protected function filterByKeyword(\ModelCriteria $query, $params)
 	{
 		if (isset($params['q'])) {
 			$columns = array();
@@ -478,7 +497,7 @@ class Curry_ModelView_List extends \Curry\View {
 		}
 	}
 
-	protected function sort($query, $params)
+	protected function sort(\ModelCriteria $query, $params)
 	{
 		$sortColumn = null;
 		if (isset($this->options['defaultSortColumn'])) {
@@ -496,7 +515,7 @@ class Curry_ModelView_List extends \Curry\View {
 		}
 		if ($sortColumn !== null) {
 			if (!isset($this->columns[$sortColumn]))
-				throw new Exception('Column not found: ' . $sortColumn);
+				throw new \Exception('Column not found: ' . $sortColumn);
 			$column = $this->columns[$sortColumn];
 			$func = $column['sort_func'];
 			if (is_callable($func))
@@ -506,27 +525,27 @@ class Curry_ModelView_List extends \Curry\View {
 		}
 	}
 
-	protected function filterByParams($query, $params)
+	protected function filterByParams(\ModelCriteria $query, $params)
 	{
 		if (isset($params['f'])) {
 			$filters = (array)$params['f'];
 			foreach ($filters as $column => $filter) {
 				$phpName = $this->columns[$column]['phpName'];
 				if (!$phpName)
-					throw new Exception('Column not found: ' . $column);
+					throw new \Exception('Column not found: ' . $column);
 				$query->{'filterBy' . $phpName}($filter);
 			}
 		}
 	}
 
-	protected function filterBySelection($query, $params)
+	protected function filterBySelection(\ModelCriteria $query)
 	{
-		$item = $this->getSelection($params);
+		$item = $this->getSelection();
 		if ($item) {
 			$relations = $this->query->getTableMap()->getRelations();
 			foreach ($relations as $relation) {
 				if ($relation->getRightTable()->getPhpName() == get_class($item) &&
-					in_array($relation->getType(), array(RelationMap::MANY_TO_ONE))) {
+					in_array($relation->getType(), array(\RelationMap::MANY_TO_ONE))) {
 					$query->{'filterBy' . $relation->getName()}($item);
 				}
 			}
@@ -547,9 +566,9 @@ class Curry_ModelView_List extends \Curry\View {
 		return $val;
 	}
 
-	public function templateToString($template, BaseObject $obj)
+	public function templateToString($template, \BaseObject $obj)
 	{
-		$tpl = Curry_Twig_Template::loadTemplateString($template);
+		$tpl = \Curry_Twig_Template::loadTemplateString($template);
 		return $tpl->render(Propel::toTwig($obj));
 	}
 }

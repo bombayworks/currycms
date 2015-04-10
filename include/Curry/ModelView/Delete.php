@@ -15,18 +15,22 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\ModelView;
+
 use Curry\App;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  *
  * @package Curry\ModelView
  */
-class Curry_ModelView_Delete extends Curry_ModelView_Abstract {
+class Delete extends AbstractBackend {
 	protected $modelClass;
 	
 	public function __construct($modelClass)
 	{
 		$this->modelClass = $modelClass;
+		parent::__construct(App::getInstance());
 	}
 
 	public function getModelClass()
@@ -34,29 +38,32 @@ class Curry_ModelView_Delete extends Curry_ModelView_Abstract {
 		return $this->modelClass;
 	}
 
-	public function render(\Curry\Backend\AbstractLegacyBackend $backend, array $params)
+	public function show(Request $request)
 	{
-		$item = $this->getSelection($params);
-		if(!isset($item))
-			throw new Exception('No item to delete');
+		$modelClass = $this->modelClass;
+		/** @var \BaseObject $item */
+		$item = $this->getSelection();
+		if(!isset($item) || !($item instanceof $modelClass))
+			throw new \Exception('No item to delete');
 
 		$name = method_exists($item, '__toString') ? '`'.htmlspecialchars((string)$item).'`' : 'this item';
-		if(isPost() && $_POST['do_delete']) {
+		if($request->isMethod('POST') && $request->request->get('do_delete')) {
 			$pk = $item->getPrimaryKey();
 			$item->delete();
 
 			// Trigger update event
-			$backend->createModelUpdateEvent($this->modelClass, $pk, 'update');
-			if ($item instanceof Curry_ISearchable)
-				Curry_Backend_Indexer::removeItem($item);
+			//$this->createModelUpdateEvent($this->modelClass, $pk, 'update');
+			if ($item instanceof \Curry_ISearchable)
+				\Curry_Backend_Indexer::removeItem($item);
 
-			$backend->addMainContent('<p>'.$name.' has been deleted.</p>');
+			$this->addMainContent('<p>'.$name.' has been deleted.</p>');
 		} else {
-			$backend->addMainContent('<form method="post" action="'.url('', $params).'">'.
+			$this->addMainContent('<form method="post">'.
 				'<input type="hidden" name="do_delete" value="1" />'.
 				'<p>Do you really want to delete '.$name.'?</p>'.
 				'<button type="submit" class="btn btn-danger">Delete</button>'.
 				'</form>');
 		}
+		return parent::render();
 	}
 }

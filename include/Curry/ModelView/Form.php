@@ -15,28 +15,31 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\ModelView;
+
+use Curry\App;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
  *
  * @package Curry\ModelView
  */
-class Curry_ModelView_Form extends \Curry\View {
+class Form extends AbstractBackend {
 	protected $modelForm;
 	protected $preRender = null;
 	protected $preSave = null;
-
 	protected $postSave = null;
 
 	public function __construct($modelOrModelForm, $options = array())
 	{
 		if (is_string($modelOrModelForm)) {
-			$this->modelForm = new Curry\Form\ModelForm($modelOrModelForm, $options);
-		} else if ($modelOrModelForm instanceof Curry\Form\ModelForm) {
+			$this->modelForm = new \Curry\Form\ModelForm($modelOrModelForm, $options);
+		} else if ($modelOrModelForm instanceof \Curry\Form\ModelForm) {
 			$this->modelForm = $modelOrModelForm;
 		} else {
-			throw new Exception('Expected string or Curry_Form_ModelForm');
+			throw new Exception('Expected string or Curry\Form\ModelForm');
 		}
+		parent::__construct(App::getInstance());
 	}
 
 	public function setPostSave($postSave)
@@ -68,30 +71,26 @@ class Curry_ModelView_Form extends \Curry\View {
 
 	public function show(Request $request)
 	{
-		$params = array();
 		$modelClass = $this->modelForm->getModelClass();
-		$item = new $modelClass;
-		/*
-		$item = $this->getSelection($params);
-		if(!isset($item)) {
+		$item = $this->getSelection();
+		if(!isset($item) || !($item instanceof $modelClass)) {
 			$item = new $modelClass;
-			$relatedItem = $this->getParentSelection($params);
+			$relatedItem = $this->parent instanceof AbstractBackend ? $this->parent->getSelection() : null;
 			if($relatedItem) {
-				$relations = PropelQuery::from($modelClass)->getTableMap()->getRelations();
+				$relations = \PropelQuery::from($modelClass)->getTableMap()->getRelations();
 				foreach($relations as $relation) {
 					if($relation->getRightTable()->getPhpName() == get_class($relatedItem) &&
-						in_array($relation->getType(), array(RelationMap::MANY_TO_ONE))) {
+						in_array($relation->getType(), array(\RelationMap::MANY_TO_ONE))) {
 						$item->{'set'.$relation->getName()}($relatedItem);
 					}
 				}
 			}
 		}
-		*/
 
 		$form = clone $this->modelForm;
 		$buttons = array('save');
-		$form->addField('save', array('type' => 'submit', 'label' => 'Save'));
-		if(!$item->isNew() && ($this->parent instanceof Curry_ModelView_List) && $this->parent->hasAction('delete')) {
+		$form->addField('save', array('type' => 'submit', 'label' => 'Save', 'class' => 'btn btn-primary'));
+		if(!$item->isNew() && ($this->parent instanceof ListView) && $this->parent->hasAction('delete')) {
 			$form->addField('delete', array(
 				'type' => 'submit',
 				'label' => 'Delete',
@@ -105,14 +104,14 @@ class Curry_ModelView_Form extends \Curry\View {
 
 		if($request->isMethod('POST') && $form->isValid($_POST)) {
 			if($form->delete && $form->delete->isChecked()) {
-				//$backend->createModelUpdateEvent($modelClass, $item->getPrimaryKey(), 'delete');
+				//$this->createModelUpdateEvent($modelClass, $item->getPrimaryKey(), 'delete');
 				$item->delete();
 
-				if ($item instanceof Curry_ISearchable)
-					Curry_Backend_Indexer::removeItem($item);
+				if ($item instanceof \Curry_ISearchable)
+					\Curry_Backend_Indexer::removeItem($item);
 
-				//$backend->addMainContent('<p>The item has been deleted.</p>');
-				return;
+				$this->addMainContent('<p>The item has been deleted.</p>');
+				return parent::render();
 			}
 
 			$form->fillModel($item);
@@ -121,15 +120,17 @@ class Curry_ModelView_Form extends \Curry\View {
 			$this->triggerCallback($this->postSave, $item, $form);
 			$form->fillForm($item);
 
-			//$backend->createModelUpdateEvent($modelClass, $item->getPrimaryKey(), 'update');
-			if ($item instanceof Curry_ISearchable)
-				Curry_Backend_Indexer::updateItem($item);
+			//$this->createModelUpdateEvent($modelClass, $item->getPrimaryKey(), 'update');
+			if ($item instanceof \Curry_ISearchable)
+				\Curry_Backend_Indexer::updateItem($item);
 
-			if (isAjax())
-				return '';
+			if ($request->isXmlHttpRequest())
+				return \Symfony\Component\HttpFoundation\Response::create('');
 		}
 
 		$this->triggerCallback($this->preRender, $item, $form);
-		return $form;
+		$this->addMainContent($form);
+
+		return parent::render();
 	}
 }

@@ -246,6 +246,11 @@ abstract class AbstractBackend extends View {
 
 	public function render()
 	{
+		$app = $this->app;
+		if ($app->request->query->get('curry_context') == 'main') {
+			return Response::create($this->mainContent);
+		}
+
 		$twig = $this->getTwig();
 		$templateFile = 'backend.html';
 
@@ -284,7 +289,6 @@ abstract class AbstractBackend extends View {
 			'Accounts' => array(),
 			'System' => array(),
 		);
-		$app = App::getInstance();
 		foreach($app->backend->views() as $viewName => $viewAndRoute) {
 			list($view, $route) = $viewAndRoute;
 			//if(!$user->hasAccess(get_class($view)))

@@ -13,11 +13,15 @@ class Form extends ContainerWidget {
 				'action' => $entity->getAction(),
 				'method' => $entity->getMethod()
 			);
+		return Entity::html('form', $attr, $this->renderBody($entity));
+	}
+
+	public function renderBody(Entity $entity)
+	{
 		$title = $entity->getLabel() !== '' ? Entity::html('label', array(), htmlspecialchars($entity->getLabel())) : '';
-		$markup = $title.
+		return $title.
 			$entity->renderDescription().
 			$entity->renderErrors().
 			$this->renderChildren($entity);
-		return Entity::html('form', $attr, $markup);
 	}
 }

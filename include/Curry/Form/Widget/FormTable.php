@@ -5,12 +5,15 @@ namespace Curry\Form\Widget;
 use Curry\Form\Entity;
 
 class FormTable extends Form {
-	public function renderContainer(Entity $entity, $normal, $hidden) {
-		$caption = $entity->getLabel() ? Entity::html('caption', array(), htmlspecialchars($entity->getLabel())) : '';
-		return $entity->renderDescription().
+
+	public function renderBody(Entity $entity)
+	{
+		$title = $entity->getLabel() !== '' ? Entity::html('label', array(), htmlspecialchars($entity->getLabel())) : '';
+		return $title.
+			$entity->renderDescription().
 			$entity->renderErrors().
-			join("\n", $hidden).
-			Entity::html('table', array(), $caption.Entity::html('tbody', array(), join("\n", $normal)));
+			$this->renderChildren($entity, true).
+			Entity::html('table', array(), Entity::html('tbody', array(), $this->renderChildren($entity, false)));
 	}
 
 	public function renderNormal(Entity $entity)

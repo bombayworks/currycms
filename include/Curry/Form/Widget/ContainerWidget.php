@@ -11,20 +11,15 @@ class ContainerWidget extends AbstractWidget {
 		return Entity::html('div', $this->attributes, $this->renderChildren($entity));
 	}
 
-	public function renderChildren(Entity $entity)
+	public function renderChildren(Container $entity, $hidden = null)
 	{
-		if (!$entity instanceof Container)
-			throw new \Exception('ContainerWidget requires entities to be a subclass of \\Curry\\Form\\Container');
-		$normal = array();
-		$hidden = array();
+		$markup = "";
 		foreach($entity as $name => $field) {
-			if ($field->isHidden()) {
-				$hidden[$name] = $this->renderHidden($field);
-			} else {
-				$normal[$name] = $this->renderNormal($field);
+			if ($hidden === null || $field->isHidden() === $hidden) {
+				$markup .= $this->renderChild($field);
 			}
 		}
-		return join("\n", $hidden).join("", $normal);
+		return $markup;
 	}
 
 	public function renderChild(Entity $entity)

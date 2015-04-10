@@ -6,7 +6,7 @@ use Curry\Form\Container;
 use Curry\Form\Entity;
 
 class CollectionTabular extends CollectionWidget {
-	public function renderContainer(Entity $entity, $normal, $hidden)
+	public function render(Entity $entity)
 	{
 		$markup = '';
 		foreach($entity as $subEntity) {
@@ -17,8 +17,8 @@ class CollectionTabular extends CollectionWidget {
 			$markup .= '</tr></thead>';
 			break;
 		}
-		$markup .= Entity::html('tbody', array(), join("\n", $normal));
-		return join("\n", $hidden).Entity::html('table', $this->attributes, $markup);
+		$markup .= Entity::html('tbody', array(), $this->renderChildren($entity, false));
+		return $this->renderChildren($entity, true).Entity::html('table', $this->attributes, $markup);
 	}
 
 	public function renderNormal(Entity $entity) {

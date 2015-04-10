@@ -19,9 +19,11 @@ namespace Curry\Backend;
 use Curry\App;
 use Curry\Archive\Archive;
 use Curry\Controller\Frontend;
+use Curry\Form\Form;
 use Curry\Util\PathHelper;
 use Curry\Util\StringHelper;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Zend\Config\Config;
 
 /**
@@ -33,6 +35,7 @@ class System extends AbstractBackend
 {
 
 	public function initialize() {
+		$this->addViewFunction('testemail', array($this, 'showTestEmail'));
 		$this->addViewFunction('bundle', array($this, 'showBundle'));
 		$this->addViewFunction('cache', array($this, 'showClearCache'));
 		$this->addViewFunction('info', array($this, 'showInfo'))
@@ -52,15 +55,15 @@ class System extends AbstractBackend
 	 */
 	public function addMainMenu()
 	{
-		$this->addMenuItem("Settings", url('', array("module","view"=>"Main")));
-		$this->addMenuItem("Bundle", url('', array("module","view"=>"Bundle")));
-		$this->addMenuItem("Clear cache", url('', array("module","view"=>"ClearCache")));
-		$this->addMenuItem("Info", url('', array("module","view"=>"Info")));
-		$this->addMenuItem("Upgrade", url('', array("module","view"=>"Upgrade")));
+		$this->addMenuItem("Settings", $this->url());
+		$this->addMenuItem("Bundle", $this->bundle->url());
+		$this->addMenuItem("Clear cache", $this->cache->url());
+		$this->addMenuItem("Info", $this->info->url());
+		$this->addMenuItem("Upgrade", $this->upgrade->url());
 	}
 	
 	/** {@inheritdoc} */
-	public function showMain()
+	public function show(Request $request)
 	{
 		$this->addMainMenu();
 		
@@ -264,7 +267,6 @@ class System extends AbstractBackend
 		)), 'maintenance');
 		
 		// Mail
-		$testEmailUrl = url('', array('module', 'view' => 'TestEmail'));
 		$dlgOpts = array('width' => 600, 'minHeight' => 150);
 		$form->addSubForm(new \Curry_Form_SubForm(array(
 			'legend' => 'Mail',
@@ -301,7 +303,7 @@ class System extends AbstractBackend
 					'value' => isset($config->curry->mail->options->ssl) ? $config->curry->mail->options->ssl : '',
 				)),
 				'mailTest' => array('rawHtml', array(
-					'value' => '<a href="'.$testEmailUrl.'" class="btn dialog" data-dialog="'.htmlspecialchars(json_encode($dlgOpts)).'">Test email</a>',
+					'value' => '<a href="'.$this->testemail->url().'" class="btn dialog" data-dialog="'.htmlspecialchars(json_encode($dlgOpts)).'">Test email</a>',
 				)),
 			)
 		)), 'mail');
@@ -378,6 +380,7 @@ class System extends AbstractBackend
 		}
 		
 		$this->addMainContent($form);
+		return parent::render();
 	}
 
 	/**
@@ -617,6 +620,7 @@ class System extends AbstractBackend
 		}
 		
 		$this->addMainContent($form);
+		return parent::render();
 	}
 	
 	/**
@@ -658,19 +662,31 @@ class System extends AbstractBackend
 	
 	/**
 	 * Clear cache.
-	 * 
-	 * @todo Clear templates.
 	 */
-	public function showClearCache()
+	public function showClearCache(Request $request)
 	{
 		$this->addMainMenu();
-		
-		$this->app->cache->clean(\Zend_Cache::CLEANING_MODE_ALL);
-		\Curry_Twig_Template::getSharedEnvironment()->clearCacheFiles();
-		if(extension_loaded('apc'))
-			@apc_clear_cache();
-		
-		$this->addMessage('Cache cleaned', self::MSG_SUCCESS);
+
+		$form = new Form(array(
+			'fields' => array(
+				'clear' => array(
+					'type' => 'submit',
+					'class' => 'btn btn-danger',
+				),
+			),
+		));
+
+		if ($request->isMethod('POST') && $form->isValid($request->request->all()) && $form->clear->isClicked()) {
+			$this->app->cache->clean(\Zend_Cache::CLEANING_MODE_ALL);
+			\Curry_Twig_Template::getSharedEnvironment()->clearCacheFiles();
+			if(extension_loaded('apc'))
+				@apc_clear_cache();
+			$this->addMessage('Cache cleared!', self::MSG_SUCCESS);
+		} else {
+			$this->addMainContent($form);
+		}
+
+		return parent::render();
 	}
 	
 	/**
@@ -682,7 +698,7 @@ class System extends AbstractBackend
 		$this->addMainMenu();
 		
 		$this->addMessage('Curry: '. App::VERSION);
-		$this->addMessage('PHP: '. PHP_VERSION . ' (<a href="'.url('', array('module','view'=>'PhpInfo')).'">phpinfo</a>)', self::MSG_NOTICE, false);
+		$this->addMessage('PHP: '. PHP_VERSION . ' (<a href="'.$this->info->phpinfo->url().'">phpinfo</a>)', self::MSG_NOTICE, false);
 		$this->addMessage('Zend Framework: '. \Zend_Version::VERSION);
 		$this->addMessage('Propel: '. \Propel::VERSION);
 		$this->addMessage('Twig: '. \Twig_Environment::VERSION);
@@ -692,6 +708,7 @@ class System extends AbstractBackend
 			$this->addMainContent('<pre>'.htmlspecialchars(file_get_contents($license)).'</pre>');
 		else
 			$this->addMessage('Unable to find license file.', self::MSG_ERROR);
+		return parent::render();
 	}
 	
 	/**
@@ -699,8 +716,9 @@ class System extends AbstractBackend
 	 */
 	public function showPhpInfo()
 	{
+		ob_start();
 		phpinfo();
-		exit;
+		return ob_get_clean();
 	}
 
 	protected static function getReleases()
@@ -770,7 +788,7 @@ class System extends AbstractBackend
 		}
 		
 		if(!$this->app->requireMigration())
-			return;
+			return parent::render();
 		
 		$form = self::getButtonForm('migrate', 'Migrate');
 		if (isPost() && $form->isValid($_POST) && $form->migrate->isChecked()) {
@@ -806,6 +824,8 @@ class System extends AbstractBackend
 			$this->addMessage('Curry CMS has been updated and you need to migrate your project before you can continue using the backend. You should <a href="'.$backupUrl.'">backup</a> your data and click the migrate button when you\'re ready!', self::MSG_WARNING, false);
 			$this->addMainContent($form);
 		}
+
+		return parent::render();
 	}
 	
 	public function showTestEmail()
@@ -814,9 +834,11 @@ class System extends AbstractBackend
 		if (isPost() && $form->isValid($_POST)) {
 			$values = $form->getValues(true);
 			$ret = $this->sendTestEmail($values);
-			self::returnPartial('<pre>'.$ret.'</pre>');
+			$this->addMessage($ret);
+		} else {
+			$this->addMainContent($form);
 		}
-		$this->addMainContent($form);
+		return parent::render();
 	}
 	
 	protected function getTestEmailForm()

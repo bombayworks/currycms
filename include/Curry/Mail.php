@@ -84,7 +84,7 @@ class Curry_Mail extends Zend_Mail
 			
 			case 'sendmail':
 			default:
-				$transport = new Zend_Mail_Transport_Sendmail($mail->options);
+				$transport = new Zend_Mail_Transport_Sendmail($mail->options->toArray());
 				Zend_Mail::setDefaultTransport($transport);
 				break;
 		}

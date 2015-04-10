@@ -102,7 +102,7 @@ class Form extends AbstractBackend {
 		//$form->addDisplayGroup($buttons, 'save_group', array('class' => 'horizontal-group'));
 		$form->fillForm($item);
 
-		if($request->isMethod('POST') && $form->isValid($_POST)) {
+		if($request->isMethod('POST') && $form->isValid($request->request->all())) {
 			if($form->delete && $form->delete->isChecked()) {
 				//$this->createModelUpdateEvent($modelClass, $item->getPrimaryKey(), 'delete');
 				$item->delete();

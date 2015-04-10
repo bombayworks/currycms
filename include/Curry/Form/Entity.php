@@ -182,7 +182,7 @@ abstract class Entity extends Configurable {
 	{
 		if ($data !== null)
 			$this->populate($data);
-		return count($this->getErrors());
+		return count($this->getErrors()) === 0;
 	}
 
 	abstract public function setInitial($initial);

@@ -450,7 +450,7 @@ TPL
 	 */
 	public static function filterFilename($filename)
 	{
-		$filename = iconv(\Curry\App::getInstance()->config->curry->internalEncoding, 'ASCII//TRANSLIT', $filename);
+		$filename = iconv('utf-8', 'ASCII//TRANSLIT', $filename);
 		$filename = preg_replace('/\s+/', '_', $filename);
 		$filename = preg_replace('/([^a-z0-9._-]+)/i', '-', $filename);
 		return $filename;

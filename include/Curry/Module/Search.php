@@ -127,24 +127,20 @@ TPL
 	public function getHitProperties(\Zend_Search_Lucene_Search_QueryHit $hit)
 	{
 		$r = $this->app->request;
-		$snippet = StringHelper::toInternalEncoding($hit->body, 'utf-8');
-		$snippet = self::createSearchSnippet($snippet, $r->query->get('query'), $this->snippetLength);
-		
-		$relatedObject = null;
-		$model = StringHelper::toInternalEncoding($hit->model, 'utf-8');
+		$snippet = self::createSearchSnippet($hit->body, $r->query->get('query'), $this->snippetLength);
 
 		$fields = array();
 		foreach($hit->getDocument()->getFieldNames() as $fieldName)
 			$fields[$fieldName] = $hit->{$fieldName};
 
 		return array(
-			'Title' => StringHelper::toInternalEncoding($hit->title, 'utf-8'),
-			'Description' => StringHelper::toInternalEncoding($hit->description, 'utf-8'),
-			'Url' => StringHelper::toInternalEncoding($hit->url, 'utf-8'),
+			'Title' => $hit->title,
+			'Description' => $hit->description,
+			'Url' => $hit->url,
 			'Snippet' => $snippet,
 			'Score' => $hit->score,
 			'Fields' => $fields,
-			'RelatedObject' => new OnDemand(array($this, 'getRelatedObject'), $model, unserialize($hit->model_id)),
+			'RelatedObject' => new OnDemand(array($this, 'getRelatedObject'), $hit->model, unserialize($hit->model_id)),
 		);
 	}
 	

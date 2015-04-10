@@ -334,26 +334,6 @@ class System extends AbstractBackend
 			)
 		)), 'paths');
 		
-		// Encoding
-		$form->addSubForm(new \Curry_Form_SubForm(array(
-			'legend' => 'Encoding',
-			'class' => 'advanced',
-			'elements' => array(
-				'internal' => array('text', array(
-					'label' => 'Internal Encoding',
-					'value' => isset($config->curry->internalEncoding) ? $config->curry->internalEncoding : '',
-					'description' => 'The internal encoding for PHP.',
-					'placeholder' => $defaultConfig->curry->internalEncoding,
-				)),
-				'output' => array('text', array(
-					'label' => 'Output Encoding',
-					'value' => isset($config->curry->outputEncoding) ? $config->curry->outputEncoding : '',
-					'description' => 'The default output encoding for pages.',
-					'placeholder' => $defaultConfig->curry->outputEncoding,
-				)),
-			)
-		)), 'encoding');
-		
 		// Misc
 		$form->addSubForm(new \Curry_Form_SubForm(array(
 			'legend' => 'Misc',
@@ -435,10 +415,6 @@ class System extends AbstractBackend
 		$config->curry->liveEdit = (bool)$values['liveEdit']['liveEdit'];
 		self::setvar($config->curry->backend, 'placeholderExclude', $excludedPlaceholders);
 
-		// Encoding
-		self::setvar($config->curry, 'internalEncoding', $values['encoding']['internal']);
-		self::setvar($config->curry, 'outputEncoding', $values['encoding']['output']);
-		
 		// Paths
 		self::setvar($config->curry, 'basePath', $values['paths']['basePath']);
 		self::setvar($config->curry, 'projectPath', $values['paths']['projectPath']);

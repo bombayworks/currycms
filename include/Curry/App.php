@@ -349,8 +349,6 @@ namespace Curry {
 					'liveEdit' => true,
 					'secret' => 'SECRET',
 					'errorNotification' => false,
-					'internalEncoding' => 'utf-8',
-					'outputEncoding' => 'utf-8',
 					'basePath' => PathHelper::path(true, dirname(__FILE__), '..', '..'),
 					'projectPath' => $projectPath,
 					'wwwPath' => getcwd(),
@@ -583,7 +581,7 @@ namespace Curry {
 				new \Zend_Search_Lucene_Analysis_Analyzer_Common_Utf8Num_CaseInsensitive()
 			);
 
-			\Zend_Search_Lucene_Search_QueryParser::setDefaultEncoding($this->config->curry->internalEncoding);
+			\Zend_Search_Lucene_Search_QueryParser::setDefaultEncoding('utf-8');
 
 			$path = PathHelper::path($this->config->curry->projectPath, 'data', 'searchindex');
 			return \Zend_Search_Lucene::open($path);

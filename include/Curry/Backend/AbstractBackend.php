@@ -259,9 +259,8 @@ abstract class AbstractBackend extends View {
 		$htmlHead->addStylesheet('shared/libs/build/all.css');
 
 		// Globals
-		$encoding = $this->app->config->curry->outputEncoding;
 		$twig->addGlobal('ProjectName', $this->app->config->curry->name);
-		$twig->addGlobal('Encoding', $encoding);
+		$twig->addGlobal('Encoding', 'utf-8');
 		$twig->addGlobal('Version', App::VERSION);
 
 		$user = \User::getUser();

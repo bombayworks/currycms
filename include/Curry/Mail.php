@@ -45,37 +45,11 @@ class Curry_Mail extends Zend_Mail
 			self::initMail();
 		}
 		if ($charset === null) {
-			$charset = \Curry\App::getInstance()->config->curry->outputEncoding;
+			$charset = 'utf-8';
 		}
 		parent::__construct($charset);
 	}
-	
-	/**
-	 * Override default charset to internal encoding.
-	 *
-	 * {@inheritdoc}
-	 */
-	public function setBodyText($txt, $charset = null, $encoding = Zend_Mime::ENCODING_QUOTEDPRINTABLE)
-	{
-		if ($charset === null) {
-			$charset = \Curry\App::getInstance()->config->curry->internalEncoding;
-		}
-		return parent::setBodyText($txt, $charset, $encoding);
-	}
 
-	/**
-	 * Override default charset to internal encoding.
-	 *
-	 * {@inheritdoc}
-	 */
-	public function setBodyHtml($html, $charset = null, $encoding = Zend_Mime::ENCODING_QUOTEDPRINTABLE)
-	{
-		if ($charset === null) {
-			$charset = \Curry\App::getInstance()->config->curry->internalEncoding;
-		}
-		return parent::setBodyHtml($html, $charset, $encoding);
-	}
-	
 	/**
 	 * If developmentMode is enabled, redirect mails to adminEmail.
 	 * 

@@ -85,16 +85,6 @@ class AbstractGenerator
 	}
 
 	/**
-	 * Get the mime-type for this page.
-	 *
-	 * @return string
-	 */
-	public function getContentType()
-	{
-		return "text/plain";
-	}
-
-	/**
 	 * Insert module and return generated content.
 	 *
 	 * @param PageModuleWrapper $pageModuleWrapper
@@ -185,8 +175,6 @@ class AbstractGenerator
 	{
 		$lang = \Curry_Language::getLanguage();
 		return array(
-			'ContentType' => $this->getContentType(),
-			'Encoding' => $this->getOutputEncoding(),
 			'language' => $lang ? $lang->toArray() : null,
 			'page' => $this->pageRevision->getPage()->toTwig(),
 		);
@@ -239,54 +227,6 @@ class AbstractGenerator
 		$this->app->generator = $prevGenerator;
 
 		return $response;
-	}
-
-	/**
-	 * Return content to browser.
-	 *
-	 * @param string $content
-	 */
-	protected function sendContent($content)
-	{
-		$internalEncoding = $this->app->config->curry->internalEncoding;
-		$outputEncoding = $this->getOutputEncoding();
-		if ($outputEncoding && $internalEncoding != $outputEncoding) {
-			trace_warning('Converting output from internal coding');
-			$content = iconv($internalEncoding, $outputEncoding."//TRANSLIT", $content);
-		}
-		echo $content;
-	}
-
-	/**
-	 * Set content-type header.
-	 */
-	protected function sendContentType()
-	{
-		header("Content-Type: ".$this->getContentTypeWithCharset());
-	}
-
-	/**
-	 * Get the output encoding for this page. If the encoding hasnt been set for this page, the encoding set in the configuration will be used.
-	 *
-	 * @return string
-	 */
-	public function getOutputEncoding()
-	{
-		return $this->getPage()->getInheritedProperty('Encoding', $this->app->config->curry->outputEncoding);
-	}
-
-	/**
-	 * Get value of HTTP Content-type header.
-	 *
-	 * @return string
-	 */
-	public function getContentTypeWithCharset()
-	{
-		$contentType = $this->getContentType();
-		$outputEncoding = $this->getOutputEncoding();
-		if($outputEncoding)
-			$contentType .= "; charset=" . $outputEncoding;
-		return $contentType;
 	}
 
 	/**

@@ -25,10 +25,6 @@ use Curry\App;
  */
 class StringHelper
 {
-	const ICONV_CUT = "cut";
-	const ICONV_TRANSLIT = "translit";
-	const ICONV_IGNORE = "ignore";
-	
 	/**
 	 * Check if string $a starts with $b
 	 *
@@ -54,17 +50,16 @@ class StringHelper
 	}
 	
 	/**
-	 * Transform string to use only ascii alpha-nummeric characters (meaning a-z, 0-9 and hyphen). Useful to create URL slugs.
+	 * Transform string to use only ascii alpha-numeric characters (meaning a-z, 0-9 and hyphen). Useful to create URL slugs.
 	 *
 	 * @param string $sString
 	 * @return string
 	 */
 	public static function getRewriteString($sString)
 	{
-		 $string = strtolower(htmlentities($sString, null, App::getInstance()->config->curry->internalEncoding));
+		 $string = strtolower(htmlentities($sString, null, 'utf-8'));
 		 $string = preg_replace("/&(.)(uml);/", "$1e", $string);
 		 $string = preg_replace("/&(.)(acute|cedil|circ|ring|tilde|uml);/", "$1", $string);
-		 //$string = strtolower(iconv(\Curry\App::getInstance()->config->curry->internalEncoding, 'ASCII//TRANSLIT', $sString));
 		 $string = preg_replace("/([^a-z0-9]+)/", "-", html_entity_decode($string));
 		 $string = trim($string, "-");
 		 return $string;
@@ -128,88 +123,5 @@ class StringHelper
 			foreach ($node->childNodes as $childNode)
 				self::_breakWordsNode($childNode, $limit, $break);
 		}
-	}
-	
-	/**
-	 * Convert from the internal encoding to the specified encoding.
-	 *
-	 * @param string $str
-	 * @param string $encoding
-	 * @param string $unhandledChars
-	 * @return string
-	 */
-	public static function toEncoding($str, $encoding, $unhandledChars = self::ICONV_TRANSLIT)
-	{
-		$internalEncoding = App::getInstance()->config->curry->internalEncoding;
-		
-		if($encoding == $internalEncoding)
-			return $str;
-		
-		switch ($unhandledChars) {
-			case self::ICONV_TRANSLIT:
-				$internalEncoding .= "//TRANSLIT";
-				break;
-			case self::ICONV_IGNORE:
-				$internalEncoding .= "//IGNORE";
-				break;
-			default:
-		}
-		return iconv($internalEncoding, $encoding, $str);
-	}
-	
-	/**
-	 * Convert from the specified encoding to the internal encoding.
-	 *
-	 * @param string $str
-	 * @param string $encoding
-	 * @param string $unhandledChars
-	 * @return string
-	 */
-	public static function toInternalEncoding($str, $encoding, $unhandledChars = self::ICONV_TRANSLIT)
-	{
-		$internalEncoding = App::getInstance()->config->curry->internalEncoding;
-		
-		if($encoding == $internalEncoding)
-			return $str;
-		
-		switch ($unhandledChars) {
-			case self::ICONV_TRANSLIT:
-				$internalEncoding .= "//TRANSLIT";
-				break;
-			case self::ICONV_IGNORE:
-				$internalEncoding .= "//IGNORE";
-				break;
-			default:
-		}
-		return iconv($encoding, $internalEncoding, $str);
-	}
-	
-	/**
-	 * Convert from the specified encoding to the output encoding.
-	 *
-	 * @param string $str
-	 * @param string $encoding	If not specified, this will default to the internal encoding.
-	 * @param string $unhandledChars
-	 * @return string
-	 */
-	public static function toOutputEncoding($str, $encoding = null, $unhandledChars = self::ICONV_TRANSLIT)
-	{
-		$outputEncoding = App::getInstance()->config->curry->outputEncoding;
-		if(!$encoding)
-			$encoding = App::getInstance()->config->curry->internalEncoding;
-			
-		if($encoding == $outputEncoding)
-			return $str;
-			
-		switch ($unhandledChars) {
-			case self::ICONV_TRANSLIT:
-				$outputEncoding .= "//TRANSLIT";
-				break;
-			case self::ICONV_IGNORE:
-				$outputEncoding .= "//IGNORE";
-				break;
-			default:
-		}
-		return iconv($encoding, $outputEncoding, $str);
 	}
 }

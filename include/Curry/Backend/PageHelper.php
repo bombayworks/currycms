@@ -505,11 +505,6 @@ class Curry_Backend_PageHelper {
 					'value' => $page->getGenerator(),
 					'placeholder' => \Curry\App::getInstance()->config->curry->defaultGeneratorClass,
 				)),
-				'encoding' => array('text', array(
-					'label' => 'Encoding',
-					'value' => $page->getEncoding(),
-					'placeholder' => \Curry\App::getInstance()->config->curry->outputEncoding,
-				)),
 			)
 		)), 'advanced');
 		

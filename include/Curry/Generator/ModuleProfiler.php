@@ -68,7 +68,6 @@ class ModuleProfiler extends Configurable implements EventSubscriberInterface
 
 	public function postModule(PostModuleEvent $event)
 	{
-		$app = \Curry\App::getInstance();
 		$pageModuleWrapper = $event->getModuleWrapper();
 
 		$queryCount = $event->getExtra('module_profiler.query_count');

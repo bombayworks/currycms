@@ -31,7 +31,6 @@
     "zf1/zend-controller": "~1.12",
     "twig/twig": "~1.12",
     "ircmaxell/password-compat": "~1.0",
-    "oyatel/minify": "dev-master",
     "zendframework/zend-config": "~2.2",
     "zendframework/zend-session": "~2.2",
     "zendframework/zend-eventmanager": "~2.2",

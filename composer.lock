@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "16c45783d9d8ff77083580106f9fbfb5",
+    "hash": "2d6e3e5fa04b06ec8ebd489cfdce9bfb",
     "packages": [
         {
             "name": "ircmaxell/password-compat",
@@ -116,35 +116,6 @@
                 "psr-3"
             ],
             "time": "2014-09-30 13:30:58"
-        },
-        {
-            "name": "oyatel/minify",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Oyatel/minify",
-                "reference": "5ec687ab165df9eac09e4db34ad640857be090fd"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://github.com/Oyatel/minify/zipball/5ec687ab165df9eac09e4db34ad640857be090fd",
-                "reference": "5ec687ab165df9eac09e4db34ad640857be090fd",
-                "shasum": ""
-            },
-            "type": "library",
-            "autoload": {
-                "classmap": [
-                    "min/lib/"
-                ]
-            },
-            "authors": [
-                {
-                    "name": "Even Andre Fiskvik",
-                    "email": "eaf@oyatel.com"
-                }
-            ],
-            "description": "Minify is a PHP5 app that helps you follow several rules for client-side performance. It combines multiple CSS or Javascript files, removes unnecessary whitespace and comments, and serves them with gzip encoding and optimal client-side cache headers",
-            "time": "2012-03-23 17:55:14"
         },
         {
             "name": "phing/phing",
@@ -2080,10 +2051,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "oyatel/minify": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
+    "prefer-lowest": false,
     "platform": {
         "php": ">=5.3.7"
     },

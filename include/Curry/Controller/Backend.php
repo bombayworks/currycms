@@ -61,10 +61,7 @@ class Backend extends AbstractBackend implements EventSubscriberInterface {
 
 	public function url($parameters = null)
 	{
-		/**
-		 * @todo: make this configurable
-		 */
-		return '/admin/';
+		return $this->app['backend.basePath'];
 	}
 
 	public static function getSubscribedEvents()

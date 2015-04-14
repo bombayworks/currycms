@@ -407,6 +407,7 @@ namespace Curry {
 					),
 				),
 				'backend' => array(
+					'basePath' => '/admin/',
 					'placeholderExclude' => array(),
 					'theme' => 'vindaloo',
 					'loginCookieExpire' => 31536000,

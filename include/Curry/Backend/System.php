@@ -97,6 +97,9 @@ class System extends AbstractBackend
 		}
 
 		$pages = \PagePeer::getSelect();
+
+		$loggers = $this->getDefaultLoggers($config);
+		$enabledLoggers = isset($config->log) ? array_filter($config->log->toArray(), function($log) { return !isset($log->enabled) || $log->enabled; }) : array();
 		
 		// General
 		$form->addSubForm(new \Curry_Form_SubForm(array(
@@ -356,10 +359,10 @@ class System extends AbstractBackend
 					'value' => isset($config->propel->debug) ? $config->propel->debug : '',
 					'description' => 'Enables query counting but doesn\'t log queries.',
 				)),
-				'log' => array('select', array(
+				'log' => array('multiselect', array(
 					'label' => 'Logging',
-					'multiOptions' => array('' => '[ Other ]', 'none' => 'Disable logging', 'firebug' => 'Firebug'),
-					'value' => isset($config->log->method) ? $config->log->method : '',
+					'multiOptions' => array_combine(array_keys($loggers), array_keys($loggers)),
+					'value' => array_keys($enabledLoggers),
 				)),
 				'update_translations' => array('checkbox', array(
 					'label' => 'Update Language strings',
@@ -381,6 +384,23 @@ class System extends AbstractBackend
 		
 		$this->addMainContent($form);
 		return parent::render();
+	}
+
+	protected function getDefaultLoggers(Config $config = null)
+	{
+		$loggers = isset($config->log) ? $config->log->toArray() : array();
+		return $loggers + array(
+			'firebug' => array(
+				'type' => 'Monolog\Handler\FirePHPHandler',
+			),
+			'file' => array(
+				'fingersCrossed' => true,
+				'type' => 'Monolog\Handler\StreamHandler',
+				'arguments' => array(
+					$this->app['projectPath'].'/data/log/app.log',
+				),
+			),
+		);
 	}
 
 	/**
@@ -449,8 +469,17 @@ class System extends AbstractBackend
 		$config->errorNotification = (bool)$values['misc']['error_notification'];
 		$config->propel->logging = (bool)$values['misc']['log_propel'];
 		$config->propel->debug = (bool)$values['misc']['debug_propel'];
-		if($values['misc']['log'])
-			$config->log->method = $values['misc']['log'];
+		$loggers = $this->getDefaultLoggers($config);
+		foreach($loggers as $name => $logger) {
+			if (in_array($name, $values['misc']['log'])) {
+				if (!isset($config->log->$name)) {
+					$config->log->$name = $logger;
+				}
+				unset($config->log->$name->enabled);
+			} else if (isset($config->log->$name)) {
+				$config->log->$name->enabled = false;
+			}
+		}
 		$config->updateTranslationStrings = (bool)$values['misc']['update_translations'];
 			
 		// Error pages

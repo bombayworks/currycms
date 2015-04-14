@@ -97,7 +97,7 @@ abstract class AbstractLegacyBackend extends AbstractBackend
 		catch (\Exception $e) {
 			if(!headers_sent())
 				header("HTTP/1.0 500 Internal server error: ".str_replace("\n", "  ", $e->getMessage()));
-			$this->app->logger->error($e->getMessage());
+			$this->app->logger->error($e->getMessage(), array('exception' => $e));
 			$this->addMessage($e->getMessage(), self::MSG_ERROR);
 			if($this->app['developmentMode'])
 				$this->addMainContent("<pre>" . htmlspecialchars($e->getTraceAsString()) . "</pre>");

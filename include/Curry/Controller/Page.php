@@ -47,7 +47,7 @@ class Page {
         $language = $page->getInheritedProperty('Language');
         $fallbackLanguage = $app['fallbackLanguage'];
         if(!$language && $fallbackLanguage) {
-            $app->logger->info('Using fallback language');
+            $app->logger->debug('Using fallback language');
             $language = $fallbackLanguage;
         }
 
@@ -56,13 +56,13 @@ class Page {
             $locale = \Curry_Language::setLanguage($language);
             $language = \Curry_Language::getLanguage();
             if($language)
-                $app->logger->info('Current language is now '.$language->getName().' (with locale '.$locale.')');
+                $app->logger->debug('Current language is now '.$language->getName().' (with locale '.$locale.')');
         } else {
-            $app->logger->notice('Language not set for page');
+            $app->logger->debug('Language not set for page');
         }
 
         // Attempt to render page
-        $app->logger->notice('Showing page ' . $page->getName() . ' (PageRevisionId: '.$pageRevision->getPageRevisionId().')');
+        $app->logger->debug('Showing page ' . $page->getName() . ' (PageRevisionId: '.$pageRevision->getPageRevisionId().')');
         $generator = AbstractGenerator::create($app, $pageRevision);
 
         return $generator->render($vars, $options);

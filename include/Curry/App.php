@@ -65,10 +65,10 @@ namespace Curry {
 	use Curry\Controller\StaticContent;
 	use Curry\Util\Html;
 	use Curry\Util\PathHelper;
-	use Monolog\Handler\FirePHPHandler;
+	use Monolog\Handler\FingersCrossedHandler;
 	use Monolog\Handler\NullHandler;
-	use Monolog\Handler\StreamHandler;
 	use Monolog\Logger;
+	use Monolog\Processor\IntrospectionProcessor;
 	use Symfony\Component\EventDispatcher\EventDispatcher;
 	use Symfony\Component\HttpFoundation\Request;
 	use Symfony\Component\HttpFoundation\RequestStack;
@@ -144,10 +144,6 @@ namespace Curry {
 		}
 
 		public function boot() {
-			if (get_magic_quotes_gpc()) {
-				throw new Exception('Magic quotes gpc is enabled, please disable!');
-			}
-
 			// Create services
 			$this->singleton('logger', array($this, 'getLogger'));
 			$this->singleton('cache', array($this, 'getCache'));
@@ -166,14 +162,15 @@ namespace Curry {
 					return new HttpKernel($app->dispatcher, $app->resolver, $app->requestStack);
 				});
 			$this->singleton('requestStack', function () use ($app) {
-					if (class_exists('Symfony\Component\HttpFoundation\RequestStack')) {
-						return new RequestStack();
-					}
-					return null;
+					return new RequestStack();
 				});
 			$this->singleton('backend', function () use ($app) {
 					return new Backend($app);
 				});
+
+			if (function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc()) {
+				$this->logger->warning('Magic quotes gpc is enabled, please disable!');
+			}
 
 			// TODO: remove this!
 			$this->globals = (object) array(
@@ -346,7 +343,7 @@ namespace Curry {
 				'configPath' => $configPath,
 				'cache' => array('method' => 'auto'),
 				'mail' => array('method' => 'sendmail'),
-				'log' => array('method' => 'none'),
+				'log' => array(),
 				'maintenance' => array('enabled' => false),
 				'defaultEditor' => 'tinyMCE',
 				'migrationVersion' => self::MIGRATION_VERSION,
@@ -460,23 +457,26 @@ namespace Curry {
 		 */
 		protected function getLogger() {
 			$logger = new Logger('currycms');
-			switch ($this['log.method']) {
-				case 'firebug':
-					ob_start();
-					$logger->pushHandler(new FirePHPHandler());
-					break;
 
-				case 'file':
-					$logger->pushHandler(new StreamHandler($this['log.file']));
-					break;
-
-				case 'none':
-				default:
-					$logger->pushHandler(new NullHandler());
-					break;
+			foreach ($this['log'] as $log) {
+				if (isset($log['enabled']) && !$log['enabled'])
+					continue;
+				$clazz = new \ReflectionClass($log['type']);
+				$arguments = isset($log['arguments']) ? $log['arguments'] : array();
+				$handler = $clazz->newInstanceArgs($arguments);
+				if (isset($log['fingersCrossed']) && $log['fingersCrossed']) {
+					$handler = new FingersCrossedHandler($handler);
+				}
+				$logger->pushHandler($handler);
 			}
 
-			$logger->debug("Logging initialized");
+			if (!count($logger->getHandlers())) {
+				$logger->pushHandler(new NullHandler());
+			}
+
+			if ($this['developmentMode'])
+				$logger->pushProcessor(new IntrospectionProcessor(Logger::WARNING));
+
 			return $logger;
 		}
 
@@ -627,11 +627,10 @@ namespace Curry {
 			@ob_end_clean();
 
 			// Add error to log
-			$this->logger->error($e->getMessage());
+			$this->logger->error($e->getMessage(), array('exception' => $e));
 
 			// Show error description
-			$debug = $this['developmentMode'];
-			if ($debug) {
+			if ($this['developmentMode']) {
 				echo '<h1>' . get_class($e) . '</h1>';
 				echo '<p>' . htmlspecialchars(basename($e->getFile())) . '(' . $e->getLine() . '): ';
 				echo htmlspecialchars($e->getMessage()) . '</p>';

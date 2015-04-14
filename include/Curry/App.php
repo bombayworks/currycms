@@ -180,7 +180,10 @@ namespace Curry {
 			);
 
 			// Try to set utf-8 locale
-			setlocale(LC_ALL, 'en_US.UTF-8', 'en_US.UTF8', 'UTF-8', 'UTF8');
+			$arguments = (array)$this['locale'];
+			array_unshift($arguments, LC_ALL);
+			$locale = call_user_func_array('setlocale', $arguments);
+			$this->logger->debug($locale ? 'Set default locale to '.$locale : 'Unable to set default locale');
 
 			// umask
 			if ($this['umask']) {
@@ -334,6 +337,7 @@ namespace Curry {
 				'forceDomain' => false,
 				'revisioning' => false,
 				'umask' => 0002,
+				'locale' => array('en_US.UTF-8', 'en_US.UTF8', 'UTF-8', 'UTF8'),
 				'liveEdit' => true,
 				'secret' => 'SECRET',
 				'errorNotification' => false,

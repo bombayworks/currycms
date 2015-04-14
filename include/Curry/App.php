@@ -185,8 +185,8 @@ namespace Curry {
 			$locale = call_user_func_array('setlocale', $arguments);
 			$this->logger->debug($locale ? 'Set default locale to '.$locale : 'Unable to set default locale');
 
-			// umask
-			if ($this['umask']) {
+			// Set default umask
+			if ($this['umask'] !== false) {
 				umask($this['umask']);
 			}
 
@@ -198,13 +198,14 @@ namespace Curry {
 
 			register_shutdown_function(array($this, 'shutdown'));
 
-			if ($this['autoPublish'])
+			if ($this['autoPublish']) {
 				$this->autoPublish();
+			}
 
-			/**
-			 * @todo only add this listener when symlink is missing, or config options forces it
-			 */
-			$this->dispatcher->addSubscriber(new StaticContent('/shared/', $app['basePath'].'/shared'));
+			if (isset($this['sharedController']) ? $this['sharedController'] : !file_exists($this['wwwPath'].'/shared')) {
+				$this->logger->notice('Using php routing for curry shared folder');
+				$this->dispatcher->addSubscriber(new StaticContent('/shared/', $app['basePath'].'/shared'));
+			}
 
 			$this->dispatcher->addSubscriber($app->backend);
 			$this->dispatcher->addSubscriber(new Frontend($this));
@@ -231,10 +232,23 @@ namespace Curry {
 		 * {@inheritdoc}
 		 */
 		public function handle(Request $request, $type = HttpKernelInterface::MASTER_REQUEST, $catch = true) {
+			$startTime = microtime(true);
+			$this->logger->debug(($type === HttpKernelInterface::MASTER_REQUEST ? 'Master-Request: ' : 'Sub-Request').$request->getMethod().' '.$request->getRequestUri());
+
 			$previous = isset($this->request) ? $this->request : null;
 			$this->request = $request;
 			$response = $this->kernel->handle($request, $type, $catch);
 			$this->request = $previous;
+
+			if ($this['developmentMode']) {
+				$queryCount = Util\Propel::getQueryCount();
+				$this->logger->debug("Response completed", array(
+					'time' => microtime(true) - $startTime,
+					'mem' => Helper::humanReadableBytes(memory_get_peak_usage()),
+					'sql' => $queryCount !== null ? $queryCount : 'n/a',
+				));
+			}
+
 			return $response;
 		}
 
@@ -711,13 +725,6 @@ namespace Curry {
 				if (self::$instance) {
 					self::$instance->showException($e);
 				}
-			}
-
-			if ($this['debug']) {
-				$queryCount = Util\Propel::getQueryCount();
-				$this->logger->debug("Generation time: " . round($this->getExecutionTime(), 3) . "s");
-				$this->logger->debug("Peak memory usage: " . Helper::humanReadableBytes(memory_get_peak_usage()));
-				$this->logger->debug("SQL query count: " . ($queryCount !== null ? $queryCount : 'n/a'));
 			}
 		}
 

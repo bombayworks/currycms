@@ -37,8 +37,6 @@ class Page {
         $app = $this->app;
         $pageRevision = $page->getPageRevision();
 
-        $app->logger->info('Starting request at '.$request->getUri());
-
         // @todo: these are currently unused :S
         $vars = array();
         $options = array();

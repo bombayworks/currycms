@@ -51,8 +51,8 @@ class FileNotFound implements EventSubscriberInterface {
 		$exception = $event->getException();
 		if ($exception instanceof NotFoundHttpException) {
 			// we don't need to explicitly set 404 status, HttpKernel will do this for us.
-			if ($this->app->config->curry->errorPage->notFound
-					&& ($page = \PageQuery::create()->findPk($this->app->config->curry->errorPage->notFound))) {
+			if ($this->app['errorPage.notFound']
+					&& ($page = \PageQuery::create()->findPk($this->app['errorPage.notFound']))) {
 				$generator = AbstractGenerator::create($this->app, $page->getActivePageRevision());
 				$event->setResponse($generator->render());
 			} else {

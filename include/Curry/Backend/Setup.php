@@ -40,9 +40,9 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractLegacyBackend {
 	{
 		$isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
 		if ($isWindows) {
-			$projectPath = $this->app->config->curry->projectPath;
-			$curryPath = $this->app->config->curry->basePath;
-			$wwwPath = $this->app->config->curry->wwwPath;
+			$projectPath = $this->app['projectPath'];
+			$curryPath = $this->app['basePath'];
+			$wwwPath = $this->app['wwwPath'];
 			$symlinks = array(
 				PathHelper::path($projectPath, 'propel', 'inject', 'core') => 'propel/inject/core',
 				PathHelper::path($projectPath, 'propel', 'core.schema.xml') => 'propel/core.schema.xml',
@@ -69,8 +69,8 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractLegacyBackend {
 	{
 		$this->addMainContent('<h2>Checking file permissions</h2>');
 		$error = false;
-		$projectPath = $this->app->config->curry->projectPath;
-		$wwwPath = $this->app->config->curry->wwwPath;
+		$projectPath = $this->app['projectPath'];
+		$wwwPath = $this->app['wwwPath'];
 		$paths = array(
 			PathHelper::path($projectPath, 'data'),
 			PathHelper::path($projectPath, 'templates'),
@@ -125,7 +125,7 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractLegacyBackend {
 		$url = url('', array('module', 'view'=>'CreateDatabase'));
 		$this->addCommand('Create database', $url, 'icon-plus-sign', array('class' => 'dialog'));
 
-		$cmsPath = $this->app->config->curry->projectPath;
+		$cmsPath = $this->app['projectPath'];
 		$propelConfig = PathHelper::path($cmsPath, 'config', 'propel.xml');
 		if(!is_writable($propelConfig))
 			$this->addMessage("Configuration file $propelConfig doesn't seem to be writable.", self::MSG_ERROR);
@@ -235,7 +235,7 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractLegacyBackend {
 		} else {
 			$this->addMainContent('<h2>Basic configuration</h2>');
 
-			$configFile = $this->app->config->curry->configPath;
+			$configFile = $this->app['configPath'];
 			if(!$configFile)
 				$this->addMessage("Configuration file not set.", self::MSG_ERROR);
 			else if(!is_writable($configFile))
@@ -272,8 +272,8 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractLegacyBackend {
 	{
 		// Disable setup and enable backend authorization
 		$config = $this->app->openConfiguration();
-		$config->curry->setup = false;
-		$config->curry->backend->noauth = false;
+		$config->setup = false;
+		$config->backend->noauth = false;
 		$this->app->writeConfiguration($config);
 
 		$backendUrl = url('');
@@ -448,7 +448,7 @@ HTML
 		}
 
 		// Initialize propel
-		Propel::init($this->app->config->curry->propel->conf);
+		Propel::init($this->app['propel.conf']);
 
 		// Set database charset
 		if($params['set_charset']) {
@@ -497,11 +497,11 @@ HTML
 			'elements' => array(
 				'name' => array('text', array(
 					'label' => 'Project name',
-					'value' => $this->app->config->curry->name,
+					'value' => $this->app['name'],
 				)),
 				'email' => array('text', array(
 					'label' => 'Webmaster email',
-					'value' => $this->app->config->curry->adminEmail,
+					'value' => $this->app['adminEmail'],
 				)),
 				'base_url' => array('text', array(
 					'label' => 'Base URL',
@@ -514,7 +514,7 @@ HTML
 				)),
 				'development_mode' => array('checkbox', array(
 					'label' => 'Development mode',
-					'value' => $this->app->config->curry->developmentMode,
+					'value' => $this->app['developmentMode'],
 				)),
 				'save' => array('submit', array(
 					'label' => 'Save',
@@ -649,14 +649,14 @@ HTML
 		}
 
 		// Create template root
-		$templateRoot = $this->app->config->curry->template->root;
+		$templateRoot = $this->app['template.root'];
 		if(!file_exists($templateRoot))
 			@mkdir($templateRoot, 0777, true);
 
 		switch($values['template']) {
 			case 'empty':
 			case 'curry':
-				$source = PathHelper::path($this->app->config->curry->wwwPath, 'shared', 'backend', 'common', 'templates', 'project-empty.html');
+				$source = PathHelper::path($this->app['wwwPath'], 'shared', 'backend', 'common', 'templates', 'project-empty.html');
 				$templateFile = PathHelper::path($templateRoot, 'Root.html');
 				if(!file_exists($templateFile))
 					@copy($source, $templateFile);
@@ -666,16 +666,16 @@ HTML
 			case 'html5boilerplate':
 		}
 
-		if (file_exists($this->app->config->curry->configPath)) {
+		if (file_exists($this->app['configPath'])) {
 			$config = $this->app->openConfiguration();
-			$config->curry->name = $values['name'];
-			$config->curry->adminEmail = $values['email'];
+			$config->name = $values['name'];
+			$config->adminEmail = $values['email'];
 			if ($values['base_url'])
-				$config->curry->baseUrl = $values['base_url'];
+				$config->baseUrl = $values['base_url'];
 			else
-				unset($config->curry->baseUrl);
-			$config->curry->developmentMode = (bool)$values['development_mode'];
-			$config->curry->secret = sha1(uniqid(mt_rand(), true) . microtime());
+				unset($config->baseUrl);
+			$config->developmentMode = (bool)$values['development_mode'];
+			$config->secret = sha1(uniqid(mt_rand(), true) . microtime());
 			$this->app->writeConfiguration($config);
 		}
 
@@ -717,7 +717,7 @@ HTML
 			$fba->setUserRole($userOrRole);
 		$fba->setPath($path);
 		$fba->setWrite($write);
-		@mkdir(PathHelper::path(\Curry\App::getInstance()->config->curry->wwwPath, $path), 0777, true);
+		@mkdir(PathHelper::path(\Curry\App::getInstance()['wwwPath'], $path), 0777, true);
 		return $fba;
 	}
 }

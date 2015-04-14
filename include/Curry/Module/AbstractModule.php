@@ -80,7 +80,7 @@ abstract class AbstractModule {
 		// find all backend directories
 		$dirs = glob(
 			PathHelper::path(
-				App::getInstance()->config->curry->projectPath,
+				App::getInstance()['projectPath'],
 				'include',
 				'*',
 				'Module'

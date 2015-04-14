@@ -119,20 +119,12 @@ namespace Curry {
 
 		public static function create($config) {
 			$config = self::getConfig($config);
-			$applicationClass = $config['curry']['applicationClass'];
+			$applicationClass = $config['applicationClass'];
 			$app = new $applicationClass($config);
 			if (!self::$instance) {
 				self::$instance = $app;
 			}
 			return $app;
-		}
-
-		public function __construct($config) {
-			// Load config
-			foreach ($config as $k => $v) {
-				$this[$k] = $v;
-			}
-			$this->config = new Config($config);
 		}
 
 		public static function getInstance() {
@@ -148,7 +140,7 @@ namespace Curry {
 		 * @return float
 		 */
 		public function getExecutionTime() {
-			return microtime(true) - $this->config->startTime;
+			return microtime(true) - $this['startTime'];
 		}
 
 		public function boot() {
@@ -185,34 +177,34 @@ namespace Curry {
 
 			// TODO: remove this!
 			$this->globals = (object) array(
-				'ProjectName' => $this->config->curry->name,
-				'BaseUrl' => $this->config->curry->baseUrl,
-				'DevelopmentMode' => $this->config->curry->developmentMode,
+				'ProjectName' => $this['name'],
+				'BaseUrl' => $this['baseUrl'],
+				'DevelopmentMode' => $this['developmentMode'],
 			);
 
 			// Try to set utf-8 locale
 			setlocale(LC_ALL, 'en_US.UTF-8', 'en_US.UTF8', 'UTF-8', 'UTF8');
 
 			// umask
-			if ($this->config->curry->umask) {
-				umask($this->config->curry->umask);
+			if ($this['umask']) {
+				umask($this['umask']);
 			}
 
 			self::initErrorHandling();
 			self::initPropel();
 
-			URL::setDefaultBaseUrl($this->config->curry->baseUrl);
-			URL::setDefaultSecret($this->config->curry->secret);
+			URL::setDefaultBaseUrl($this['baseUrl']);
+			URL::setDefaultSecret($this['secret']);
 
 			register_shutdown_function(array($this, 'shutdown'));
 
-			if ($this->config->curry->autoPublish)
+			if ($this['autoPublish'])
 				$this->autoPublish();
 
 			/**
 			 * @todo only add this listener when symlink is missing, or config options forces it
 			 */
-			$this->dispatcher->addSubscriber(new StaticContent('/shared/', $app->config->curry->basePath.'/shared'));
+			$this->dispatcher->addSubscriber(new StaticContent('/shared/', $app['basePath'].'/shared'));
 
 			$this->dispatcher->addSubscriber($app->backend);
 			$this->dispatcher->addSubscriber(new Frontend($this));
@@ -252,7 +244,7 @@ namespace Curry {
 		 * @return Config
 		 */
 		public function getDefaultConfiguration() {
-			return new Config(self::getConfig($this->config->curry->configPath, false));
+			return new Config(self::getConfig($this['configPath'], false));
 		}
 
 		/**
@@ -263,7 +255,7 @@ namespace Curry {
 		 */
 		public function openConfiguration($file = null) {
 			if ($file === null) {
-				$file = $this->config->curry->configPath;
+				$file = $this['configPath'];
 			}
 			return new Config($file ? require($file) : array(), true);
 		}
@@ -276,7 +268,7 @@ namespace Curry {
 		 */
 		public function writeConfiguration(Config $config, $file = null) {
 			if ($file === null) {
-				$file = $this->config->curry->configPath;
+				$file = $this['configPath'];
 			}
 			$writer = new \Zend\Config\Writer\PhpArray();
 			$writer->toFile($file, $config);
@@ -335,39 +327,37 @@ namespace Curry {
 			// default config
 			$config = array(
 				'startTime' => isset($_SERVER['REQUEST_TIME_FLOAT']) ? $_SERVER['REQUEST_TIME_FLOAT'] : microtime(true),
-				'curry' => array(
-					'name' => "untitled",
-					'baseUrl' => '/',
-					'adminEmail' => "info@example.com",
-					'divertOutMailToAdmin' => false,
-					'statistics' => false,
-					'applicationClass' => 'Curry\App',
-					'defaultGeneratorClass' => 'Curry\Generator\HtmlGenerator',
-					'forceDomain' => false,
-					'revisioning' => false,
-					'umask' => 0002,
-					'liveEdit' => true,
-					'secret' => 'SECRET',
-					'errorNotification' => false,
-					'basePath' => PathHelper::path(true, dirname(__FILE__), '..', '..'),
-					'projectPath' => $projectPath,
-					'wwwPath' => getcwd(),
-					'configPath' => $configPath,
-					'cache' => array('method' => 'auto'),
-					'mail' => array('method' => 'sendmail'),
-					'log' => array('method' => 'none'),
-					'maintenance' => array('enabled' => false),
-					'defaultEditor' => 'tinyMCE',
-					'migrationVersion' => self::MIGRATION_VERSION,
-					'pageCache' => true,
-					'autoPublish' => false,
-					'developmentMode' => false,
-					'autoUpdateIndex' => false,
-					'password' => array(
-						'algorithm' => PASSWORD_BCRYPT,
-						'options' => array(
-							'cost' => 10, //value between 4 to 31
-						),
+				'name' => "untitled",
+				'baseUrl' => '/',
+				'adminEmail' => "info@example.com",
+				'divertOutMailToAdmin' => false,
+				'statistics' => false,
+				'applicationClass' => 'Curry\App',
+				'defaultGeneratorClass' => 'Curry\Generator\HtmlGenerator',
+				'forceDomain' => false,
+				'revisioning' => false,
+				'umask' => 0002,
+				'liveEdit' => true,
+				'secret' => 'SECRET',
+				'errorNotification' => false,
+				'basePath' => PathHelper::path(true, dirname(__FILE__), '..', '..'),
+				'projectPath' => $projectPath,
+				'wwwPath' => getcwd(),
+				'configPath' => $configPath,
+				'cache' => array('method' => 'auto'),
+				'mail' => array('method' => 'sendmail'),
+				'log' => array('method' => 'none'),
+				'maintenance' => array('enabled' => false),
+				'defaultEditor' => 'tinyMCE',
+				'migrationVersion' => self::MIGRATION_VERSION,
+				'pageCache' => true,
+				'autoPublish' => false,
+				'developmentMode' => false,
+				'autoUpdateIndex' => false,
+				'password' => array(
+					'algorithm' => PASSWORD_BCRYPT,
+					'options' => array(
+						'cost' => 10, //value between 4 to 31
 					),
 				),
 			);
@@ -377,44 +367,42 @@ namespace Curry {
 			}
 
 			// Fix base url
-			$config['curry']['baseUrl'] = url($config['curry']['baseUrl'])->getAbsolute();
+			$config['baseUrl'] = url($config['baseUrl'])->getAbsolute();
 
-			if (!$config['curry']['projectPath']) {
+			if (!$config['projectPath']) {
 				throw new Exception('Project path could not be found, please use a configuration file to specify the path');
 			}
 
 			$secondaryConfig = array(
-				'curry' => array(
-					'vendorPath' => PathHelper::path($config['curry']['basePath'], 'vendor'),
-					'tempPath' => self::getTempDir($config['curry']['projectPath']),
-					'trashPath' => PathHelper::path($config['curry']['projectPath'], 'data', 'trash'),
-					'autoBackup' => $config['curry']['developmentMode'] ? 0 : 86400,
-					'errorReporting' => $config['curry']['developmentMode'] ? -1 : false,
-					'propel' => array(
-						'conf' => PathHelper::path($config['curry']['projectPath'], 'config', 'propel.php'),
-						'projectClassPath' => PathHelper::path($config['curry']['projectPath'], 'propel', 'build', 'classes'),
+				'vendorPath' => PathHelper::path($config['basePath'], 'vendor'),
+				'tempPath' => self::getTempDir($config['projectPath']),
+				'trashPath' => PathHelper::path($config['projectPath'], 'data', 'trash'),
+				'autoBackup' => $config['developmentMode'] ? 0 : 86400,
+				'errorReporting' => $config['developmentMode'] ? -1 : false,
+				'propel' => array(
+					'conf' => PathHelper::path($config['projectPath'], 'config', 'propel.php'),
+					'projectClassPath' => PathHelper::path($config['projectPath'], 'propel', 'build', 'classes'),
+				),
+				'template' => array(
+					'root' => PathHelper::path($config['projectPath'], 'templates'),
+					'options' => array(
+						'debug' => (bool) $config['developmentMode'],
+						'cache' => PathHelper::path($config['projectPath'], 'data', 'cache', 'templates'),
+						'base_template_class' => 'Curry_Twig_Template',
 					),
-					'template' => array(
-						'root' => PathHelper::path($config['curry']['projectPath'], 'templates'),
-						'options' => array(
-							'debug' => (bool) $config['curry']['developmentMode'],
-							'cache' => PathHelper::path($config['curry']['projectPath'], 'data', 'cache', 'templates'),
-							'base_template_class' => 'Curry_Twig_Template',
-						),
-					),
-					'backend' => array(
-						'placeholderExclude' => array(),
-						'theme' => 'vindaloo',
-						'loginCookieExpire' => 31536000,
-						'loginTokenExpire' => 31536000,
-					),
-					'mail' => array(
-						'options' => array(),
-					),
-					'domainMapping' => array(
-						'enabled' => false,
-						'domains' => array(),
-					),
+				),
+				'backend' => array(
+					'placeholderExclude' => array(),
+					'theme' => 'vindaloo',
+					'loginCookieExpire' => 31536000,
+					'loginTokenExpire' => 31536000,
+				),
+				'mail' => array(
+					'options' => array(),
+				),
+				'domainMapping' => array(
+					'enabled' => false,
+					'domains' => array(),
 				),
 			);
 			$config = ArrayHelper::extend($secondaryConfig, $config);
@@ -425,11 +413,11 @@ namespace Curry {
 		 * Initialize error-handling.
 		 */
 		protected function initErrorHandling() {
-			$level = $this->config->curry->errorReporting;
+			$level = $this['errorReporting'];
 			if ($level !== false) {
 				error_reporting($level);
 			}
-			ini_set('display_errors', $this->config->curry->developmentMode);
+			ini_set('display_errors', $this['developmentMode']);
 			set_error_handler(array($this, "errorHandler"));
 			set_exception_handler(array($this, "showException"));
 		}
@@ -438,16 +426,16 @@ namespace Curry {
 		 * Initializes Propel.
 		 */
 		protected function initPropel() {
-			if (!file_exists($this->config->curry->propel->conf)) {
+			if (!file_exists($this['propel.conf'])) {
 				$this->logger->notice("Propel configuration missing, skipping propel initialization.");
 				return;
 			}
 
 			// Use Composer autoloader instead of the built-in propel autoloader
-			\Propel::configure($this->config->curry->propel->conf);
+			\Propel::configure($this['propel.conf']);
 			$config = \Propel::getConfiguration(\PropelConfiguration::TYPE_OBJECT);
 			$classmap = array();
-			$projectClassPath = $this->config->curry->propel->projectClassPath;
+			$projectClassPath = $this['propel.projectClassPath'];
 			foreach ($config['classmap'] as $className => $file) {
 				$classmap[$className] = $projectClassPath . DIRECTORY_SEPARATOR . $file;
 			}
@@ -459,9 +447,9 @@ namespace Curry {
 			error_reporting($level);
 
 			// Initialize debugging/logging
-			if ($this->config->curry->propel->debug) {
+			if ($this['propel.debug']) {
 				\Propel::getConnection()->useDebug(true);
-				if ($this->config->curry->propel->logging) {
+				if ($this['propel.logging']) {
 					\Propel::setLogger($this->logger);
 				}
 			}
@@ -471,16 +459,15 @@ namespace Curry {
 		 * Initialize logging.
 		 */
 		protected function getLogger() {
-			$log = $this->config->curry->log;
 			$logger = new Logger('currycms');
-			switch ($log->method) {
+			switch ($this['log.method']) {
 				case 'firebug':
 					ob_start();
 					$logger->pushHandler(new FirePHPHandler());
 					break;
 
 				case 'file':
-					$logger->pushHandler(new StreamHandler($log->file));
+					$logger->pushHandler(new StreamHandler($this['log.file']));
 					break;
 
 				case 'none':
@@ -497,13 +484,11 @@ namespace Curry {
 		 * Initializes zend cache.
 		 */
 		protected function getCache() {
-			$cache = $this->config->curry->cache;
-
 			$uniqueId = substr(
 				md5(
-					$this->config->curry->name .
-					':' . $this->config->curry->projectPath .
-					':' . $this->config->curry->basePath
+					$this['name'] .
+					':' . $this['projectPath'] .
+					':' . $this['basePath']
 				), 0, 6
 			);
 			$frontendOptions = array(
@@ -515,12 +500,12 @@ namespace Curry {
 				'file_name_prefix' => $uniqueId,
 			);
 
-			if ($cache->logging) {
-				$frontendOptions['logging'] = $cache->logging;
+			if ($this['cache.logging']) {
+				$frontendOptions['logging'] = $this['cache.logging'];
 				$frontendOptions['logger'] = $this->logger;
 			}
 
-			switch ($cache->method) {
+			switch ($this['cache.method']) {
 				case 'auto':
 					if (extension_loaded('memcache')) {
 						$backend = 'Memcached';
@@ -534,7 +519,7 @@ namespace Curry {
 					} else {
 						$backend = 'File';
 						$backendOptions = array(
-							'cache_dir' => $this->config->curry->tempPath,
+							'cache_dir' => $this['tempPath'],
 							'file_name_prefix' => $uniqueId
 						);
 					}
@@ -542,23 +527,17 @@ namespace Curry {
 					break;
 
 				case 'file':
-					if ($cache->options) {
-						$backendOptions = $cache->options->toArray();
-					}
+					$backendOptions = $this['cache.options'];
 					break;
 
 				case 'memcached':
 					$backend = 'Memcached';
-					if ($cache->options) {
-						$backendOptions = $cache->options->toArray();
-					}
+					$backendOptions = $this['cache.options'];
 					break;
 
 				case 'apc':
 					$backend = 'Apc';
-					if ($cache->options) {
-						$backendOptions = $cache->options->toArray();
-					}
+					$backendOptions = $this['cache.options'];
 					break;
 
 				case 'none':
@@ -583,7 +562,7 @@ namespace Curry {
 
 			\Zend_Search_Lucene_Search_QueryParser::setDefaultEncoding('utf-8');
 
-			$path = PathHelper::path($this->config->curry->projectPath, 'data', 'searchindex');
+			$path = PathHelper::path($this['projectPath'], 'data', 'searchindex');
 			return \Zend_Search_Lucene::open($path);
 		}
 
@@ -651,7 +630,7 @@ namespace Curry {
 			$this->logger->error($e->getMessage());
 
 			// Show error description
-			$debug = $this->config->curry->developmentMode;
+			$debug = $this['developmentMode'];
 			if ($debug) {
 				echo '<h1>' . get_class($e) . '</h1>';
 				echo '<p>' . htmlspecialchars(basename($e->getFile())) . '(' . $e->getLine() . '): ';
@@ -664,7 +643,7 @@ namespace Curry {
 
 			// Send error notification
 			if ($sendNotification === null) {
-				$sendNotification = $this->config->curry->errorNotification;
+				$sendNotification = $this['errorNotification'];
 			}
 			if ($sendNotification) {
 				$this->sendErrorNotification($e);
@@ -687,8 +666,8 @@ namespace Curry {
 
 				// Create mail
 				$mail = new \Curry_Mail();
-				$mail->addTo($this->config->curry->adminEmail);
-				$mail->setSubject('Error on ' . $this->config->curry->name);
+				$mail->addTo($this['adminEmail']);
+				$mail->setSubject('Error on ' . $this['name']);
 				$mail->setBodyHtml(
 					'<html><body>' .
 					'<h1>' . get_class($e) . '</h1>' .
@@ -752,7 +731,7 @@ namespace Curry {
 		 * @return bool
 		 */
 		public function requireMigration() {
-			return $this->config->curry->migrationVersion < self::MIGRATION_VERSION;
+			return $this['migrationVersion'] < self::MIGRATION_VERSION;
 		}
 
 		/**

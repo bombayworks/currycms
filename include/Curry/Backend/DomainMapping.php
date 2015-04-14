@@ -38,7 +38,7 @@ class Curry_Backend_DomainMapping extends \Curry\Backend\AbstractLegacyBackend {
 	public function showMain()
 	{
 
-		if(!is_writable($this->app->config->curry->configPath))
+		if(!is_writable($this->app['configPath']))
 			$this->addMessage("Configuration file doesn't seem to be writable.", self::MSG_ERROR);
 			
 		$config = $this->app->openConfiguration();
@@ -51,12 +51,12 @@ class Curry_Backend_DomainMapping extends \Curry\Backend\AbstractLegacyBackend {
 		    'elements' => array(
 				'enabled' => array('checkbox', array(
 					'label' => 'Enable domain mapping',
-					'value' => $config->curry->domainMapping->enabled,
+					'value' => $config->domainMapping->enabled,
 				)),
 				'default_base_page' => array('select', array(
 					'label' => 'Default base page',
 					'description' => 'The default base page will only be used if there are no other domains matching and domain mapping is enabled',
-					'value' => $config->curry->domainMapping->default,
+					'value' => $config->domainMapping->default,
 					'multiOptions' => array('' => '[ None ]') + $pages,
 				)),
 			)
@@ -84,7 +84,7 @@ class Curry_Backend_DomainMapping extends \Curry\Backend\AbstractLegacyBackend {
 		$form->addSubForm(new Curry_Form_MultiForm(array(
 			'legend' => '',
 			'cloneTarget' => $domainForm,
-			'defaults' => $config->curry->domainMapping->domains ? $config->curry->domainMapping->domains->toArray() : array(),
+			'defaults' => $config->domainMapping->domains ? $config->domainMapping->domains->toArray() : array(),
 		)),'domainMapping');
 
 		$form->addElement('submit', 'save', array('label' => 'Save'));
@@ -92,12 +92,12 @@ class Curry_Backend_DomainMapping extends \Curry\Backend\AbstractLegacyBackend {
 		if (isPost() && $form->isValid($_POST)) {
 			$values = $form->getValues();
 			
-			if(!$config->curry->domainMapping)
-				$config->curry->domainMapping = array();
+			if(!$config->domainMapping)
+				$config->domainMapping = array();
 
-			$config->curry->domainMapping->enabled = count($values['domainMapping']) ? (bool)$values['enabled'] : false;
-			$config->curry->domainMapping->default = $values['default_base_page'];
-			$config->curry->domainMapping->domains = $values['domainMapping'];
+			$config->domainMapping->enabled = count($values['domainMapping']) ? (bool)$values['enabled'] : false;
+			$config->domainMapping->default = $values['default_base_page'];
+			$config->domainMapping->domains = $values['domainMapping'];
 
 	
 			try {

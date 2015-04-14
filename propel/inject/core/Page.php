@@ -14,7 +14,7 @@ protected static function buildPageCache()
 	if(self::$pageCache !== null)
 		return true;
 		
-	if(!\Curry\App::getInstance()->config->curry->pageCache)
+	if(!\Curry\App::getInstance()['pageCache'])
 		return false;
 	
 	self::$pageCache = array();
@@ -122,7 +122,7 @@ public function createDefaultRevisions($basePage = null) {
 	$revision->setDescription("Initial (auto-created)");
 	$this->setActivePageRevision($revision);
 
-	if (\Curry\App::getInstance()->config->curry->revisioning) {
+	if (\Curry\App::getInstance()['revisioning']) {
 		$revision2 = new PageRevision();
 		$revision2->setPage($this);
 		$revision2->setBasePage($basePage);

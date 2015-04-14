@@ -97,7 +97,7 @@ class Article extends AbstractModule {
 	{
 		$editor = $this->editor;
 		if(!$editor)
-			$editor = strtolower($this->app->config->curry->defaultEditor);
+			$editor = strtolower($this->app['defaultEditor']);
 			
 		$elementType = 'textarea';
 		if($editor == self::CODEMIRROR)

@@ -220,11 +220,11 @@ abstract class AbstractBackend extends View {
 	public function getTwig()
 	{
 		if (!$this->twig) {
-			$backendPath = PathHelper::path(true, $this->app->config->curry->basePath, 'shared', 'backend');
+			$backendPath = PathHelper::path(true, $this->app['basePath'], 'shared', 'backend');
 			if (!$backendPath)
 				throw new \Exception('Curry\Controller\Backend path (shared/backend) not found.');
 			$templatePaths = array(
-				PathHelper::path($backendPath, $this->app->config->curry->backend->theme, 'templates'),
+				PathHelper::path($backendPath, $this->app['backend.theme'], 'templates'),
 				PathHelper::path($backendPath, 'common', 'templates'),
 			);
 			$templatePaths = array_filter($templatePaths, 'is_dir');
@@ -259,7 +259,7 @@ abstract class AbstractBackend extends View {
 		$htmlHead->addStylesheet('shared/libs/build/all.css');
 
 		// Globals
-		$twig->addGlobal('ProjectName', $this->app->config->curry->name);
+		$twig->addGlobal('ProjectName', $this->app['name']);
 		$twig->addGlobal('Encoding', 'utf-8');
 		$twig->addGlobal('Version', App::VERSION);
 

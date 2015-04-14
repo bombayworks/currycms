@@ -74,7 +74,7 @@ public function setLoggedIn($setCookie = false)
 
 	// Create cookie
 	if($setCookie) {
-		$expiration = ($setCookie === true) ? \Curry\App::getInstance()->config->curry->backend->loginTokenExpire : intval($setCookie);
+		$expiration = ($setCookie === true) ? \Curry\App::getInstance()['backend.loginTokenExpire'] : intval($setCookie);
 		setcookie(self::COOKIE_NAME, $this->getLoginToken(), time() + $expiration, '/');
 	}
 }
@@ -103,7 +103,7 @@ private static function loginUserFromToken($token)
 public function getLoginToken($expiration = null)
 {
 	if ($expiration === null)
-		$expiration = \Curry\App::getInstance()->config->curry->backend->loginTokenExpire;
+		$expiration = \Curry\App::getInstance()['backend.loginTokenExpire'];
 	$expiration += time();
 	$value = $this->getUserId();
 	$digest = $this->getTokenDigest($value, $expiration);
@@ -119,8 +119,8 @@ protected function getTokenDigest($value, $expiration)
 
 protected function hashPassword($password)
 {
-	$options = \Curry\App::getInstance()->config->curry->password->options->toArray();
-	$algorithm = \Curry\App::getInstance()->config->curry->password->algorithm;
+	$options = \Curry\App::getInstance()['password.options'];
+	$algorithm = \Curry\App::getInstance()['password.algorithm'];
 
 	$hash = password_hash($password, $algorithm, $options);
 	if ($hash === false)
@@ -130,8 +130,8 @@ protected function hashPassword($password)
 
 public function verifyPassword($password)
 {
-	$options = \Curry\App::getInstance()->config->curry->password->options->toArray();
-	$algorithm = \Curry\App::getInstance()->config->curry->password->algorithm;
+	$options = \Curry\App::getInstance()['password.options'];
+	$algorithm = \Curry\App::getInstance()['password.algorithm'];
 
 	if (password_verify($password, $this->getPassword())) {
 		if (password_needs_rehash($this->getPassword(), $algorithm, $options)) {

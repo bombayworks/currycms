@@ -57,12 +57,12 @@ class Curry_Mail extends Zend_Mail
 	 */
 	public function send($transport = null)
 	{
-		if (\Curry\App::getInstance()->config->curry->divertOutMailToAdmin) {
+		if (\Curry\App::getInstance()['divertOutMailToAdmin']) {
 			$subject = '(dev) ' . $this->getSubject();
 			$this->clearSubject();
 			$this->setSubject($subject);
 			$this->clearRecipients();
-			$this->addTo(\Curry\App::getInstance()->config->curry->adminEmail);
+			$this->addTo(\Curry\App::getInstance()['adminEmail']);
 		}
 		return parent::send($transport);
 	}
@@ -75,7 +75,7 @@ class Curry_Mail extends Zend_Mail
 		if(self::$initialized)
 			return;
 		self::$initialized = true;
-		$mail = \Curry\App::getInstance()->config->curry->mail;
+		$mail = \Curry\App::getInstance()['mail'];
 		switch(strtolower($mail->method)) {
 			case 'smtp':
 				$transport = new Zend_Mail_Transport_Smtp($mail->host, $mail->options->toArray());

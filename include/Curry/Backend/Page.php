@@ -47,7 +47,7 @@ class Curry_Backend_Page extends \Curry\Backend\AbstractLegacyBackend
 
 	public static function updateIndex(Page $page)
 	{
-		if (\Curry\App::getInstance()->config->curry->autoUpdateIndex)
+		if (\Curry\App::getInstance()['autoUpdateIndex'])
 			\Curry\Util\BackgroundFunctions::register(array(__CLASS__, 'doUpdateIndex'), $page);
 	}
 
@@ -63,7 +63,7 @@ class Curry_Backend_Page extends \Curry\Backend\AbstractLegacyBackend
 
 	public static function getTemplatePage()
 	{
-		$templatePage = \Curry\App::getInstance()->config->curry->backend->templatePage;
+		$templatePage = \Curry\App::getInstance()['backend.templatePage'];
 		return $templatePage ? PageQuery::create()->findPk($templatePage) : null;
 	}
 
@@ -514,7 +514,7 @@ class Curry_Backend_Page extends \Curry\Backend\AbstractLegacyBackend
 			}
 			
 			// Live edit
-			if($this->app->config->curry->liveEdit)
+			if($this->app['liveEdit'])
 				$this->addCommand('Live edit', url($page->getUrl(), array('curry_inline_admin'=>'true')), 'icon-cogs');
 
 			// Delete
@@ -681,7 +681,7 @@ class Curry_Backend_Page extends \Curry\Backend\AbstractLegacyBackend
 		if(!self::getPagePermission($pageRevision->getPage(), PageAccessPeer::PERM_PUBLISH))
 			throw new Exception('You do not have permission to publish this page.');
 			
-		if(!$this->app->config->curry->autoPublish)
+		if(!$this->app['autoPublish'])
 			$this->addMessage('Auto publishing is not enabled, for this functionality to work you must enable it in <a href="'.url('', array('module'=>'Curry_Backend_System')).'">System</a>.', self::MSG_WARNING, false);
 			
 		$form = Curry_Backend_PageHelper::getPublishDateForm($pageRevision);

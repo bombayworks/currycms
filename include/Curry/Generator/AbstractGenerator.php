@@ -54,7 +54,7 @@ class AbstractGenerator
 	 */
 	public static function create(App $app, \PageRevision $pageRevision)
 	{
-		$generatorClass = $pageRevision->getPage()->getInheritedProperty('Generator', $app->config->curry->defaultGeneratorClass);
+		$generatorClass = $pageRevision->getPage()->getInheritedProperty('Generator', $app['defaultGeneratorClass']);
 		$generator = new $generatorClass($app, $pageRevision);
 		if (!$generator instanceof AbstractGenerator) {
 			throw new \Exception('Page generator must be of type Curry\Generator\AbstractGenerator');

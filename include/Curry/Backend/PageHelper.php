@@ -503,7 +503,7 @@ class Curry_Backend_PageHelper {
 				'generator' => array('text', array(
 					'label' => 'Generator',
 					'value' => $page->getGenerator(),
-					'placeholder' => \Curry\App::getInstance()->config->curry->defaultGeneratorClass,
+					'placeholder' => \Curry\App::getInstance()['defaultGeneratorClass'],
 				)),
 			)
 		)), 'advanced');
@@ -823,7 +823,7 @@ class Curry_Backend_PageHelper {
 				$className = $values['module_class'];
 				$predefinedTemplates = call_user_func(array($className, 'getPredefinedTemplates'));
 
-				$root = \Curry\App::getInstance()->config->curry->template->root;
+				$root = \Curry\App::getInstance()['template.root'];
 				$template = $values['template_name'];
 				$templateFile = $root . DIRECTORY_SEPARATOR . $template;
 				if(!file_exists($templateFile)) {

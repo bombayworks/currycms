@@ -52,7 +52,7 @@ class Frontend implements EventSubscriberInterface {
 	public function __construct(App $app)
 	{
 		$this->app = $app;
-		if($app->config->curry->pageCache && class_exists('\\Page')) {
+		if($app['pageCache'] && class_exists('\\Page')) {
 			\Page::getCachedPages();
 		}
 		//\Curry\URL::setReverseRouteCallback(array($this, 'reverseRoute'));
@@ -74,7 +74,7 @@ class Frontend implements EventSubscriberInterface {
 			$forceShow = false;
 			$showWorking = false;
 
-			//if($app->config->curry->setup) {
+			//if($app['setup']) {
 			//	die('Site is not yet configured, go to admin.php and configure your site.');
 			//}
 
@@ -84,7 +84,7 @@ class Frontend implements EventSubscriberInterface {
 				/*
 				// check for inline-admin
 				$adminNamespace = new \Zend\Session\Container('Curry\Controller\Backend');
-				if($app->config->curry->liveEdit && !$request->getParam('curry_force_show')) {
+				if($app['liveEdit'] && !$request->getParam('curry_force_show')) {
 					if($request->query->has('curry_inline_admin'))
 						$adminNamespace->inlineAdmin = (bool)$request->query->get('curry_inline_admin');
 					if($adminNamespace->inlineAdmin) {
@@ -112,22 +112,22 @@ class Frontend implements EventSubscriberInterface {
 			}
 
 			// Show maintenance page?
-			if($this->app->config->curry->maintenance->enabled && !$forceShow) {
+			if($this->app['maintenance.enabled'] && !$forceShow) {
 				$this->app->logger->debug("Maintenance enabled");
 
 				$message = 'Page is down for maintenance, please check back later.';
-				if($this->app->config->curry->maintenance->message)
-					$message = $this->app->config->curry->maintenance->message;
+				if($this->app['maintenance.message'])
+					$message = $this->app['maintenance.message'];
 
 				$request->attributes->set('message', $message);
-				$request->attributes->set('page', $this->app->config->curry->maintenance->page);
+				$request->attributes->set('page', $this->app['maintenance.page']);
 				$request->attributes->set('_controller', new Maintenance($this->app));
 				return;
 			}
 
 			// Force domain redirect
 			// @todo force scheme?
-			if($this->app->config->curry->maintenance->enabled && !$forceShow) {
+			if($this->app['maintenance.enabled'] && !$forceShow) {
 				$base = URL::getDefaultBaseUrl();
 				$baseHost = strtolower($base['host']);
 				$httpHost = strtolower($request->server->get('HTTP_HOST'));
@@ -188,23 +188,23 @@ class Frontend implements EventSubscriberInterface {
 
 		// use domain mapping to restrict page to a certain page-branch
 		$rootPage = null;
-		if($this->app->config->curry->domainMapping->enabled){
+		if($this->app['domainMapping.enabled']){
 			$currentDomain = strtolower($request->server->get('HTTP_HOST'));
-			foreach ($this->app->config->curry->domainMapping->domains as $domain) {
+			foreach ($this->app['domainMapping.domains'] as $domain) {
 				if(strtolower($domain->domain) === $currentDomain
 					|| ($domain->include_www && strtolower('www.'.$domain->domain) === $currentDomain)){
 					$rootPage = $domain->base_page;
 					break;
 				}
 			}
-			if(!$rootPage && $this->app->config->curry->domainMapping->default)
-				$rootPage = $this->app->config->curry->domainMapping->default;
+			if(!$rootPage && $this->app['domainMapping.default'])
+				$rootPage = $this->app['domainMapping.default'];
 			if($rootPage)
 				$rootPage = \PageQuery::create()->findPk($rootPage);
 		}
 
 		// attempt to find page using url
-		if($this->app->config->curry->pageCache) {
+		if($this->app['pageCache']) {
 			$pages = array();
 			$allPages = \Page::getCachedPages();
 			foreach($allPages as $page) {

@@ -514,7 +514,7 @@ class Curry_Backend_Users extends AbstractLegacyBackend
 
 		$home = self::getUserHome($user, true);
 		if($values['create_home_folder']) {
-			$folder = $this->app->config->curry->wwwPath . DIRECTORY_SEPARATOR;
+			$folder = $this->app['wwwPath'] . DIRECTORY_SEPARATOR;
 			$folder .= str_replace('/', DIRECTORY_SEPARATOR, rtrim($home->getPath(), '/'));
 			if (!file_exists($folder))
 				@mkdir($folder, 0777, true);

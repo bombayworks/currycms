@@ -63,9 +63,9 @@ class SendForm extends AbstractModule {
 	{
 		parent::__construct();
 		$this->to = "";
-		$this->from = $this->app->config->curry->adminEmail;
-		$this->sender = $this->app->config->curry->name;
-		$this->subject = $this->app->config->curry->name . ', form';
+		$this->from = $this->app['adminEmail'];
+		$this->sender = $this->app['name'];
+		$this->subject = $this->app['name'] . ', form';
 	}
 	
 	/** {@inheritdoc} */

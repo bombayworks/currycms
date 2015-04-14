@@ -117,7 +117,7 @@ class Curry_Backend_Indexer extends \Curry\Backend\AbstractLegacyBackend {
 				if ($model === '@custom') {
 					// Trigger custom indexer
 					$ses->model++;
-					$indexerClass = \Curry\App::getInstance()->config->curry->indexerClass;
+					$indexerClass = \Curry\App::getInstance()['indexerClass'];
 					if($indexerClass && is_callable(array($indexerClass, 'build'))) {
 						call_user_func(array($indexerClass, 'build'));
 					}
@@ -272,7 +272,7 @@ class Curry_Backend_Indexer extends \Curry\Backend\AbstractLegacyBackend {
 			}
 		}
 
-		if (\Curry\App::getInstance()->config->curry->indexerClass)
+		if (\Curry\App::getInstance()['indexerClass'])
 			$models[] = '@custom';
 
 		$ses = new \Zend\Session\Container(__CLASS__);

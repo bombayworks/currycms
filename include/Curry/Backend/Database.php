@@ -578,18 +578,18 @@ class Curry_Backend_Database extends \Curry\Backend\AbstractLegacyBackend
 	 */
 	public function doAutoRebuild()
 	{
-		if(!is_writable($this->app->config->curry->configPath)) {
+		if(!is_writable($this->app['configPath'])) {
 			$this->addMessage("Configuration file doesn't seem to be writable.", self::MSG_ERROR);
 			return;
 		}
 		$config = $this->app->openConfiguration();
 		$restoreConfig = clone $config;
 		
-		$config->curry->backend->noauth = true;
-		if(!$config->curry->maintenance->enabled || $config->curry->maintenance->page) {
-			$config->curry->maintenance->enabled = true;
-			$config->curry->maintenance->page = false;
-			$config->curry->maintenance->message = "Rebuilding database, please wait...";
+		$config->backend->noauth = true;
+		if(!$config->maintenance->enabled || $config->maintenance->page) {
+			$config->maintenance->enabled = true;
+			$config->maintenance->page = false;
+			$config->maintenance->message = "Rebuilding database, please wait...";
 		}
 
 		$this->app->writeConfiguration($config);
@@ -909,7 +909,7 @@ class Curry_Backend_Database extends \Curry\Backend\AbstractLegacyBackend
 				$fp = fopen("php://temp", 'r+');
 				Curry_Backend_DatabaseHelper::dumpDatabase($fp, $values['tables'], $this);
 				rewind($fp);
-				$name = StringHelper::getRewriteString($this->app->config->curry->name).'-db.txt';
+				$name = StringHelper::getRewriteString($this->app['name']).'-db.txt';
 				self::returnData($fp, 'application/octet-stream', $name);
 			} else if($values['type'] == 'online') {
 				$filename = Curry_Backend_DatabaseHelper::createBackupName($values['name']);

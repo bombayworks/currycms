@@ -45,7 +45,7 @@ class Page {
 
         // Find language
         $language = $page->getInheritedProperty('Language');
-        $fallbackLanguage = $app->config->curry->fallbackLanguage;
+        $fallbackLanguage = $app['fallbackLanguage'];
         if(!$language && $fallbackLanguage) {
             $app->logger->info('Using fallback language');
             $language = $fallbackLanguage;

@@ -46,7 +46,7 @@ class LiveEdit implements EventSubscriberInterface {
 			$this->adminPanel();
 
 			$moduleContent = $event->getContent();
-			$excluded = $this->app->config->curry->backend->placeholderExclude->toArray();
+			$excluded = $this->app['backend.placeholderExclude'];
 			$placeholders = array();
 			$tpl = $event->getTemplate();
 			while($tpl) {
@@ -134,7 +134,7 @@ JS
 		$htmlHead->addScript(self::JQUERY_JS);
 		$htmlHead->addInlineScript('window.inlineAdminContent = '.json_encode($content).';');
 		$htmlHead->addScript('shared/backend/common/js/inline-admin.js');
-		$htmlHead->addStyleSheet('shared/backend/'.$this->app->config->curry->backend->theme.'/css/inline-admin.css');
+		$htmlHead->addStyleSheet('shared/backend/'.$this->app['backend.theme'].'/css/inline-admin.css');
 	}
 
 	/**

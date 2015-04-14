@@ -33,7 +33,7 @@ class Curry_Backend_Template extends Curry_Backend_FileEditor
 	public function __construct(\Curry\App $app)
 	{
 		parent::__construct($app);
-		$this->root = $this->app->config->curry->template->root;
+		$this->root = $this->app['template.root'];
 	}
 
 	/** {@inheritdoc} */

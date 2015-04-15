@@ -15,7 +15,8 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
-use Curry\Controller\Frontend;
+namespace Curry;
+
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -23,15 +24,8 @@ use Symfony\Component\HttpFoundation\Request;
  * 
  * @package Curry
  */
-class Curry_Mail extends Zend_Mail
+class Mail extends \Zend_Mail
 {
-	/**
-	 * Is the default transport initialized?
-	 *
-	 * @var bool
-	 */
-	private static $initialized = false;
-	
 	/**
 	 * Constructor
 	 * 
@@ -41,9 +35,6 @@ class Curry_Mail extends Zend_Mail
 	 */
 	public function __construct($charset = null)
 	{
-		if(!self::$initialized) {
-			self::initMail();
-		}
 		if ($charset === null) {
 			$charset = 'utf-8';
 		}
@@ -57,45 +48,17 @@ class Curry_Mail extends Zend_Mail
 	 */
 	public function send($transport = null)
 	{
-		if (\Curry\App::getInstance()['divertOutMailToAdmin']) {
-			$subject = '(dev) ' . $this->getSubject();
-			$this->clearSubject();
-			$this->setSubject($subject);
-			$this->clearRecipients();
-			$this->addTo(\Curry\App::getInstance()['adminEmail']);
-		}
+		if ($transport === null)
+			App::getInstance()->sendMail($this);
 		return parent::send($transport);
 	}
-	
-	/**
-	 * Initializes the default mail transport configured in the curry config.
-	 */
-	public static function initMail()
-	{
-		if(self::$initialized)
-			return;
-		self::$initialized = true;
-		$mail = \Curry\App::getInstance()['mail'];
-		switch(strtolower($mail->method)) {
-			case 'smtp':
-				$transport = new Zend_Mail_Transport_Smtp($mail->host, $mail->options->toArray());
-				Zend_Mail::setDefaultTransport($transport);
-				break;
-			
-			case 'sendmail':
-			default:
-				$transport = new Zend_Mail_Transport_Sendmail($mail->options->toArray());
-				Zend_Mail::setDefaultTransport($transport);
-				break;
-		}
-	}
-	
+
 	/**
 	 * Create a mail from a URL, Page or PageRevision.
 	 *
-	 * @param string|Page|PageRevision|Request $page
+	 * @param string|\Page|\PageRevision|Request $page
 	 * @param array $variables Additional template variables.
-	 * @return Curry_Mail
+	 * @return Mail
 	 */
 	public static function createFromPage($page)
 	{
@@ -104,21 +67,21 @@ class Curry_Mail extends Zend_Mail
 		// Make sure we have a request object
 		if (is_string($page)) {
 			$request = Request::create($page);
-		} elseif ($page instanceof Page) {
+		} elseif ($page instanceof \Page) {
 			$request = Request::create($page->getUrl());
-		} elseif ($page instanceof PageRevision) {
+		} elseif ($page instanceof \PageRevision) {
 			$request = Request::create($page->getPage()->getUrl());
 		} elseif ($page instanceof Request) {
 			$request = $page;
 		} else {
-			throw new Exception('Expected parameter $page to be one of string|Page|PageRevision|Request.');
+			throw new \Exception('Expected parameter $page to be one of string|Page|PageRevision|Request.');
 		}
 		
 		// Generate page
 		$response = $app->handle($request, \Symfony\Component\HttpKernel\HttpKernelInterface::SUB_REQUEST, false);
 		
 		// Create email
-		$mail = new Curry_Mail();
+		$mail = new Mail();
 		$mail->setBodyHtml($response->getContent());
 
 		return $mail;

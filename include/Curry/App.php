@@ -425,6 +425,43 @@ namespace Curry {
 			return $config;
 		}
 
+		public function sendMail(Mail $mail)
+		{
+			static $initialized = false;
+			if(!$initialized) {
+				$this->initMail();
+				$initialized = true;
+			}
+
+			if ($this['divertOutMailToAdmin']) {
+				$subject = '(dev) ' . $mail->getSubject();
+				$mail->clearSubject();
+				$mail->setSubject($subject);
+				$mail->clearRecipients();
+				$mail->addTo($this['adminEmail']);
+			}
+		}
+
+		protected function initMail()
+		{
+			if (isset($this['mail.from.email']))
+				\Zend_Mail::setDefaultFrom($this['mail.from.email'], $this['mail.from.name']);
+			if (isset($this['mail.replyto.email']))
+				\Zend_Mail::setDefaultReplyTo($this['mail.replyto.email'], $this['mail.replyto.name']);
+			// Create transport
+			switch(strtolower($this['mail.method'])) {
+				case 'smtp':
+					$transport = new \Zend_Mail_Transport_Smtp($this['mail.host'], (array)$this['mail.options']);
+					\Zend_Mail::setDefaultTransport($transport);
+					break;
+				case 'sendmail':
+				default:
+					$transport = new \Zend_Mail_Transport_Sendmail((array)$this['mail.options']);
+					\Zend_Mail::setDefaultTransport($transport);
+					break;
+			}
+		}
+
 		/**
 		 * Initialize error-handling.
 		 */
@@ -683,7 +720,7 @@ namespace Curry {
 				$form = '<form action="' . $action . '" method="' . $method . '">' . $hidden . '<button type="submit">Execute</button></form>';
 
 				// Create mail
-				$mail = new \Curry_Mail();
+				$mail = new Mail();
 				$mail->addTo($this['adminEmail']);
 				$mail->setSubject('Error on ' . $this['name']);
 				$mail->setBodyHtml(

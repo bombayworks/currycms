@@ -20,6 +20,7 @@ use Curry\App;
 use Curry\Archive\Archive;
 use Curry\Controller\Frontend;
 use Curry\Form\Form;
+use Curry\Mail;
 use Curry\Util\PathHelper;
 use Curry\Util\StringHelper;
 use Symfony\Component\HttpFoundation\Request;
@@ -123,9 +124,9 @@ class System extends AbstractBackend
 					'value' => isset($config->adminEmail) ? $config->adminEmail : '',
 				)),
 				'divertOutMailToAdmin' => array('checkbox', array(
-						'label' => 'Divert outgoing email to adminEmail',
+						'label' => 'Divert outgoing email to admin email',
 						'value' => isset($config->divertOutMailToAdmin) ? $config->divertOutMailToAdmin : '',
-						'description' => 'All outgoing Curry_Mail will be diverted to adminEmail.',
+						'description' => 'All outgoing Curry\Mail will be diverted to admin email.',
 				)),
 				'developmentMode' => array('checkbox', array(
 					'label' => 'Development mode',
@@ -275,6 +276,22 @@ class System extends AbstractBackend
 			'legend' => 'Mail',
 			'class' => 'advanced',
 			'elements' => array(
+				'fromEmail' => array('text', array(
+					'label' => 'From email',
+					'value' => isset($config->mail->from->email) ? $config->mail->from->email : '',
+				)),
+				'fromName' => array('text', array(
+					'label' => 'From name',
+					'value' => isset($config->mail->from->name) ? $config->mail->from->name : '',
+				)),
+				'replytoEmail' => array('text', array(
+					'label' => 'ReplyTo email',
+					'value' => isset($config->mail->replyto->email) ? $config->mail->replyto->email : '',
+				)),
+				'replytoName' => array('text', array(
+					'label' => 'ReplyTo name',
+					'value' => isset($config->mail->replyto->name) ? $config->mail->replyto->name : '',
+				)),
 				'method' => array('select', array(
 					'label' => 'Transport',
 					'multiOptions' => array('' => '[ Default ]', 'smtp' => 'SMTP', 'sendmail' => 'PHP mail() function, ie sendmail.'),
@@ -372,7 +389,7 @@ class System extends AbstractBackend
 
 			)
 		)), 'misc');
-		
+
 		$form->addElement('submit', 'save', array(
 			'label' => 'Save',
 			'disabled' => $configFile ? null : 'disabled',
@@ -425,9 +442,9 @@ class System extends AbstractBackend
 		$config->autoPublish = (bool)$values['backend']['autoPublish'];
 		$config->backend->noauth = (bool)$values['backend']['noauth'];
 		self::setvar($config, 'defaultEditor', $values['backend']['defaultEditor']);
-		self::setvar($config->backend, 'theme', $values['backend']['theme']);
-		self::setvar($config->backend, 'templatePage', $values['backend']['templatePage'] ? (int)$values['backend']['templatePage'] : null);
-		self::setvar($config->backend, 'logotype', $values['backend']['logotype']);
+		self::setvar($config, 'backend.theme', $values['backend']['theme']);
+		self::setvar($config, 'backend.templatePage', $values['backend']['templatePage'] ? (int)$values['backend']['templatePage'] : null);
+		self::setvar($config, 'backend.logotype', $values['backend']['logotype']);
 		self::setvar($config, 'autoBackup', $values['backend']['autoBackup']);
 		self::setvar($config, 'autoUpdateIndex', $values['backend']['autoUpdateIndex']);
 
@@ -436,7 +453,7 @@ class System extends AbstractBackend
 		if (!count($excludedPlaceholders))
 			$excludedPlaceholders = null;
 		$config->liveEdit = (bool)$values['liveEdit']['liveEdit'];
-		self::setvar($config->backend, 'placeholderExclude', $excludedPlaceholders);
+		self::setvar($config, 'backend.placeholderExclude', $excludedPlaceholders);
 
 		// Paths
 		self::setvar($config, 'basePath', $values['paths']['basePath']);
@@ -445,26 +462,21 @@ class System extends AbstractBackend
 		self::setvar($config, 'vendorPath', $values['paths']['vendorPath']);
 			
 		// Mail
-		if($values['mail']['method']) {
-			if(!$config->mail)
-				$config->mail = array();
-			$config->mail->method = $values['mail']['method'];
-			
-			// Smtp
-			if($values['mail']['method'] == 'smtp') {
-				$config->mail->host = $values['mail']['host'];
-				if(!$config->mail->options)
-					$config->mail->options = array();
-				self::setvar($config->mail->options, 'port', $values['mail']['port']);
-				self::setvar($config->mail->options, 'ssl', $values['mail']['ssl']);
-				self::setvar($config->mail->options, 'auth', $values['mail']['auth']);
-				self::setvar($config->mail->options, 'username', $values['mail']['username']);
-				self::setvar($config->mail->options, 'password', $values['mail']['password']);
-			}
-		} else if(isset($config->mail->method)) {
-			unset($config->mail->method);
+		self::setvar($config, 'mail.from.email', $values['mail']['fromEmail']);
+		self::setvar($config, 'mail.from.name', $values['mail']['fromName']);
+		self::setvar($config, 'mail.replyto.email', $values['mail']['replytoEmail']);
+		self::setvar($config, 'mail.replyto.name', $values['mail']['replytoName']);
+		self::setvar($config, 'mail.method', $values['mail']['method']);
+		// Mail / Smtp
+		if($values['mail']['method'] == 'smtp') {
+			self::setvar($config, 'mail.host', $values['mail']['host']);
+			self::setvar($config, 'mail.options.port', $values['mail']['port']);
+			self::setvar($config, 'mail.options.ssl', $values['mail']['ssl']);
+			self::setvar($config, 'mail.options.auth', $values['mail']['auth']);
+			self::setvar($config, 'mail.options.username', $values['mail']['username']);
+			self::setvar($config, 'mail.options.password', $values['mail']['password']);
 		}
-		
+
 		// Misc
 		$config->errorNotification = (bool)$values['misc']['error_notification'];
 		$config->propel->logging = (bool)$values['misc']['log_propel'];
@@ -516,14 +528,27 @@ class System extends AbstractBackend
 	 * @param string $name
 	 * @param string $value
 	 */
-	private static function setvar(&$config, $name, $value)
+	private static function setvar(Config $config, $name, $value)
 	{
-		if($config instanceof Config) {
-			if($value != '')
-				$config->$name = $value;
-			else
-				unset($config->$name);
+		if (strpos($name, '.') !== false) {
+			$parts = explode('.', $name);
+			do {
+				$name = array_shift($parts);
+				if (!isset($config->$name)) {
+					if ($value === '') {
+						return;
+					}
+					// this will actually be converted to a Config object, so we don't have to use references below.
+					$config->$name = array();
+				}
+				$config = $config->$name;
+			} while (count($parts) > 1);
+			$name = array_shift($parts);
 		}
+		if($value != '')
+			$config->$name = $value;
+		else
+			unset($config->$name);
 	}
 	
 	/**
@@ -904,7 +929,7 @@ class System extends AbstractBackend
 HTML;
 
 		try {
-			$mail = new \Curry_Mail();
+			$mail = new Mail();
 			$mail->addTo($values['toEmail'], $values['toEmail'])
 				->setFrom($this->app['adminEmail'], $projectName)
 				->setSubject('Test email from '.$this->app['name'])

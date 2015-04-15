@@ -16,6 +16,7 @@
  * @link       http://currycms.com
  */
 namespace Curry\Module;
+use Curry\Mail;
 
 /**
  * Module to send POST-data to an email.
@@ -95,7 +96,7 @@ class SendForm extends AbstractModule {
 		$html = $this->getMailHtml();
 		$text = strip_tags($html);
 		
-		$mail = new \Curry_Mail();
+		$mail = new Mail();
 		$mail->setBodyText($text);
 		$mail->setBodyHtml($html);
 		$mail->setSubject($this->subject);

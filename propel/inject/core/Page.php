@@ -487,13 +487,13 @@ public function getSearchDocument()
 	if(!$this->getEnabled() || !$this->getActivePageRevision() || !$this->getIncludeInIndex())
 		return null;
 	
-	$preventRedirect = Curry_URL::setPreventRedirect(true);
+	$preventRedirect = \Curry\URL::setPreventRedirect(true);
 	$pageGenerator = \Curry\Generator\AbstractGenerator::create(\Curry\App::getInstance(), $this->getActivePageRevision());
 	$language = $this->getInheritedProperty('Language');
 	if($language)
 		Curry_Language::setLanguage($language);
 	$content = $pageGenerator->render(array(), array('indexing' => true));
-	Curry_URL::setPreventRedirect($preventRedirect);
+	\Curry\URL::setPreventRedirect($preventRedirect);
 	
 	$doc = Zend_Search_Lucene_Document_Html::loadHTML($content, true);
 	if($language)

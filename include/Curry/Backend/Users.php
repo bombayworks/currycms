@@ -77,7 +77,7 @@ class Curry_Backend_Users extends AbstractLegacyBackend
 		// Redirect to first view
 		reset($views);
 		list($view, $name) = each($views);
-		url('', array('module','view'=>$view))->redirect();
+		self::redirect(url('', array('module','view'=>$view)));
 	}
 
 	public function showUsers()

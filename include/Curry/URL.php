@@ -89,13 +89,6 @@ class URL {
 	protected $reverseRoute = true;
 	
 	/**
-	 * If true, will prevent redirects and cause redirect() to throw an Exception.
-	 *
-	 * @var bool
-	 */
-	protected static $preventRedirect = false;
-	
-	/**
 	 * Callback function to run when reverse-routing.
 	 *
 	 * @var callback|null
@@ -162,27 +155,6 @@ class URL {
 	public static function getDefaultSecret()
 	{
 		return self::$defaultSecret;
-	}
-
-	/**
-	 * If set to true, this will prevent redirects and cause redirect() to throw an Exception.
-	 *
-	 * @param bool $value Enable or disable.
-	 * @return bool	Returns the old value.
-	 */
-	public static function setPreventRedirect($value) {
-		$oldValue = self::$preventRedirect;
-		self::$preventRedirect = (bool)$value;
-		return $oldValue;
-	}
-	
-	/**
-	 * Get the value of prevent redirect.
-	 *
-	 * @return bool
-	 */
-	public static function getPreventRedirect() {
-		return self::$preventRedirect;
 	}
 	
 	/**
@@ -696,27 +668,7 @@ class URL {
 
 		return $ret;
 	}
-	
-	/**
-	 * Do a browser redirect and exit.
-	 * 
-	 * 301 Moved permanently
-	 * 302 Found
-	 * 303 See other
-	 * 307 Temporary redirect
-	 *
-	 * @param integer $code
-	 * @param bool $secure
-	 */
-	public function redirect($code = 302, $secure = false) {
-		$url = $this->getAbsolute('&', $secure);
-		if(self::$preventRedirect)
-			throw new \Curry_Exception_RedirectPrevented($url);
-			
-		header('Location: ' . $url, true, $code);
-		exit;
-	}
-	
+
 	/**
 	 * Get full URL including all parts.
 	 *

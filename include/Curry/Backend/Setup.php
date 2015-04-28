@@ -62,7 +62,7 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractLegacyBackend {
 				}
 			}
 		}
-		url('', array('module','view'=>'FixPermissions'))->redirect();
+		self::redirect(url('', array('module','view'=>'FixPermissions')));
 	}
 	
 	public function showFixPermissions()
@@ -98,7 +98,7 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractLegacyBackend {
 		if($error) {
 			$this->addMainContent('<p>Please fix the errors above and reload the page. If you\'re unable to fix the errors, you may attempt to <a href="'.$nextUrl.'">continue installation anyway</a>.</p>');
 		} else {
-			$nextUrl->redirect();
+			self::redirect($nextUrl);
 		}
 	}
 
@@ -161,7 +161,7 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractLegacyBackend {
 
 		if ($params['init']) {
 			if ($this->saveConnection($params, $propelConfig))
-				url('', array('module','view'=>'Configure'))->redirect();
+				self::redirect(url('', array('module','view'=>'Configure')));
 		}
 
 		$form = $this->getDatabaseForm($params);
@@ -174,7 +174,7 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractLegacyBackend {
 					$this->addMessage('Connection failed: ' . $status, self::MSG_ERROR);
 			} else if($form->save->isChecked()) {
 				if($this->saveConnection($form->getValues(), $propelConfig))
-					$nextUrl->redirect();
+					self::redirect($nextUrl);
 				return;
 			}
 		}
@@ -230,7 +230,7 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractLegacyBackend {
 		$form = $this->getConfigureForm();
 		if(isPost() && $form->isValid($_POST)) {
 			$this->saveConfiguration($form->getValues());
-			url('', array('module','view'=>'RemoveInstallationFiles'))->redirect();
+			self::redirect(url('', array('module','view'=>'RemoveInstallationFiles')));
 			return;
 		} else {
 			$this->addMainContent('<h2>Basic configuration</h2>');
@@ -255,7 +255,7 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractLegacyBackend {
 				foreach($installationFiles as $file) {
 					unlink($file);
 				}
-				$nextUrl->redirect();
+				self::redirect($nextUrl);
 			} else {
 				$this->addMainContent('<p>You should now delete the following installation files:</p>'.
 					'<ul><li>'.join('</li><li>', $installationFiles).'</li></ul>'.
@@ -264,7 +264,7 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractLegacyBackend {
 					'or you can <a href="'.$nextUrl.'">skip this step</a>.</p>');
 			}
 		} else {
-			$nextUrl->redirect();
+			self::redirect($nextUrl);
 		}
 	}
 

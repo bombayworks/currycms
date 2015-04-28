@@ -61,9 +61,9 @@ class Curry_Backend_InlineAdmin extends \Curry\Backend\AbstractLegacyBackend
 	public function showPage($url)
 	{
 		$url .= '?curry_inline_admin=true';
-		$this->addBodyClass('tpl-fullscreen');
-		url($url)->redirect();
-		$this->addMainContent('<iframe id="inline-admin-preview" src="'.$url.'" frameborder="0" width="100%" height="100%"></iframe>');
+		self::redirect($url);
+		//$this->addBodyClass('tpl-fullscreen');
+		//$this->addMainContent('<iframe id="inline-admin-preview" src="'.$url.'" frameborder="0" width="100%" height="100%"></iframe>');
 	}
 
 }

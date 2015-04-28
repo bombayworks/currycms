@@ -20,6 +20,7 @@ use Curry\App;
 use Curry\Exception\ResponseException;
 use Curry\Util\StringHelper;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -43,7 +44,7 @@ abstract class AbstractLegacyBackend extends AbstractBackend
 		if(isAjax()) // we're in a dialog, use javascript to redirect
 			self::returnPartial($dialogRedirect ? $redirectJs : '');
 		else
-			url($url)->redirect();
+			throw new ResponseException(RedirectResponse::create($url));
 	}
 
 	/**

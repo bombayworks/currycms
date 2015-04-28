@@ -16,6 +16,7 @@
  * @link       http://currycms.com
  */
 namespace Curry\Module;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Module to redirect to different pages depending on the detected browser language.
@@ -53,7 +54,7 @@ class Language extends AbstractModule {
 			
 			$page = \PageQuery::create()->findPk($language['page_id']);
 			if($page)
-				url($page->getUrl(), $_GET)->redirect();
+				return RedirectResponse::create(url($page->getUrl(), $_GET));
 			else
 				$this->app->logger->notice('Redirect page not found');
 		} else

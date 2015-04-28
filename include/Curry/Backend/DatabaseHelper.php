@@ -635,7 +635,7 @@ class Curry_Backend_DatabaseHelper {
 					'line' => $total,
 					'max_execution_time' => $maxExecutionTime,
 				);
-				url('', $params)->redirect(302, true);
+				AbstractLegacyBackend::redirect(url('', $params)->getAbsolute("&", true));
 			}
 		}
 		

@@ -394,11 +394,10 @@ class Curry_Backend_Page extends \Curry\Backend\AbstractLegacyBackend
 	{
 		$page = PageQuery::create()->findPk($_GET['page_id']);
 		if ($page && file_exists($page->getImage())) {
-			url($page->getImage())->redirect();
-			exit;
+			self::redirect($page->getImage());
 		}
 		
-		url('shared/backend/common/images/no-page-image.png')->redirect();
+		self::redirect('shared/backend/common/images/no-page-image.png');
 	}
 	
 	/**
@@ -953,7 +952,7 @@ class Curry_Backend_Page extends \Curry\Backend\AbstractLegacyBackend
 	 */
 	public function showModuleProperties()
 	{
-		url('', array('module','page_id','view'=>'Content','action'=>'properties','item'=>json_encode($_GET['page_module_id'])))->redirect();
+		self::redirect(url('', array('module','page_id','view'=>'Content','action'=>'properties','item'=>json_encode($_GET['page_module_id']))));
 	}
 	
 	/**
@@ -961,7 +960,7 @@ class Curry_Backend_Page extends \Curry\Backend\AbstractLegacyBackend
 	 */
 	public function showDeleteModule()
 	{
-		url('', array('module','page_id','view'=>'Content','action'=>'delete','item'=>json_encode($_GET['page_module_id'])))->redirect();
+		self::redirect(url('', array('module','page_id','view'=>'Content','action'=>'delete','item'=>json_encode($_GET['page_module_id']))));
 	}
 
 	/**
@@ -969,6 +968,6 @@ class Curry_Backend_Page extends \Curry\Backend\AbstractLegacyBackend
 	 */
 	public function showModule()
 	{
-		url('', array('module','page_id','view'=>'Content','action'=>'edit','item'=>json_encode($_GET['page_module_id'])))->redirect();
+		self::redirect(url('', array('module','page_id','view'=>'Content','action'=>'edit','item'=>json_encode($_GET['page_module_id']))));
 	}
 }

@@ -80,6 +80,12 @@ namespace Curry {
 	use Exception;
 	use Curry\Util\Helper;
 	use Curry\Util\ArrayHelper;
+	use Whoops\Exception\Inspector;
+	use Whoops\Handler\CallbackHandler;
+	use Whoops\Handler\Handler;
+	use Whoops\Handler\PlainTextHandler;
+	use Whoops\Handler\PrettyPageHandler;
+	use Whoops\Run;
 	use Zend\Config\Config;
 
 	/**
@@ -109,13 +115,6 @@ namespace Curry {
 		 * @var App;
 		 */
 		protected static $instance;
-
-		/**
-		 * Convert php-errors to exceptions.
-		 *
-		 * @var boolean
-		 */
-		public $throwExceptionsOnError = true;
 
 		public static function create($config) {
 			$config = self::getConfig($config);
@@ -167,6 +166,30 @@ namespace Curry {
 			$this->singleton('backend', function () use ($app) {
 					return new Backend($app);
 				});
+			$this->singleton('whoopsHandler', function() use ($app) {
+					if (PHP_SAPI === 'cli') {
+						return new PlainTextHandler();
+					} else if ($this['developmentMode']) {
+						return new PrettyPageHandler;
+					} else {
+						return new CallbackHandler(array($app, 'showException'));
+					}
+				});
+			$this->singleton('whoops', function() use ($app) {
+					$whoops = new \Whoops\Run;
+					$whoops->pushHandler($app->whoopsHandler);
+					// Send error mail
+					if ($app['errorNotification']) {
+						$whoops->pushHandler(array($app, 'sendErrorNotification'));
+					}
+					// Add error to log
+					$whoops->pushHandler(function(\Exception $e) use ($app) {
+						$app->logger->error($e->getMessage(), array('exception' => $e));
+						return Handler::DONE;
+					});
+					return $whoops;
+				});
+			$this->whoops->register();
 
 			if (function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc()) {
 				$this->logger->warning('Magic quotes gpc is enabled, please disable!');
@@ -195,8 +218,6 @@ namespace Curry {
 
 			URL::setDefaultBaseUrl($this['baseUrl']);
 			URL::setDefaultSecret($this['secret']);
-
-			register_shutdown_function(array($this, 'shutdown'));
 
 			if ($this['autoPublish']) {
 				$this->autoPublish();
@@ -471,8 +492,6 @@ namespace Curry {
 				error_reporting($level);
 			}
 			ini_set('display_errors', $this['developmentMode']);
-			set_error_handler(array($this, "errorHandler"));
-			set_exception_handler(array($this, "showException"));
 		}
 
 		/**
@@ -655,55 +674,13 @@ namespace Curry {
 		}
 
 		/**
-		 * Custom error handling function. Will convert regular php-errors to Exceptions.
-		 *
-		 * @param int $type
-		 * @param string $message
-		 * @param string $file
-		 * @param int $line
+		 * Prints uncatched exceptions.
 		 */
-		public function errorHandler($type, $message, $file, $line) {
-			if ($this->throwExceptionsOnError && ($type & error_reporting())) {
-				throw new \ErrorException($message, 0, $type, $file, $line);
-			}
-		}
-
-		/**
-		 * Print exception error.
-		 *
-		 * @param Exception $e
-		 * @param bool|null $sendNotification
-		 */
-		public function showException(Exception $e, $sendNotification = null) {
-			// Set error headers and remove content in output buffer
-			if (!headers_sent()) {
-				@header("HTTP/1.0 500 Internal Server Error");
-				@header("Status: 500 Internal Server Error");
-			}
-			@ob_end_clean();
-
-			// Add error to log
-			$this->logger->error($e->getMessage(), array('exception' => $e));
-
-			// Show error description
-			if ($this['developmentMode']) {
-				echo '<h1>' . get_class($e) . '</h1>';
-				echo '<p>' . htmlspecialchars(basename($e->getFile())) . '(' . $e->getLine() . '): ';
-				echo htmlspecialchars($e->getMessage()) . '</p>';
-				echo '<h2>Trace</h2>';
-				echo '<pre>' . htmlspecialchars($e->getTraceAsString()) . '</pre>';
-			} else {
-				echo '<h1>Internal server error, please try again later.</h1>';
-			}
-
-			// Send error notification
-			if ($sendNotification === null) {
-				$sendNotification = $this['errorNotification'];
-			}
-			if ($sendNotification) {
-				$this->sendErrorNotification($e);
-			}
-			exit;
+		public function showException(\Exception $e, Inspector $inspector, Run $run)
+		{
+			echo '<h1>Sorry, something went wrong</h1>'.
+				'<p>Please try again later, or contact the administrator.</p>';
+			return Handler::QUIT;
 		}
 
 		/**
@@ -711,20 +688,15 @@ namespace Curry {
 		 *
 		 * @param Exception $e
 		 */
-		public function sendErrorNotification(Exception $e) {
+		public function sendErrorNotification(Exception $e, Inspector $inspector, Run $run) {
 			try {
 				// Create form to recreate error
 				$method = strtoupper($_SERVER['REQUEST_METHOD']);
 				$hidden = Html::createHiddenFields($method == 'POST' ? $_POST : $_GET);
 				$action = url(URL::getRequestUri())->getAbsolute();
 				$form = '<form action="' . $action . '" method="' . $method . '">' . $hidden . '<button type="submit">Execute</button></form>';
-
-				// Create mail
-				$mail = new Mail();
-				$mail->addTo($this['adminEmail']);
-				$mail->setSubject('Error on ' . $this['name']);
-				$mail->setBodyHtml(
-					'<html><body>' .
+				// Compose mail
+				$content = '<html><body>' .
 					'<h1>' . get_class($e) . '</h1>' .
 					'<h2>' . htmlspecialchars($e->getMessage()) . '</h2>' .
 					'<p><strong>Method:</strong> ' . $method . '<br/>' .
@@ -741,29 +713,18 @@ namespace Curry {
 					'<pre>' . htmlspecialchars(print_r($_POST, true)) . '</pre>' .
 					'<h3>$_SERVER</h3>' .
 					'<pre>' . htmlspecialchars(print_r($_SERVER, true)) . '</pre>' .
-					'</body></html>'
-				);
+					'</body></html>';
+				// Create and send mail
+				$mail = new Mail();
+				$mail->addTo($this['adminEmail']);
+				$mail->setSubject('Error on ' . $this['name']);
+				$mail->setBodyHtml($content);
 				$mail->send();
-				App::getInstance()->logger->info('Sent error notification');
+				$this->logger->info('Sent error notification');
 			} catch (Exception $e) {
-				App::getInstance()->logger->error('Failed to send error notification');
+				$this->logger->error('Failed to send error notification');
 			}
-		}
-
-		/**
-		 * Shutdown function to execute at the end of the request. This function
-		 * is called automatically so there is no need to call it explicitly.
-		 */
-		public function shutdown() {
-			$this->throwExceptionsOnError = false;
-
-			$error = error_get_last();
-			if ($error !== null && $error['type'] == E_ERROR) {
-				$e = new \ErrorException($error['message'], 0, $error['type'], $error['file'], $error['line']);
-				if (self::$instance) {
-					self::$instance->showException($e);
-				}
-			}
+			return Handler::DONE;
 		}
 
 		/**

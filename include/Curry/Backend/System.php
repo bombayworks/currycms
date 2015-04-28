@@ -100,7 +100,9 @@ class System extends AbstractBackend
 		$pages = \PagePeer::getSelect();
 
 		$loggers = $this->getDefaultLoggers($config);
-		$enabledLoggers = isset($config->log) ? array_filter($config->log->toArray(), function($log) { return !isset($log->enabled) || $log->enabled; }) : array();
+		$enabledLoggers = isset($config->log) ? array_filter($config->log->toArray(), function($log) {
+			return !isset($log['enabled']) || $log['enabled'];
+		}) : array();
 		
 		// General
 		$form->addSubForm(new \Curry_Form_SubForm(array(

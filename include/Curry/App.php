@@ -65,6 +65,7 @@ namespace Curry {
 	use Curry\Controller\StaticContent;
 	use Curry\Util\Html;
 	use Curry\Util\PathHelper;
+	use Monolog\Handler\BufferHandler;
 	use Monolog\Handler\FingersCrossedHandler;
 	use Monolog\Handler\NullHandler;
 	use Monolog\Logger;
@@ -539,6 +540,9 @@ namespace Curry {
 				$clazz = new \ReflectionClass($log['type']);
 				$arguments = isset($log['arguments']) ? $log['arguments'] : array();
 				$handler = $clazz->newInstanceArgs($arguments);
+				if (isset($log['buffer']) && $log['buffer']) {
+					$handler = new BufferHandler($handler);
+				}
 				if (isset($log['fingersCrossed']) && $log['fingersCrossed']) {
 					$handler = new FingersCrossedHandler($handler);
 				}

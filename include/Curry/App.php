@@ -105,7 +105,7 @@ namespace Curry {
 		/**
 		 * The CurryCms version.
 		 */
-		const VERSION = '2.0.0-alpha';
+		const VERSION = '2.0.0-dev';
 
 		/**
 		 * Current migration version number. This is used to decide if project migration is needed.

@@ -9,20 +9,22 @@ abstract class View extends Configurable implements \ArrayAccess {
 	protected $subviews = null;
 	protected $params = array();
 
-	public function addView($name, $view, $route = null)
+	public function addView($name, View $view, $route = null)
 	{
 		if ($route === null)
 			$route = $name.'/';
 		if (is_string($route))
 			$route = new Route($route);
 		$this->subviews[$name] = array($view, $route);
+		if ($view->parent)
+			throw new \Exception('Unable to add sub-view, view already has parent');
 		$view->parent = $this;
 	}
 
-	public function addViewFunction($path, $viewFunction, $route = null)
+	public function addViewFunction($name, $viewFunction, $route = null)
 	{
 		$view = new ViewFunction($viewFunction);
-		$this->addView($path, $view, $route);
+		$this->addView($name, $view, $route);
 		return $view;
 	}
 

@@ -119,7 +119,7 @@ class Curry_Core {
 	/**
 	 * The CurryCms version.
 	 */
-	const VERSION = '1.1.0-alpha1';
+	const VERSION = '1.1.0';
 	
 	/**
 	 * Current migration version number. This is used to decide if project migration is needed.

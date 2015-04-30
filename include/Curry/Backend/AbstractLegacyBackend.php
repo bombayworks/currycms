@@ -149,6 +149,28 @@ abstract class AbstractLegacyBackend extends AbstractBackend
 	}
 
 	/**
+	 * Add menu item.
+	 *
+	 * @param string $name
+	 * @param string $url
+	 * @param string $message
+	 * @param string $notifications
+	 * @param array $attributes
+	 */
+	public function addMenuItem($name, $url, $message = "", $notifications = "", $attributes = array())
+	{
+		$env = url($url)->getVars();
+		$this->menuItems[] = array(
+			'Name' => $name,
+			'Url' => $url,
+			'Message' => $message,
+			'Notifications' => $notifications,
+			'Active' => isset($env['view']) && $env['view'] == $this->app->request->query->get('view'),
+			'Attributes' => $attributes
+		);
+	}
+
+	/**
 	 * Add a command item which opens in a dialog.
 	 *
 	 * @param string $name

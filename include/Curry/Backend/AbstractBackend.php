@@ -355,14 +355,13 @@ abstract class AbstractBackend extends View {
 	 */
 	public function addMenuItem($name, $url, $message = "", $notifications = "", $attributes = array())
 	{
-		$env = url($url)->getVars();
-		$view = isset($_GET['view']) ? $_GET['view'] : 'Main';
+		$path = url($url)->getPath();
 		$this->menuItems[] = array(
 			'Name' => $name,
 			'Url' => $url,
 			'Message' => $message,
 			'Notifications' => $notifications,
-			'Active' => ($env['view'] == $view),
+			'Active' => substr($this->app->request->getPathInfo(), 0, strlen($path)) === $path,
 			'Attributes' => $attributes
 		);
 	}

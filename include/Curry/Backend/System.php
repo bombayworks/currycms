@@ -18,13 +18,11 @@
 namespace Curry\Backend;
 use Curry\App;
 use Curry\Archive\Archive;
-use Curry\Controller\Frontend;
 use Curry\Form\Form;
 use Curry\Mail;
 use Curry\Util\PathHelper;
 use Curry\Util\StringHelper;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Zend\Config\Config;
 
 /**
@@ -575,8 +573,8 @@ class System extends AbstractBackend
 					'label' => 'WWW folder',
 					'value' => true,
 				)),
-				'base' => array('checkbox', array(
-					'label' => 'Curry Core',
+				'vendor' => array('checkbox', array(
+					'label' => 'Vendor',
 					'value' => true,
 				)),
 				'database' => array('checkbox', array(
@@ -636,20 +634,11 @@ class System extends AbstractBackend
 			}
 			
 			if($form->www->isChecked()) {
-				$tar->add($this->app['wwwPath'], 'www/', array_merge($options, array(
-					array('path' => 'shared', 'skip' => true),
-					array('path' => 'shared/', 'skip' => true),
-				)));
+				$tar->add($this->app['wwwPath'], 'www/', $options);
 			}
 			
-			if($form->base->isChecked()) {
-				$sharedPath = realpath($this->app['wwwPath'] . '/shared');
-				if($sharedPath)
-					$tar->add($sharedPath, 'www/shared/', $options);
-				$tar->add($this->app['basePath'].'/include', 'curry/include/', $options);
-				$tar->add($this->app['basePath'].'/propel', 'curry/propel/', $options);
-				$tar->add($this->app['basePath'].'/vendor', 'curry/vendor/', $options);
-				$tar->add($this->app['basePath'].'/.htaccess', 'curry/', $options);
+			if($form->vendor->isChecked()) {
+				$tar->add($this->app['projectPath'].'/../vendor', 'vendor/', $options);
 			}
 			
 			if($form->database->isChecked()) {

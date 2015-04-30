@@ -18,54 +18,36 @@
 use Curry\URL;
 use Curry\Util\Console;
 use Curry\Util\PathHelper;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Curry setup/installation backend.
  *
  * @package Curry\Backend
  */
-class Curry_Backend_Setup extends \Curry\Backend\AbstractLegacyBackend {
+class Curry_Backend_Setup extends \Curry\Backend\AbstractBackend {
 	
 	public function getGroup()
 	{
 		return 'Installation';
 	}
 
-	public function showMain()
+	public function initialize()
 	{
-		$this->showFixSymlinks();
+		$this->addViewFunction('permissions', array($this, 'showPermissions'));
+		$this->addViewFunction('database', array($this, 'showDatabase'));
+		$this->addViewFunction('create-database', array($this, 'showCreateDatabase'));
+		$this->addViewFunction('configure', array($this, 'showConfigure'));
+		$this->addViewFunction('complete', array($this, 'showSetupComplete'));
 	}
 
-	public function showFixSymlinks()
+	public function show(Request $request)
 	{
-		$isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
-		if ($isWindows) {
-			$projectPath = $this->app['projectPath'];
-			$curryPath = $this->app['basePath'];
-			$wwwPath = $this->app['wwwPath'];
-			$symlinks = array(
-				PathHelper::path($projectPath, 'propel', 'inject', 'core') => 'propel/inject/core',
-				PathHelper::path($projectPath, 'propel', 'core.schema.xml') => 'propel/core.schema.xml',
-				PathHelper::path($wwwPath, 'shared') => 'shared',
-			);
-			foreach ($symlinks as $symlink => $target) {
-				$source = $curryPath.DIRECTORY_SEPARATOR.$target;
-				if (!is_link($symlink)) {
-					if (is_dir($source) && !is_dir($symlink)) {
-						if (is_file($symlink))
-							unlink($symlink);
-						@mkdir($symlink);
-						self::copyDirectory($source, $symlink);
-					} else if (is_file($source)) {
-						copy($source, $symlink);
-					}
-				}
-			}
-		}
-		self::redirect(url('', array('module','view'=>'FixPermissions')));
+		return RedirectResponse::create($this->permissions->url());
 	}
 	
-	public function showFixPermissions()
+	public function showPermissions()
 	{
 		$this->addMainContent('<h2>Checking file permissions</h2>');
 		$error = false;
@@ -94,36 +76,23 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractLegacyBackend {
 				}
 			}
 		}
-		$nextUrl = url('', array('module','view'=>'Database'));
+		$nextUrl = $this->database->url();
 		if($error) {
 			$this->addMainContent('<p>Please fix the errors above and reload the page. If you\'re unable to fix the errors, you may attempt to <a href="'.$nextUrl.'">continue installation anyway</a>.</p>');
 		} else {
-			self::redirect($nextUrl);
+			return RedirectResponse::create($nextUrl);
 		}
-	}
-
-	protected static function copyDirectory($source, $dest)
-	{
-		$iterator = new RecursiveIteratorIterator(
-			new RecursiveDirectoryIterator($source, RecursiveDirectoryIterator::SKIP_DOTS),
-			RecursiveIteratorIterator::SELF_FIRST);
-		foreach ($iterator as $item) {
-			if ($item->isDir()) {
-				mkdir($dest . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
-			} else {
-				copy($item, $dest . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
-			}
-		}
+		return parent::render();
 	}
 
 	public function showDatabase()
 	{
-		$nextUrl = url('', array('module','view'=>'Configure'));
+		$nextUrl = $this->configure->url();
 
 		$this->addMainContent('<h2>Configure database</h2>');
-		$this->addBreadcrumb('Database', url('', array('module', 'view'=>'Database')));
+		$this->addBreadcrumb('Database', $this->database->url());
 		$url = url('', array('module', 'view'=>'CreateDatabase'));
-		$this->addCommand('Create database', $url, 'icon-plus-sign', array('class' => 'dialog'));
+		$this->addCommand('Create database', $this['create-database']->url(), 'icon-plus-sign', array('class' => 'dialog'));
 
 		$cmsPath = $this->app['projectPath'];
 		$propelConfig = PathHelper::path($cmsPath, 'config', 'propel.xml');
@@ -133,10 +102,9 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractLegacyBackend {
 		$config = new SimpleXMLElement(file_get_contents($propelConfig));
 		$defaultDataSource = (string)$config->propel->datasources['default'];
 		$params = array(
-			'init' => false,
 			'host' => 'localhost',
-			'database' => 'curry_db',
-			'user' => 'curry_user',
+			'database' => '',
+			'user' => '',
 			'password' => '',
 			'set_charset' => true,
 			'create_tables' => true,
@@ -146,10 +114,9 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractLegacyBackend {
 				switch((string)$datasource->adapter) {
 					case 'mysql':
 						$params['adapter'] = 'mysql';
-						if (preg_match('/^mysql:host=([^;]+);dbname=([^;]+)(;curry=init)?$/', $datasource->connection->dsn, $matches)) {
+						if (preg_match('/^mysql:host=([^;]+);dbname=([^;]+)?$/', $datasource->connection->dsn, $matches)) {
 							$params['host'] = $matches[1];
 							$params['database'] = $matches[2];
-							$params['init'] = !empty($matches[3]);
 						}
 						$params['user'] = (string)$datasource->connection->user;
 						$params['password'] = (string)$datasource->connection->password;
@@ -157,11 +124,6 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractLegacyBackend {
 				}
 				break;
 			}
-		}
-
-		if ($params['init']) {
-			if ($this->saveConnection($params, $propelConfig))
-				self::redirect(url('', array('module','view'=>'Configure')));
 		}
 
 		$form = $this->getDatabaseForm($params);
@@ -174,11 +136,11 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractLegacyBackend {
 					$this->addMessage('Connection failed: ' . $status, self::MSG_ERROR);
 			} else if($form->save->isChecked()) {
 				if($this->saveConnection($form->getValues(), $propelConfig))
-					self::redirect($nextUrl);
-				return;
+					return RedirectResponse::create($nextUrl);
 			}
 		}
 		$this->addMainContent($form);
+		return parent::render();
 	}
 
 	public function showCreateDatabase()
@@ -220,6 +182,7 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractLegacyBackend {
 		} else {
 			$this->addMainContent($form);
 		}
+		return parent::render();
 	}
 
 	public function showConfigure()
@@ -230,8 +193,7 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractLegacyBackend {
 		$form = $this->getConfigureForm();
 		if(isPost() && $form->isValid($_POST)) {
 			$this->saveConfiguration($form->getValues());
-			self::redirect(url('', array('module','view'=>'RemoveInstallationFiles')));
-			return;
+			return RedirectResponse::create(url('', array('module','view'=>'SetupComplete')));
 		} else {
 			$this->addMainContent('<h2>Basic configuration</h2>');
 
@@ -243,29 +205,7 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractLegacyBackend {
 
 			$this->addMainContent($form);
 		}
-	}
-
-	public function showRemoveInstallationFiles()
-	{
-		$installationFiles = array_merge(glob('*.tar'), array('install.php', 'db.txt'));
-		$installationFiles = array_filter($installationFiles, 'file_exists');
-		$nextUrl = url('', array('module','view'=>'SetupComplete'));
-		if(count($installationFiles)) {
-			if (isPost()) {
-				foreach($installationFiles as $file) {
-					unlink($file);
-				}
-				self::redirect($nextUrl);
-			} else {
-				$this->addMainContent('<p>You should now delete the following installation files:</p>'.
-					'<ul><li>'.join('</li><li>', $installationFiles).'</li></ul>'.
-					'<p>You can attempt to '.
-					'<a href="'.url('', $_GET).'" class="postback">do it automatically</a> '.
-					'or you can <a href="'.$nextUrl.'">skip this step</a>.</p>');
-			}
-		} else {
-			self::redirect($nextUrl);
-		}
+		return parent::render();
 	}
 
 	public function showSetupComplete()
@@ -276,7 +216,7 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractLegacyBackend {
 		$config->backend->noauth = false;
 		$this->app->writeConfiguration($config);
 
-		$backendUrl = url('');
+		$backendUrl = url($this->app['backend.basePath']);
 		$frontendUrl = url('~/');
 		$this->addMainContent(<<<HTML
 <div style="text-align:center">
@@ -286,6 +226,7 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractLegacyBackend {
 </div>
 HTML
 );
+		return parent::render();
 	}
 
 	protected function getCreateDatabaseForm()
@@ -656,7 +597,7 @@ HTML
 		switch($values['template']) {
 			case 'empty':
 			case 'curry':
-				$source = PathHelper::path($this->app['wwwPath'], 'shared', 'backend', 'common', 'templates', 'project-empty.html');
+				$source = PathHelper::path($this->app['basePath'], 'shared', 'backend', 'common', 'templates', 'project-empty.html');
 				$templateFile = PathHelper::path($templateRoot, 'Root.html');
 				if(!file_exists($templateFile))
 					@copy($source, $templateFile);

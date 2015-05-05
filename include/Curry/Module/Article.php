@@ -16,6 +16,7 @@
  * @link       http://currycms.com
  */
 namespace Curry\Module;
+use Curry\Twig\Template;
 
 /**
  * Article module to store HTML content.
@@ -74,7 +75,7 @@ class Article extends AbstractModule {
 	protected $allowTemplateSyntax = false;
 	
 	/** {@inheritdoc} */
-	public function showFront(\Curry_Twig_Template $template = null)
+	public function showFront(Template $template = null)
 	{
 		$twig = $this->toTwig();
 		return $template ? $template->render($twig) : $twig['content'];
@@ -85,7 +86,7 @@ class Article extends AbstractModule {
 	{
 		$content = $this->content;
 		if($this->allowTemplateSyntax) {
-			$tpl = \Curry_Twig_Template::loadTemplateString($content);
+			$tpl = $this->app->loadTemplateString($content);
 			$content = $tpl->render(array());
 		}
 		

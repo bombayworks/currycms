@@ -125,7 +125,7 @@ JS
 		$url = url('', $_GET);
 		$commands[] = array('Name' => 'Exit Live Edit', 'Url' => $url, 'Class' => 'curry-admin-logout');
 
-		$tpl = \Curry_Twig_Template::loadTemplateString($this->getAdminPanelTpl());
+		$tpl = $this->app->loadTemplateString($this->getAdminPanelTpl());
 		$content = $tpl->render(array(
 				'commands' => $commands,
 			));
@@ -159,7 +159,7 @@ JS
 		if (!count($commands))
 			return $content;
 
-		$tpl = \Curry_Twig_Template::loadTemplateString($this->getAdminBlockTpl());
+		$tpl = $this->app->loadTemplateString($this->getAdminBlockTpl());
 		return $tpl->render(array(
 				'Id' => $id,
 				'Target' => $target,
@@ -218,7 +218,7 @@ JS
 		if (!count($commands))
 			return $content;
 
-		$tpl = \Curry_Twig_Template::loadTemplateString($this->getAdminModuleTpl());
+		$tpl = $this->app->loadTemplateString($this->getAdminModuleTpl());
 		return $tpl->render(array(
 				'Id' => $pageModuleId,
 				'Name' => $pageModuleWrapper->getName(),

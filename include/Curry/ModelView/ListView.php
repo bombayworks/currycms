@@ -567,7 +567,7 @@ class ListView extends AbstractBackend {
 
 	public function templateToString($template, \BaseObject $obj)
 	{
-		$tpl = \Curry_Twig_Template::loadTemplateString($template);
+		$tpl = $this->app->loadTemplateString($template);
 		return $tpl->render(Propel::toTwig($obj));
 	}
 }

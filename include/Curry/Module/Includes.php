@@ -18,6 +18,7 @@
 namespace Curry\Module;
 
 use Curry\Generator\HtmlGenerator;
+use Curry\Twig\Template;
 use Curry\Util\PathHelper;
 
 /**
@@ -58,7 +59,7 @@ class Includes extends AbstractModule {
 	}
 	
 	/** {@inheritdoc} */
-	public function showFront(\Curry_Twig_Template $template = null)
+	public function showFront(Template $template = null)
 	{
 		$pageGenerator = $this->app->generator;
 		if(!($pageGenerator instanceof HtmlGenerator))

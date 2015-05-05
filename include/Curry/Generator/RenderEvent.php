@@ -1,6 +1,7 @@
 <?php
 namespace Curry\Generator;
 
+use Curry\Twig\Template;
 use Symfony\Component\EventDispatcher\Event;
 
 class RenderEvent extends Event
@@ -15,7 +16,7 @@ class RenderEvent extends Event
 	 */
 	protected $content;
 
-	public function __construct(\Curry_Twig_Template $template, $content)
+	public function __construct(Template $template, $content)
 	{
 		$this->template = $template;
 		$this->content = $content;

@@ -222,7 +222,7 @@ class Curry_Backend_FileBrowser extends \Curry\Backend\AbstractLegacyBackend
 			}
 		}
 		
-		$template = Curry_Twig_Template::loadTemplateString(<<<TPL
+		$template = $this->app->loadTemplateString(<<<TPL
 {% spaceless %}
 <div class="finder">
   {% if selection %}

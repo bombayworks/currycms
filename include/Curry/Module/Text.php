@@ -16,6 +16,7 @@
  * @link       http://currycms.com
  */
 namespace Curry\Module;
+use Curry\Twig\Template;
 
 /**
  * Text module (single-line of text).
@@ -35,7 +36,7 @@ class Text extends AbstractModule {
 	protected $content = "Hello world!";
 
 	/** {@inheritdoc} */
-	public function showFront(\Curry_Twig_Template $template = null)
+	public function showFront(Template $template = null)
 	{
 		return $template ? parent::showFront($template) : $this->content;
 	}

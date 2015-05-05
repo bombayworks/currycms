@@ -722,7 +722,7 @@ class System extends AbstractBackend
 
 		if ($request->isMethod('POST') && $form->isValid($request->request->all()) && $form->clear->isClicked()) {
 			$this->app->cache->clean(\Zend_Cache::CLEANING_MODE_ALL);
-			\Curry_Twig_Template::getSharedEnvironment()->clearCacheFiles();
+			$this->app->twig->clearCacheFiles();
 			if(extension_loaded('apc'))
 				@apc_clear_cache();
 			$this->addMessage('Cache cleared!', self::MSG_SUCCESS);

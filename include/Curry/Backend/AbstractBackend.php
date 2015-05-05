@@ -246,7 +246,7 @@ abstract class AbstractBackend extends View {
 			$options = array(
 				'debug' => true,
 				'trim_blocks' => true,
-				'base_template_class' => 'Curry_Twig_Template',
+				'base_template_class' => '\Curry\Twig\Template',
 			);
 			$loader = new \Twig_Loader_Filesystem($templatePaths);
 			$twig = new \Twig_Environment($loader, $options);

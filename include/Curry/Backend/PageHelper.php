@@ -667,7 +667,7 @@ class Curry_Backend_PageHelper {
 			try {
 				$template = $pageRevision->getInheritedProperty('Template');
 				if($template)
-					$template = Curry_Twig_Template::loadTemplate($template);
+					$template = \Curry\App::getInstance()->twig->loadTemplate($template);
 				while($template) {
 					$targets = array_merge($targets, $template->getPlaceholders());
 					$template = $template->getParent(array());

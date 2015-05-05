@@ -15,20 +15,14 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Twig;
 
 /**
  * Base class for Twig templates.
  * 
  * @package Curry
  */
-abstract class Curry_Twig_Template extends Twig_Template {
-	/**
-	 * Shared twig environment.
-	 *
-	 * @var Twig_Environment
-	 */
-	private static $twig;
-	
+abstract class Template extends \Twig_Template {
 	/** 
 	 * {@inheritdoc}
 	 * 
@@ -38,7 +32,7 @@ abstract class Curry_Twig_Template extends Twig_Template {
 	 * 
 	 * @see Curry_Twig_QueryWrapper
 	 */
-	protected function getAttribute($object, $item, array $arguments = array(), $type = Twig_TemplateInterface::ANY_CALL, $noStrictCheck = false, $line = -1)
+	protected function getAttribute($object, $item, array $arguments = array(), $type = \Twig_TemplateInterface::ANY_CALL, $noStrictCheck = false, $line = -1)
 	{
 		if(is_object($object) && method_exists($object, '__get') && isset($object->$item))
 			$attr = $object->$item;
@@ -48,8 +42,8 @@ abstract class Curry_Twig_Template extends Twig_Template {
 		while(is_object($attr)) {
 			if (method_exists($attr, 'toTwig'))
 				$attr = $attr->toTwig();
-			else if($attr instanceof ModelCriteria)
-				$attr = new Curry_Twig_QueryWrapper($attr);
+			else if($attr instanceof \ModelCriteria)
+				$attr = new \Curry_Twig_QueryWrapper($attr);
 			else
 				break;
 		}
@@ -61,97 +55,12 @@ abstract class Curry_Twig_Template extends Twig_Template {
 	public function render(array $context)
 	{
 		foreach($context as &$var) {
-			if($var instanceof ModelCriteria)
-				$var = new Curry_Twig_QueryWrapper($var);
+			if($var instanceof \ModelCriteria)
+				$var = new \Curry_Twig_QueryWrapper($var);
 			if(is_object($var) && method_exists($var, 'toTwig'))
 				$var = $var->toTwig();
 		}
 		unset($var);
 		return parent::render($context);
-	}
-	
-	/**
-	 * Create twig environment with the options specified in the curry cms configuration.
-	 *
-	 * @param Twig_LoaderInterface $loader
-	 * @return Twig_Environment
-	 */
-	private static function createTwigEnvironment(Twig_LoaderInterface $loader)
-	{
-		$options = \Curry\App::getInstance()['template.options'];
-		$twig = new Twig_Environment($loader, $options);
-		$twig->setParser(new Curry_Twig_Parser($twig));
-		$twig->addTokenParser(new Curry_Twig_TokenParser_Placeholder());
-		$twig->addTokenParser(new Curry_Twig_TokenParser_Ia());
-		$twig->addFunction('url', new Twig_Function_Function('url'));
-		$twig->addFunction('L', new Twig_Function_Function('L'));
-		$twig->addFunction('round', new Twig_Function_Function('round'));
-		$twig->addFilter('ldate', new Twig_Filter_Function('Curry_Twig_Template::ldate'));
-		$twig->addFilter('dump', new Twig_Filter_Function('var_dump'));
-		
-		return $twig;
-	}
-	
-	/**
-	 * Locale based date function (using strftime).
-	 *
-	 * @param mixed $string
-	 * @param string $format
-	 * @return string
-	 */
-	public static function ldate($date, $format)
-	{
-		if ($date instanceof DateTime) {
-			$date = $date->format('U');
-		} else if ((string)intval($date) === (string)$date) {
-			$date = intval($date);
-		} else {
-			$date = strtotime((string)$date);
-		}
-		return strftime($format, $date);
-	}
-	
-	/**
-	 * Load template from filename using the shared environment.
-	 *
-	 * @param string $filename
-	 * @return Curry_Twig_Template
-	 */
-	public static function loadTemplate($filename)
-	{
-		self::getSharedEnvironment();
-		return self::$twig->loadTemplate($filename);
-	}
-	
-	/**
-	 * Load template from string using the shared environment.
-	 *
-	 * @param string $template
-	 * @return Curry_Twig_Template
-	 */
-	public static function loadTemplateString($template)
-	{
-		self::getSharedEnvironment();
-		$loader = self::$twig->getLoader();
-		self::$twig->setLoader(new Twig_Loader_String());
-		$tpl = self::$twig->loadTemplate($template);
-		self::$twig->setLoader($loader);
-		return $tpl;
-	}
-	
-	/**
-	 * Get shared Twig environment.
-	 * 
-	 * This environment is automatically setup from the curry cms configuration.
-	 *
-	 * @return Twig_Environment
-	 */
-	public static function getSharedEnvironment()
-	{
-		if(!self::$twig) {
-			$loader = new Twig_Loader_Filesystem(\Curry\App::getInstance()['template.root']);
-			self::$twig = self::createTwigEnvironment($loader);
-		}
-		return self::$twig;
 	}
 }

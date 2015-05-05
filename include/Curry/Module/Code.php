@@ -16,6 +16,7 @@
  * @link       http://currycms.com
  */
 namespace Curry\Module;
+use Curry\Twig\Template;
 
 /**
  * Executes PHP code and sends output to the front-end.
@@ -36,7 +37,7 @@ class Code extends AbstractModule {
 	protected $code = "echo 'Hello world!';";
 	
 	/** {@inheritdoc} */
-	public function showFront(\Curry_Twig_Template $template = null)
+	public function showFront(Template $template = null)
 	{
 		$twig = $this->toTwig();
 		return $template ? $template->render($twig) : $twig['content'];

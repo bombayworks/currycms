@@ -190,6 +190,20 @@ namespace Curry {
 					});
 					return $whoops;
 				});
+			$this->singleton('twig', function() use ($app) {
+				$loader = new \Twig_Loader_Filesystem($app['template.root']);
+				$options = $app['template.options'];
+				$twig = new \Twig_Environment($loader, $options);
+				$twig->setParser(new \Curry_Twig_Parser($twig));
+				$twig->addTokenParser(new \Curry_Twig_TokenParser_Placeholder());
+				$twig->addTokenParser(new \Curry_Twig_TokenParser_Ia());
+				$twig->addFunction('url', new \Twig_Function_Function('url'));
+				$twig->addFunction('L', new \Twig_Function_Function('L'));
+				$twig->addFunction('round', new \Twig_Function_Function('round'));
+				$twig->addFilter('ldate', new \Twig_Filter_Function('\Curry\App::ldate'));
+				$twig->addFilter('dump', new \Twig_Filter_Function('var_dump'));
+				return $twig;
+			});
 			$this->whoops->register();
 
 			if (function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc()) {
@@ -427,7 +441,7 @@ namespace Curry {
 					'options' => array(
 						'debug' => (bool) $config['developmentMode'],
 						'cache' => PathHelper::path($config['projectPath'], 'data', 'cache', 'templates'),
-						'base_template_class' => 'Curry_Twig_Template',
+						'base_template_class' => '\Curry\Twig\Template',
 					),
 				),
 				'backend' => array(
@@ -784,6 +798,41 @@ namespace Curry {
 				$this->logger->info('Next publish is in '.($nextPublish - time()) . ' seconds.');
 				$this->cache->save(true, $cacheName, array(), $nextPublish - time());
 			}
+		}
+
+		/**
+		 * Locale based date function (using strftime).
+		 *
+		 * @param mixed $string
+		 * @param string $format
+		 * @return string
+		 */
+		public static function ldate($date, $format)
+		{
+			if ($date instanceof \DateTime) {
+				$date = $date->format('U');
+			} else if ((string)intval($date) === (string)$date) {
+				$date = intval($date);
+			} else {
+				$date = strtotime((string)$date);
+			}
+			return strftime($format, $date);
+		}
+
+		/**
+		 * Load template from string using the shared environment.
+		 *
+		 * @param string $template
+		 * @return \Curry\Twig\Template
+		 */
+		public function loadTemplateString($template)
+		{
+			$twig = $this->twig;
+			$loader = $twig->getLoader();
+			$twig->setLoader(new \Twig_Loader_String());
+			$tpl = $twig->loadTemplate($template);
+			$twig->setLoader($loader);
+			return $tpl;
 		}
 	}
 }

@@ -103,9 +103,9 @@ class AbstractGenerator
 			$module = $pageModuleWrapper->createObject();
 			$template = null;
 			if ($event->getTemplate() !== null)
-				$template = \Curry_Twig_Template::loadTemplate($event->getTemplate());
+				$this->app->twig->loadTemplate($event->getTemplate());
 			else if ($module->getDefaultTemplate())
-				$template = \Curry_Twig_Template::loadTemplateString($module->getDefaultTemplate());
+				$template = $this->app->loadTemplateString($module->getDefaultTemplate());
 			if ($template && $template->getEnvironment()) {
 				$twig = $template->getEnvironment();
 				$twig->addGlobal('module', array(
@@ -189,7 +189,7 @@ class AbstractGenerator
 	 */
 	public function render(array $vars = array(), array $options = array())
 	{
-		$twig = \Curry_Twig_Template::getSharedEnvironment();
+		$twig = $this->app->twig;
 
 		$prevPage = isset($this->app->page) ? $this->app->page : null;
 		$prevPageRevision = isset($this->app->pageRevision) ? $this->app->pageRevision : null;
@@ -260,13 +260,13 @@ class AbstractGenerator
 	/**
 	 * Get the template object for this PageRevision.
 	 *
-	 * @return \Curry_Twig_Template
+	 * @return \Curry\Twig\Template
 	 */
 	public function getTemplateObject()
 	{
 		$rootTemplate = $this->getRootTemplate();
 		if(!$rootTemplate)
 			throw new \Exception("Page has no root template");
-		return \Curry_Twig_Template::loadTemplate($rootTemplate);
+		return $this->app->twig->loadTemplate($rootTemplate);
 	}
 }

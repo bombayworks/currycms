@@ -163,7 +163,7 @@ class Flash extends AbstractModule {
 			$flashvars[$flashvar['name']] = $flashvar['value'];
 		
 		if($this->module) {
-			$moduleTemplate = $this->template ? \Curry_Twig_Template::loadTemplate($this->template) : null;
+			$moduleTemplate = $this->template ? $this->app->twig->loadTemplate($this->template) : null;
 			$flashvars[$this->moduleFlashvar] = $this->module->showFront($moduleTemplate);
 		}
 		

@@ -16,6 +16,7 @@
  * @link       http://currycms.com
  */
 namespace Curry\Module;
+use Curry\Twig\Template;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
@@ -34,7 +35,7 @@ class Language extends AbstractModule {
 	protected $languages = array();
 	
 	/** {@inheritdoc} */
-	public function showFront(\Curry_Twig_Template $template = null)
+	public function showFront(Template $template = null)
 	{
 		if(is_array($this->languages) && count($this->languages)) {
 			// allowed languages

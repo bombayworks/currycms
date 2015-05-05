@@ -8,12 +8,6 @@ Curry CMS is an open-source Content Management System (CMS) for PHP 5.3.
 * A supported database (**MySQL**, MS SQL Server, PostgreSQL, SQLite, Oracle)
 * Web server with support for URL rewriting
 
-Curry CMS also depend on the following 3rd party libraries:
-
-* Zend Framework
-* Propel
-* Twig
-
 ## Getting started
 
 To setup Curry CMS, you need a project with some minimal configuration. A project skeleton
@@ -22,11 +16,10 @@ repository. You can use composer to create a new project using this repository.
 
 * [Install composer](http://getcomposer.org)
 * Create project skeleton and install dependencies `php composer.phar create-project --stability=dev bombayworks/currycms-project-base <directory>`
-* Create curry symlink `ln -s vendor/bombayworks/currycms curry`
 
 Once everything has been installed, you need to make the `www` folder accessible from your
 web server and configure URL rewriting, after that you should be able to access the project
-installation from `/admin.php`.
+installation from `/admin/`.
 
 ## Unit testing
 

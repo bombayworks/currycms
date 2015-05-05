@@ -78,7 +78,7 @@ abstract class Curry_Twig_Template extends Twig_Template {
 	 */
 	private static function createTwigEnvironment(Twig_LoaderInterface $loader)
 	{
-		$options = Curry_Core::$config->curry->template->options->toArray();
+		$options = \Curry\App::getInstance()['template.options'];
 		$twig = new Twig_Environment($loader, $options);
 		$twig->setParser(new Curry_Twig_Parser($twig));
 		$twig->addTokenParser(new Curry_Twig_TokenParser_Placeholder());
@@ -149,7 +149,7 @@ abstract class Curry_Twig_Template extends Twig_Template {
 	public static function getSharedEnvironment()
 	{
 		if(!self::$twig) {
-			$loader = new Twig_Loader_Filesystem(Curry_Core::$config->curry->template->root);
+			$loader = new Twig_Loader_Filesystem(\Curry\App::getInstance()['template.root']);
 			self::$twig = self::createTwigEnvironment($loader);
 		}
 		return self::$twig;

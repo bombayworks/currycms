@@ -38,7 +38,7 @@
 				var name = overwrite[i];
 				o[name] = confirm('Do you want to overwrite ' + name + '?');
 			}
-			var action = base.options.action + '&' + $.param({
+			var action = base.options.action + '?' + $.param({
 				action: 'UploadOverwrite',
 				overwrite: o
 			});
@@ -110,7 +110,7 @@
         				});
         				
 						var element = null;
-						base.$el.find('.folder:not(.root), .icon_folder .navigate').not(this).not($li.parent()).not($helper).not($helper.children()).each(function() {
+						base.$el.find('.folder:not(.root), .is-folder .navigate').not(this).not($li.parent()).not($helper).not($helper.children()).each(function() {
 							var offset = $(this).offset();
 							offset.right = offset.left + $(this).outerWidth();
 							offset.bottom = offset.top + $(this).outerHeight();
@@ -118,8 +118,10 @@
 								element = this;
 						});
 						
-						if(target)
+						if(target && target !== element) {
 							$(target).removeClass('drop-target');
+							target = null;
+						}
 						if(element) {
 							target = element;
 							$(target).addClass('drop-target');
@@ -148,7 +150,7 @@
 							var source = $file.data('finder').path;
 							var destination = $(target).data('finder').path;
 							var postMove = function(overwrite) {
-								var action = base.options.action + '&' + $.param({
+								var action = base.options.action + '?' + $.param({
 									action: 'Move',
 									path: source,
 									destination: destination,
@@ -370,7 +372,7 @@
         	var preLeft = $wrapper.scrollLeft();
         	var preWidth = $wrapper.length ? $wrapper.get(0).scrollWidth : 0;
         	
-        	var path = base.options.action + '&' + $.param({
+        	var path = base.options.action + '?' + $.param({
         		path: base.options.path,
         		filter: base.options.filter,
         		public: base.options.public,
@@ -426,7 +428,7 @@
     };
     
     $.finder.defaultOptions = {
-        action: 'admin.php?module=Curry_Backend_FileBrowser',
+        action: '/admin/curry_backend_filebrowser/',
         filter: null,
         filters: [
         	['all', '*','All files'],

@@ -15,12 +15,13 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Module;
 
 /**
  * Renders a template without any variables.
  * 
  * @package Curry\Module
  */
-class Curry_Module_Template extends Curry_Module {
+class Template extends AbstractModule {
 
 }

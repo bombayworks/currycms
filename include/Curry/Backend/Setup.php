@@ -15,65 +15,50 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\URL;
+use Curry\Util\Console;
+use Curry\Util\PathHelper;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Curry setup/installation backend.
  *
  * @package Curry\Backend
  */
-class Curry_Backend_Setup extends Curry_Backend {
+class Curry_Backend_Setup extends \Curry\Backend\AbstractBackend {
 	
-	public static function getGroup()
+	public function getGroup()
 	{
 		return 'Installation';
 	}
 
-	public function showMain()
+	public function initialize()
 	{
-		$this->showFixSymlinks();
+		$this->addViewFunction('permissions', array($this, 'showPermissions'));
+		$this->addViewFunction('database', array($this, 'showDatabase'));
+		$this->addViewFunction('create-database', array($this, 'showCreateDatabase'));
+		$this->addViewFunction('configure', array($this, 'showConfigure'));
+		$this->addViewFunction('complete', array($this, 'showSetupComplete'));
 	}
 
-	public function showFixSymlinks()
+	public function show(Request $request)
 	{
-		$isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
-		if ($isWindows) {
-			$projectPath = Curry_Core::$config->curry->projectPath;
-			$curryPath = Curry_Core::$config->curry->basePath;
-			$wwwPath = Curry_Core::$config->curry->wwwPath;
-			$symlinks = array(
-				Curry_Util::path($projectPath,'propel','inject','core') => 'propel/inject/core',
-				Curry_Util::path($projectPath,'propel','core.schema.xml') => 'propel/core.schema.xml',
-				Curry_Util::path($wwwPath,'shared') => 'shared',
-			);
-			foreach ($symlinks as $symlink => $target) {
-				$source = $curryPath.DIRECTORY_SEPARATOR.$target;
-				if (!is_link($symlink)) {
-					if (is_dir($source) && !is_dir($symlink)) {
-						if (is_file($symlink))
-							unlink($symlink);
-						@mkdir($symlink);
-						self::copyDirectory($source, $symlink);
-					} else if (is_file($source)) {
-						copy($source, $symlink);
-					}
-				}
-			}
-		}
-		url('', array('module','view'=>'FixPermissions'))->redirect();
+		return RedirectResponse::create($this->permissions->url());
 	}
 	
-	public function showFixPermissions()
+	public function showPermissions()
 	{
 		$this->addMainContent('<h2>Checking file permissions</h2>');
 		$error = false;
-		$projectPath = Curry_Core::$config->curry->projectPath;
-		$wwwPath = Curry_Core::$config->curry->wwwPath;
+		$projectPath = $this->app['projectPath'];
+		$wwwPath = $this->app['wwwPath'];
 		$paths = array(
-			Curry_Util::path($projectPath,'data'),
-			Curry_Util::path($projectPath,'templates'),
-			Curry_Util::path($projectPath,'propel','build'),
-			Curry_Util::path($projectPath,'config'),
-			Curry_Util::path($wwwPath,'cache'),
+			PathHelper::path($projectPath, 'data'),
+			PathHelper::path($projectPath, 'templates'),
+			PathHelper::path($projectPath, 'propel', 'build'),
+			PathHelper::path($projectPath, 'config'),
+			PathHelper::path($wwwPath, 'cache'),
 		);
 		foreach ($paths as $path) {
 			if(!is_writable($path)) {
@@ -91,49 +76,35 @@ class Curry_Backend_Setup extends Curry_Backend {
 				}
 			}
 		}
-		$nextUrl = url('', array('module','view'=>'Database'));
+		$nextUrl = $this->database->url();
 		if($error) {
 			$this->addMainContent('<p>Please fix the errors above and reload the page. If you\'re unable to fix the errors, you may attempt to <a href="'.$nextUrl.'">continue installation anyway</a>.</p>');
 		} else {
-			$nextUrl->redirect();
+			return RedirectResponse::create($nextUrl);
 		}
-	}
-
-	protected static function copyDirectory($source, $dest)
-	{
-		$iterator = new RecursiveIteratorIterator(
-			new RecursiveDirectoryIterator($source, RecursiveDirectoryIterator::SKIP_DOTS),
-			RecursiveIteratorIterator::SELF_FIRST);
-		foreach ($iterator as $item) {
-			if ($item->isDir()) {
-				mkdir($dest . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
-			} else {
-				copy($item, $dest . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
-			}
-		}
+		return parent::render();
 	}
 
 	public function showDatabase()
 	{
-		$nextUrl = url('', array('module','view'=>'Configure'));
+		$nextUrl = $this->configure->url();
 
 		$this->addMainContent('<h2>Configure database</h2>');
-		$this->addBreadcrumb('Database', url('', array('module', 'view'=>'Database')));
+		$this->addBreadcrumb('Database', $this->database->url());
 		$url = url('', array('module', 'view'=>'CreateDatabase'));
-		$this->addCommand('Create database', $url, 'icon-plus-sign', array('class' => 'dialog'));
+		$this->addCommand('Create database', $this['create-database']->url(), 'icon-plus-sign', array('class' => 'dialog'));
 
-		$cmsPath = Curry_Core::$config->curry->projectPath;
-		$propelConfig = Curry_Util::path($cmsPath,'config','propel.xml');
+		$cmsPath = $this->app['projectPath'];
+		$propelConfig = PathHelper::path($cmsPath, 'config', 'propel.xml');
 		if(!is_writable($propelConfig))
 			$this->addMessage("Configuration file $propelConfig doesn't seem to be writable.", self::MSG_ERROR);
 
 		$config = new SimpleXMLElement(file_get_contents($propelConfig));
 		$defaultDataSource = (string)$config->propel->datasources['default'];
 		$params = array(
-			'init' => false,
 			'host' => 'localhost',
-			'database' => 'curry_db',
-			'user' => 'curry_user',
+			'database' => '',
+			'user' => '',
 			'password' => '',
 			'set_charset' => true,
 			'create_tables' => true,
@@ -143,10 +114,9 @@ class Curry_Backend_Setup extends Curry_Backend {
 				switch((string)$datasource->adapter) {
 					case 'mysql':
 						$params['adapter'] = 'mysql';
-						if (preg_match('/^mysql:host=([^;]+);dbname=([^;]+)(;curry=init)?$/', $datasource->connection->dsn, $matches)) {
+						if (preg_match('/^mysql:host=([^;]+);dbname=([^;]+)?$/', $datasource->connection->dsn, $matches)) {
 							$params['host'] = $matches[1];
 							$params['database'] = $matches[2];
-							$params['init'] = !empty($matches[3]);
 						}
 						$params['user'] = (string)$datasource->connection->user;
 						$params['password'] = (string)$datasource->connection->password;
@@ -154,11 +124,6 @@ class Curry_Backend_Setup extends Curry_Backend {
 				}
 				break;
 			}
-		}
-
-		if ($params['init']) {
-			if ($this->saveConnection($params, $propelConfig))
-				url('', array('module','view'=>'Configure'))->redirect();
 		}
 
 		$form = $this->getDatabaseForm($params);
@@ -171,11 +136,11 @@ class Curry_Backend_Setup extends Curry_Backend {
 					$this->addMessage('Connection failed: ' . $status, self::MSG_ERROR);
 			} else if($form->save->isChecked()) {
 				if($this->saveConnection($form->getValues(), $propelConfig))
-					$nextUrl->redirect();
-				return;
+					return RedirectResponse::create($nextUrl);
 			}
 		}
 		$this->addMainContent($form);
+		return parent::render();
 	}
 
 	public function showCreateDatabase()
@@ -217,6 +182,7 @@ class Curry_Backend_Setup extends Curry_Backend {
 		} else {
 			$this->addMainContent($form);
 		}
+		return parent::render();
 	}
 
 	public function showConfigure()
@@ -227,12 +193,11 @@ class Curry_Backend_Setup extends Curry_Backend {
 		$form = $this->getConfigureForm();
 		if(isPost() && $form->isValid($_POST)) {
 			$this->saveConfiguration($form->getValues());
-			url('', array('module','view'=>'RemoveInstallationFiles'))->redirect();
-			return;
+			return RedirectResponse::create(url('', array('module','view'=>'SetupComplete')));
 		} else {
 			$this->addMainContent('<h2>Basic configuration</h2>');
 
-			$configFile = Curry_Core::$config->curry->configPath;
+			$configFile = $this->app['configPath'];
 			if(!$configFile)
 				$this->addMessage("Configuration file not set.", self::MSG_ERROR);
 			else if(!is_writable($configFile))
@@ -240,41 +205,18 @@ class Curry_Backend_Setup extends Curry_Backend {
 
 			$this->addMainContent($form);
 		}
-	}
-
-	public function showRemoveInstallationFiles()
-	{
-		$installationFiles = array_merge(glob('*.tar'), array('install.php', 'db.txt'));
-		$installationFiles = array_filter($installationFiles, 'file_exists');
-		$nextUrl = url('', array('module','view'=>'SetupComplete'));
-		if(count($installationFiles)) {
-			if (isPost()) {
-				foreach($installationFiles as $file) {
-					unlink($file);
-				}
-				$nextUrl->redirect();
-			} else {
-				$this->addMainContent('<p>You should now delete the following installation files:</p>'.
-					'<ul><li>'.join('</li><li>', $installationFiles).'</li></ul>'.
-					'<p>You can attempt to '.
-					'<a href="'.url('', $_GET).'" class="postback">do it automatically</a> '.
-					'or you can <a href="'.$nextUrl.'">skip this step</a>.</p>');
-			}
-		} else {
-			$nextUrl->redirect();
-		}
+		return parent::render();
 	}
 
 	public function showSetupComplete()
 	{
 		// Disable setup and enable backend authorization
-		$config = new Zend_Config(require(Curry_Core::$config->curry->configPath), true);
-		$config->curry->setup = false;
-		$config->curry->backend->noauth = false;
-		$writer = new Zend_Config_Writer_Array();
-		$writer->write(Curry_Core::$config->curry->configPath, $config);
+		$config = $this->app->openConfiguration();
+		$config->setup = false;
+		$config->backend->noauth = false;
+		$this->app->writeConfiguration($config);
 
-		$backendUrl = url('');
+		$backendUrl = url($this->app['backend.basePath']);
 		$frontendUrl = url('~/');
 		$this->addMainContent(<<<HTML
 <div style="text-align:center">
@@ -284,6 +226,7 @@ class Curry_Backend_Setup extends Curry_Backend {
 </div>
 HTML
 );
+		return parent::render();
 	}
 
 	protected function getCreateDatabaseForm()
@@ -441,12 +384,12 @@ HTML
 		$content = Curry_Backend_DatabaseHelper::propelGen('');
 		if(!Curry_Backend_DatabaseHelper::getPropelGenStatus($content)) {
 			$this->addMessage('It seems there was an error when building propel', self::MSG_ERROR);
-			$this->addMainContent('<pre class="console">'.Curry_Console::colorize($content).'</pre>');
+			$this->addMainContent('<pre class="console">'.Console::colorize($content).'</pre>');
 			return false;
 		}
 
 		// Initialize propel
-		Propel::init(Curry_Core::$config->curry->propel->conf);
+		Propel::init($this->app['propel.conf']);
 
 		// Set database charset
 		if($params['set_charset']) {
@@ -463,7 +406,7 @@ HTML
 			$content = Curry_Backend_DatabaseHelper::propelGen('insert-sql');
 			if(!Curry_Backend_DatabaseHelper::getPropelGenStatus($content)) {
 				$this->addMessage('It seems there was an error when creating database tables', self::MSG_ERROR);
-				$this->addMainContent('<pre class="console">'.Curry_Console::colorize($content).'</pre>');
+				$this->addMainContent('<pre class="console">'.Console::colorize($content).'</pre>');
 				return false;
 			}
 		}
@@ -484,7 +427,7 @@ HTML
 			$contentTemplates = array('backup' => '[ Restore from backup ]') + $contentTemplates;
 		}
 
-		$scriptPath = Curry_URL::getScriptPath();
+		$scriptPath = URL::getScriptPath();
 		if (($pos = strrpos($scriptPath, '/')) !== false)
 			$scriptPath = substr($scriptPath, 0, $pos + 1);
 		else
@@ -495,11 +438,11 @@ HTML
 			'elements' => array(
 				'name' => array('text', array(
 					'label' => 'Project name',
-					'value' => Curry_Core::$config->curry->name,
+					'value' => $this->app['name'],
 				)),
 				'email' => array('text', array(
 					'label' => 'Webmaster email',
-					'value' => Curry_Core::$config->curry->adminEmail,
+					'value' => $this->app['adminEmail'],
 				)),
 				'base_url' => array('text', array(
 					'label' => 'Base URL',
@@ -512,7 +455,7 @@ HTML
 				)),
 				'development_mode' => array('checkbox', array(
 					'label' => 'Development mode',
-					'value' => Curry_Core::$config->curry->developmentMode,
+					'value' => $this->app['developmentMode'],
 				)),
 				'save' => array('submit', array(
 					'label' => 'Save',
@@ -647,15 +590,15 @@ HTML
 		}
 
 		// Create template root
-		$templateRoot = Curry_Core::$config->curry->template->root;
+		$templateRoot = $this->app['template.root'];
 		if(!file_exists($templateRoot))
 			@mkdir($templateRoot, 0777, true);
 
 		switch($values['template']) {
 			case 'empty':
 			case 'curry':
-				$source = Curry_Util::path(Curry_Core::$config->curry->wwwPath, 'shared', 'backend', 'common', 'templates', 'project-empty.html');
-				$templateFile = Curry_Util::path($templateRoot, 'Root.html');
+				$source = PathHelper::path($this->app['basePath'], 'shared', 'backend', 'common', 'templates', 'project-empty.html');
+				$templateFile = PathHelper::path($templateRoot, 'Root.html');
 				if(!file_exists($templateFile))
 					@copy($source, $templateFile);
 				break;
@@ -664,18 +607,17 @@ HTML
 			case 'html5boilerplate':
 		}
 
-		if (file_exists(Curry_Core::$config->curry->configPath)) {
-			$config = new Zend_Config(require(Curry_Core::$config->curry->configPath), true);
-			$config->curry->name = $values['name'];
-			$config->curry->adminEmail = $values['email'];
+		if (file_exists($this->app['configPath'])) {
+			$config = $this->app->openConfiguration();
+			$config->name = $values['name'];
+			$config->adminEmail = $values['email'];
 			if ($values['base_url'])
-				$config->curry->baseUrl = $values['base_url'];
+				$config->baseUrl = $values['base_url'];
 			else
-				unset($config->curry->baseUrl);
-			$config->curry->developmentMode = (bool)$values['development_mode'];
-			$config->curry->secret = sha1(uniqid(mt_rand(), true) . microtime());
-			$writer = new Zend_Config_Writer_Array();
-			$writer->write(Curry_Core::$config->curry->configPath, $config);
+				unset($config->baseUrl);
+			$config->developmentMode = (bool)$values['development_mode'];
+			$config->secret = sha1(uniqid(mt_rand(), true) . microtime());
+			$this->app->writeConfiguration($config);
 		}
 
 		return true;
@@ -716,7 +658,7 @@ HTML
 			$fba->setUserRole($userOrRole);
 		$fba->setPath($path);
 		$fba->setWrite($write);
-		@mkdir(Curry_Util::path(Curry_Core::$config->curry->wwwPath, $path), 0777, true);
+		@mkdir(PathHelper::path(\Curry\App::getInstance()['wwwPath'], $path), 0777, true);
 		return $fba;
 	}
 }

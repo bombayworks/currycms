@@ -1,0 +1,30 @@
+{
+  "name": "currycms-js",
+  "version": "1.1.0-alpha1",
+  "homepage": "https://github.com/bombayworks/currycms",
+  "authors": [
+    "Jesper Ek <deadbeef84@gmail.com>"
+  ],
+  "description": "currycms javascript files",
+  "main": "build/all.min.js",
+  "keywords": [
+    "currycms"
+  ],
+  "license": "GPL-3.0+",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "~2.1.1",
+    "jquery-ui": "~1.11.0",
+    "codemirror": "~4.3.0",
+    "dynatree": "~1.2.5",
+    "chosen": "https://github.com/harvesthq/chosen/releases/download/v1.1.0/chosen_v1.1.0.zip",
+    "uri.js": "~1.13.2"
+  }
+}

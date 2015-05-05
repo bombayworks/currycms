@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\App;
 
 /**
  * Static class to manage internatianalization.
@@ -103,7 +104,7 @@ class Curry_Language {
 		if ($language) {
 			// initialize language strings
 			if (!array_key_exists($language->getLangcode(), self::$languageStrings)) {
-				trace_notice('Loading translation-strings for ' . $language->getName() . ' ('.$language->getLangcode().')');
+				App::getInstance()->logger->info('Loading translation-strings for ' . $language->getName() . ' ('.$language->getLangcode().')');
 				self::$languageStrings[$language->getLangcode()] = LanguageStringTranslationQuery::create()
 					->filterByLanguage($language)
 					->find()
@@ -158,7 +159,7 @@ class Curry_Language {
 	 */
 	public static function get($variableName, $language = null)
 	{
-		if(Curry_Core::$config->curry->updateTranslationStrings)
+		if(\Curry\App::getInstance()['updateTranslationStrings'])
 			self::$used[] = $variableName;
 		
 		$language = self::_getLanguage($language);

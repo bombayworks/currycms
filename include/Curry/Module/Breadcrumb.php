@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Module;
 
 /**
  * Breadcrumb navigation.
@@ -26,7 +27,7 @@
  * 
  * @package Curry\Module
  */
-class Curry_Module_Breadcrumb extends Curry_Module {
+class Breadcrumb extends AbstractModule {
 	/**
 	 * List pages from root to the current page.
 	 */
@@ -55,13 +56,13 @@ class Curry_Module_Breadcrumb extends Curry_Module {
 	/** {@inheritdoc} */
 	public function toTwig()
 	{
-		$page = $this->getPageGenerator()->getPage();
+		$page = $this->app->page;
 		$pages = array();
 		while($page) {
 			$pages[] = $page->toTwig();
 			if($page->getPageId() == $this->rootPageId)
 				break;
-			$page = Page::getCachedParent($page);
+			$page = \Page::getCachedParent($page);
 		}
 		
 		if($this->direction === self::FROM_ROOT)
@@ -109,7 +110,7 @@ TPL
 	/** {@inheritdoc} */
 	public function showBack()
 	{
-		$form = new Curry_Form_SubForm(array(
+		$form = new \Curry_Form_SubForm(array(
 			'elements' => array(
 				'direction' => array('select', array(
 					'label' => 'Direction',
@@ -118,7 +119,7 @@ TPL
 				)),
 				'root' => array('select', array(
 					'label' => 'RootPage',
-					'multiOptions' => PagePeer::getSelect(),
+					'multiOptions' => \PagePeer::getSelect(),
 					'value' => $this->rootPageId,
 				)),
 			)
@@ -127,7 +128,7 @@ TPL
 	}
 	
 	/** {@inheritdoc} */
-	public function saveBack(Zend_Form_SubForm $form)
+	public function saveBack(\Zend_Form_SubForm $form)
 	{
 		$values = $form->getValues(true);
 		$this->direction = $values['direction'];

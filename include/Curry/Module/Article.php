@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Module;
 
 /**
  * Article module to store HTML content.
@@ -26,7 +27,7 @@
  *
  * @package Curry\Module
  */
-class Curry_Module_Article extends Curry_Module {
+class Article extends AbstractModule {
 	/**
 	 * Default editor.
 	 */
@@ -73,7 +74,7 @@ class Curry_Module_Article extends Curry_Module {
 	protected $allowTemplateSyntax = false;
 	
 	/** {@inheritdoc} */
-	public function showFront(Curry_Twig_Template $template = null)
+	public function showFront(\Curry_Twig_Template $template = null)
 	{
 		$twig = $this->toTwig();
 		return $template ? $template->render($twig) : $twig['content'];
@@ -84,7 +85,7 @@ class Curry_Module_Article extends Curry_Module {
 	{
 		$content = $this->content;
 		if($this->allowTemplateSyntax) {
-			$tpl = Curry_Twig_Template::loadTemplateString($content);
+			$tpl = \Curry_Twig_Template::loadTemplateString($content);
 			$content = $tpl->render(array());
 		}
 		
@@ -96,7 +97,7 @@ class Curry_Module_Article extends Curry_Module {
 	{
 		$editor = $this->editor;
 		if(!$editor)
-			$editor = strtolower(Curry_Core::$config->curry->defaultEditor);
+			$editor = strtolower($this->app['defaultEditor']);
 			
 		$elementType = 'textarea';
 		if($editor == self::CODEMIRROR)
@@ -104,7 +105,7 @@ class Curry_Module_Article extends Curry_Module {
 		else if($editor == self::TINYMCE)
 			$elementType = 'tinyMCE';
 
-		$form = new Curry_Form_SubForm(array(
+		$form = new \Curry_Form_SubForm(array(
 		    'elements' => array(
 		    	'content' => array($elementType, array(
 		    		'label' => 'Content',
@@ -113,7 +114,7 @@ class Curry_Module_Article extends Curry_Module {
 			),
 		));
 
-		$subform = new Curry_Form_SubForm(array(
+		$subform = new \Curry_Form_SubForm(array(
 			'legend' => 'Advanced',
 			'class' => 'advanced',
 		    'elements' => array(
@@ -153,7 +154,7 @@ class Curry_Module_Article extends Curry_Module {
 	}
 
 	/** {@inheritdoc} */
-	public function saveBack(Zend_Form_SubForm $form)
+	public function saveBack(\Zend_Form_SubForm $form)
 	{
 		$values = $form->getValues(true);
 

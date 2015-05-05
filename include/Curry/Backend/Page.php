@@ -15,26 +15,29 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Tree\PropelTree;
+use Curry\Tree\Tree;
+use Curry\Util\ArrayHelper;
 
 /**
  * Manage pages.
  * 
  * @package Curry\Backend
  */
-class Curry_Backend_Page extends Curry_Backend
+class Curry_Backend_Page extends \Curry\Backend\AbstractLegacyBackend
 {
 	/** {@inheritdoc} */
-	public static function getGroup()
+	public function getGroup()
 	{
 		return "Content";
 	}
 
-	public static function getName()
+	public function getName()
 	{
 		return "Pages";
 	}
 
-	public static function getNotifications()
+	public function getNotifications()
 	{
 		return PageQuery::create()
 			->filterByWorkingPageRevisionId(null, Criteria::ISNOTNULL)
@@ -44,8 +47,8 @@ class Curry_Backend_Page extends Curry_Backend
 
 	public static function updateIndex(Page $page)
 	{
-		if (Curry_Core::$config->curry->autoUpdateIndex)
-			Curry_Application::registerBackgroundFunction(array(__CLASS__, 'doUpdateIndex'), $page);
+		if (\Curry\App::getInstance()['autoUpdateIndex'])
+			\Curry\Util\BackgroundFunctions::register(array(__CLASS__, 'doUpdateIndex'), $page);
 	}
 
 	public static function doUpdateIndex(Page $page)
@@ -60,7 +63,7 @@ class Curry_Backend_Page extends Curry_Backend
 
 	public static function getTemplatePage()
 	{
-		$templatePage = Curry_Core::$config->curry->backend->templatePage;
+		$templatePage = \Curry\App::getInstance()['backend.templatePage'];
 		return $templatePage ? PageQuery::create()->findPk($templatePage) : null;
 	}
 
@@ -93,7 +96,7 @@ class Curry_Backend_Page extends Curry_Backend
 
 		$dependantPages = $page->getDependantPages();
 		if(count($dependantPages)) {
-			$pageNames = join(", ", Curry_Array::objectsToArray($dependantPages, null, 'getName'));
+			$pageNames = join(", ", ArrayHelper::objectsToArray($dependantPages, null, 'getName'));
 			$this->addMessage("Unable to delete page, other pages depend on this page (".$pageNames.").", self::MSG_ERROR);
 		} elseif($page->countChildren()) {
 			$this->addMessage("Unable to delete page, page has subpages.", self::MSG_ERROR);
@@ -179,12 +182,12 @@ class Curry_Backend_Page extends Curry_Backend
 		}
 		$query = PageQuery::create()
 			->filterByPageId($access);
-		$tree = new Curry_Tree_Propel($query, array(
+		$tree = new PropelTree($query, array(
 			'ajaxUrl' => (string)url('', array('module', 'view'=>'Menu', 'page_id', 'json'=>1)),
 			'minExpandLevel' => 2,
 			'autoFocus' => false,
 			'selectMode' => 1, // single
-			'dndCallback' => array(__CLASS__, 'movePage'),
+			'dndCallback' => array($this, 'movePage'),
 			'nodeCallback' => array($this, 'getPageTreeNode'),
 		));
 		// Override tree cookies to force tree selection
@@ -199,11 +202,11 @@ class Curry_Backend_Page extends Curry_Backend
 	 * Get page tree node properties.
 	 *
 	 * @param Page $page
-	 * @param Curry_Tree $tree
+	 * @param Tree $tree
 	 * @param int $depth
 	 * @return array
 	 */
-	public function getPageTreeNode($page, Curry_Tree $tree, $depth = 0)
+	public function getPageTreeNode($page, Tree $tree, $depth = 0)
 	{
 		$p = $tree->objectToJson($page, $tree, $depth);
 
@@ -244,13 +247,13 @@ class Curry_Backend_Page extends Curry_Backend
 	 * @param array $params
 	 * @return array|bool
 	 */
-	public static function movePage($params)
+	public function movePage($params)
 	{
 		$page = PageQuery::create()->findPk($params['source']);
 		$target = PageQuery::create()->findPk($params['target']);
 		$mode = $params['mode'];
 		if($page && $target) {
-			trace('Moving '.$page->getName().' '.$mode.' '.$target->getName());
+			$this->logger->notice('Moving '.$page->getName().' '.$mode.' '.$target->getName());
 
 			// Remember if we have a custom url
 			$isCustomUrl = $page->isCustomUrl();
@@ -293,7 +296,7 @@ class Curry_Backend_Page extends Curry_Backend
 		$disabled = array();
 		$enabled = array();
 		foreach(PageQuery::create()->orderByBranch()->find() as $page) {
-			$options[$page->getPageId()] = str_repeat(Curry_Core::SELECT_TREE_PREFIX, $page->getLevel()).$page->getName();
+			$options[$page->getPageId()] = str_repeat("\xC2\xA0", $page->getLevel() * 3).$page->getName();
 			if(!$page->getWorkingPageRevisionId() || $page->getWorkingPageRevisionId() == $page->getActivePageRevisionId())
 				$disabled[] = $page->getPageId();
 			else
@@ -391,11 +394,10 @@ class Curry_Backend_Page extends Curry_Backend
 	{
 		$page = PageQuery::create()->findPk($_GET['page_id']);
 		if ($page && file_exists($page->getImage())) {
-			url($page->getImage())->redirect();
-			exit;
+			self::redirect($page->getImage());
 		}
 		
-		url('shared/backend/common/images/no-page-image.png')->redirect();
+		self::redirect('shared/backend/common/images/no-page-image.png');
 	}
 	
 	/**
@@ -426,7 +428,7 @@ class Curry_Backend_Page extends Curry_Backend
 		if(isset($_GET['view']) && in_array($_GET['view'], $access))
 			return $_GET['view'];
 			
-		$ses = new Zend_Session_Namespace(__CLASS__);
+		$ses = new \Zend\Session\Container(__CLASS__);
 		if(isset($ses->pageView) && in_array($ses->pageView, $access))
 			return $ses->pageView;
 		
@@ -511,7 +513,7 @@ class Curry_Backend_Page extends Curry_Backend
 			}
 			
 			// Live edit
-			if(Curry_Core::$config->curry->liveEdit)
+			if($this->app['liveEdit'])
 				$this->addCommand('Live edit', url($page->getUrl(), array('curry_inline_admin'=>'true')), 'icon-cogs');
 
 			// Delete
@@ -531,7 +533,7 @@ class Curry_Backend_Page extends Curry_Backend
 	 */
 	public function showPageMetadata()
 	{
-		$ses = new Zend_Session_Namespace(__CLASS__);
+		$ses = new \Zend\Session\Container(__CLASS__);
 		$ses->pageView = 'PageMetadata';
 		
 		$page = self::getPage(PageAccessPeer::PERM_META);
@@ -550,11 +552,11 @@ class Curry_Backend_Page extends Curry_Backend
 		
 		if(self::getPagePermission(PageQuery::create()->findRoot(), PageAccessPeer::PERM_META)) {
 			$url = url('', array('module', 'view' => 'NewMetadata'));
-			$this->addDialogCommand('Add new field', $url, 'icon_textfield_add');
+			$this->addDialogCommand('Add new field', $url, 'icon-plus');
 		}
 		
 		$url = url('', array('module' => 'Curry_Backend_Database', 'view' => 'Table', 'table' => 'Metadata'));
-		$this->addCommand('Edit fields', $url, 'icon_table_edit');
+		$this->addCommand('Edit fields', $url, 'icon-table');
 	}
 	
 	/**
@@ -571,7 +573,7 @@ class Curry_Backend_Page extends Curry_Backend
 		$form = Curry_Backend_PageHelper::getNewMetadataForm();
 		if(isPost('pid_newmetadata') && $form->isValid($_POST)) {
 			Curry_Backend_PageHelper::saveNewMetadata($form->getValues());
-			Curry_Application::returnPartial('');
+			self::returnPartial('');
 		}
 		$this->addMainContent($form);
 	}
@@ -584,7 +586,7 @@ class Curry_Backend_Page extends Curry_Backend
 	{
 		$page = self::getPage(PageAccessPeer::PERM_REVISIONS);
 		
-		$ses = new Zend_Session_Namespace(__CLASS__);
+		$ses = new \Zend\Session\Container(__CLASS__);
 		$ses->pageView = 'PageRevisions';
 		
 		$this->addPageMenu($page);
@@ -644,7 +646,7 @@ class Curry_Backend_Page extends Curry_Backend
 				},
 			));
 		}
-		$list->show($this);
+		$this->addMainContent($list);
 	}
 
 	/**
@@ -678,7 +680,7 @@ class Curry_Backend_Page extends Curry_Backend
 		if(!self::getPagePermission($pageRevision->getPage(), PageAccessPeer::PERM_PUBLISH))
 			throw new Exception('You do not have permission to publish this page.');
 			
-		if(!Curry_Core::$config->curry->autoPublish)
+		if(!$this->app['autoPublish'])
 			$this->addMessage('Auto publishing is not enabled, for this functionality to work you must enable it in <a href="'.url('', array('module'=>'Curry_Backend_System')).'">System</a>.', self::MSG_WARNING, false);
 			
 		$form = Curry_Backend_PageHelper::getPublishDateForm($pageRevision);
@@ -716,7 +718,7 @@ class Curry_Backend_Page extends Curry_Backend
 	 */
 	public function showCopyPaste()
 	{
-		$ses = new Zend_Session_Namespace(__CLASS__);
+		$ses = new \Zend\Session\Container(__CLASS__);
 		$ses->pageView = 'CopyPaste';
 		
 		$page = self::getPage(PageAccessPeer::PERM_MODULES);
@@ -773,7 +775,7 @@ class Curry_Backend_Page extends Curry_Backend
 	 */
 	public function showPageProperties()
 	{
-		$ses = new Zend_Session_Namespace(__CLASS__);
+		$ses = new \Zend\Session\Container(__CLASS__);
 		$ses->pageView = 'PageProperties';
 		
 		$page = self::getPage(PageAccessPeer::PERM_PROPERTIES);
@@ -782,7 +784,7 @@ class Curry_Backend_Page extends Curry_Backend
 			$values = $form->getValues();
 			Curry_Backend_PageHelper::savePageProperties($page, $values);
 			$form = Curry_Backend_PageHelper::getPagePropertiesForm($page);
-			Curry_Admin::getInstance()->addBodyClass('live-edit-close');
+			$this->addBodyClass('live-edit-close');
 			self::updateIndex($page);
 		}
 		
@@ -795,7 +797,7 @@ class Curry_Backend_Page extends Curry_Backend
 	 */
 	public function showPagePermissions()
 	{
-		$ses = new Zend_Session_Namespace(__CLASS__);
+		$ses = new \Zend\Session\Container(__CLASS__);
 		$ses->pageView = 'PagePermissions';
 		
 		$page = self::getPage(PageAccessPeer::PERM_PERMISSIONS);
@@ -811,7 +813,7 @@ class Curry_Backend_Page extends Curry_Backend
 	 */
 	public function showContent()
 	{
-		$ses = new Zend_Session_Namespace(__CLASS__);
+		$ses = new \Zend\Session\Container(__CLASS__);
 		$ses->pageView = 'Content';
 		
 		$page = self::getPage(PageAccessPeer::PERM_CONTENT);
@@ -837,7 +839,7 @@ class Curry_Backend_Page extends Curry_Backend
 		}
 
 		$list = new Curry_Backend_ContentList($this, $pageRevision, $langcode);
-		$list->show($this);
+		$this->addMainContent($list);
 	}
 	
 	/**
@@ -911,11 +913,11 @@ class Curry_Backend_Page extends Curry_Backend
 			if (self::isTemplatePage($page))
 				continue;
 			$pages[] = array(
-				str_repeat(Curry_Core::SELECT_TREE_PREFIX, $page->getLevel()) . $page->getName(),
+				str_repeat("\xC2\xA0", $page->getLevel() * 3) . $page->getName(),
 				$page->getUrl(),
 			);
 		}
-		Curry_Application::returnPartial('var tinyMCELinkList = ' . json_encode($pages).';', "text/plain");
+		self::returnPartial('var tinyMCELinkList = ' . json_encode($pages).';', "text/plain");
 	}
 
 	/**
@@ -932,7 +934,7 @@ class Curry_Backend_Page extends Curry_Backend
 
 		$a = (int)$_POST['a'];
 		$b = (int)$_POST['b'];
-		$modules = Curry_Array::objectsToArray($pageRevision->getModules(), null, 'getPageModuleId');
+		$modules = ArrayHelper::objectsToArray($pageRevision->getModules(), null, 'getPageModuleId');
 		$aIndex = array_search($a, $modules);
 		$bIndex = array_search($b, $modules);
 		if ($aIndex === false || $bIndex === false)
@@ -950,7 +952,7 @@ class Curry_Backend_Page extends Curry_Backend
 	 */
 	public function showModuleProperties()
 	{
-		url('', array('module','page_id','view'=>'Content','action'=>'properties','item'=>json_encode($_GET['page_module_id'])))->redirect();
+		self::redirect(url('', array('module','page_id','view'=>'Content','action'=>'properties','item'=>json_encode($_GET['page_module_id']))));
 	}
 	
 	/**
@@ -958,7 +960,7 @@ class Curry_Backend_Page extends Curry_Backend
 	 */
 	public function showDeleteModule()
 	{
-		url('', array('module','page_id','view'=>'Content','action'=>'delete','item'=>json_encode($_GET['page_module_id'])))->redirect();
+		self::redirect(url('', array('module','page_id','view'=>'Content','action'=>'delete','item'=>json_encode($_GET['page_module_id']))));
 	}
 
 	/**
@@ -966,6 +968,6 @@ class Curry_Backend_Page extends Curry_Backend
 	 */
 	public function showModule()
 	{
-		url('', array('module','page_id','view'=>'Content','action'=>'edit','item'=>json_encode($_GET['page_module_id'])))->redirect();
+		self::redirect(url('', array('module','page_id','view'=>'Content','action'=>'edit','item'=>json_encode($_GET['page_module_id']))));
 	}
 }

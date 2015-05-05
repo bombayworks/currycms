@@ -14,7 +14,7 @@ protected static function buildPageCache()
 	if(self::$pageCache !== null)
 		return true;
 		
-	if(!Curry_Core::$config->curry->pageCache)
+	if(!\Curry\App::getInstance()['pageCache'])
 		return false;
 	
 	self::$pageCache = array();
@@ -122,7 +122,7 @@ public function createDefaultRevisions($basePage = null) {
 	$revision->setDescription("Initial (auto-created)");
 	$this->setActivePageRevision($revision);
 
-	if (Curry_Core::$config->curry->revisioning) {
+	if (\Curry\App::getInstance()['revisioning']) {
 		$revision2 = new PageRevision();
 		$revision2->setPage($this);
 		$revision2->setBasePage($basePage);
@@ -163,12 +163,13 @@ public function getPageRevision($revision = null)
 public function getInheritedProperty($name, $default = null, $cache = true, $forceUpdate = false)
 {
 	// generate a unique cache name
+	$app = \Curry\App::getInstance();
 	$cacheName = __CLASS__ . '_' . $this->getPageRevisionId() . '_' . $name;
-	
+
 	// attempt to load value from cache
 	$value = false;
 	if ($cache && !$forceUpdate) {
-		$value = Curry_Core::$cache->load($cacheName);
+		$value = $app->cache->load($cacheName);
 	}
 	
 	// if value is not set...
@@ -182,9 +183,9 @@ public function getInheritedProperty($name, $default = null, $cache = true, $for
     	}
         if($cache) {
         	if($value !== false) {
-        		Curry_Core::$cache->save($value, $cacheName);
+				$app->cache->save($value, $cacheName);
         	} else {
-        		trace_warning("Unable to store $name for {$this->getUrl()}");
+        		$app->logger->notice("Unable to store $name for {$this->getUrl()}");
         	}
         }
 	}
@@ -241,7 +242,7 @@ public function getExpectedUrl($parentUrl = null)
 	}
 	if($parentUrl == '/')
 		$parentUrl = '';
-	return ($parentUrl . Curry_String::getRewriteString($this->getName()) . '/');
+	return ($parentUrl . \Curry\Util\StringHelper::getRewriteString($this->getName()) . '/');
 }
 
 public function getActualRedirectPage()
@@ -311,7 +312,7 @@ public function setAutoName($v)
 
 public function getBodyId()
 {
-	return Curry_String::getRewriteString('page-'.$this->getUrl());
+	return \Curry\Util\StringHelper::getRewriteString('page-'.$this->getUrl());
 }
 
 /**
@@ -339,13 +340,13 @@ public function getDependantPages()
 	$lastPages = array($this->getPageId() => $this);
 	do {
 		$c = count($pages);
-		$pageIds = Curry_Array::objectsToArray($lastPages, null, 'getPageId');
+		$pageIds = \Curry\Util\ArrayHelper::objectsToArray($lastPages, null, 'getPageId');
 		$lastPages = PageQuery::create()
 			->useWorkingPageRevisionQuery('', Criteria::INNER_JOIN)
 				->filterByBasePageId($pageIds)
 			->endUse()
 			->find();
-		$pages += Curry_Array::objectsToArray($lastPages, 'getPageId', null);
+		$pages += \Curry\Util\ArrayHelper::objectsToArray($lastPages, 'getPageId', null);
 	} while(count($pages) != $c);
 	return $pages;
 }
@@ -353,7 +354,7 @@ public function getDependantPages()
 public function preInsert(PropelPDO $con = null)
 {
 	if ($this->getUid() === null)
-		$this->setUid(Curry_Util::getUniqueId());
+		$this->setUid(\Curry\Util\Helper::getUniqueId());
 	return true;
 }
 
@@ -369,7 +370,7 @@ public function postDelete(PropelPDO $con = null)
 
 public function getPageAccess(User $user = null, UserRole $role = null)
 {
-	$parents = Curry_Array::objectsToArray($this->getAncestors(), null, 'getPageId');
+	$parents = \Curry\Util\ArrayHelper::objectsToArray($this->getAncestors(), null, 'getPageId');
 	$access = PageAccessQuery::create('pa')
 		// User and role condition
 		->_if($user && !$user->isNew())
@@ -396,13 +397,13 @@ public function getPageAccess(User $user = null, UserRole $role = null)
 public function getMetadata()
 {
 	$cacheName = __CLASS__ . '_' . $this->getPageRevisionId() . '_Metadata';
-	if(($meta = Curry_Core::$cache->load($cacheName)) === false) {
+	if(($meta = \Curry\App::getInstance()->cache->load($cacheName)) === false) {
 		$meta = array('cascaded' => array(), 'inherited' => array());
 		$metadatas = MetadataQuery::create()->find();
 		
 		$localPageRevisionId = $this->getPageRevisionId();
-		$cascadeIds = Curry_Array::objectsToArray(array_reverse(Page::getCachedPath($this)), null, 'getPageRevisionId');
-		$inheritIds = array_reverse(Curry_Array::objectsToArray($this->getPageRevision()->getInheritanceChain(true), null, 'getPageRevisionId'));
+		$cascadeIds = \Curry\Util\ArrayHelper::objectsToArray(array_reverse(Page::getCachedPath($this)), null, 'getPageRevisionId');
+		$inheritIds = array_reverse(\Curry\Util\ArrayHelper::objectsToArray($this->getPageRevision()->getInheritanceChain(true), null, 'getPageRevisionId'));
 		$pageRevisionIds = array_unique(array_merge($cascadeIds, $inheritIds));
 		$pageMetadatas = PageMetadataQuery::create()->filterByPageRevisionId($pageRevisionIds)->find();
 		
@@ -431,7 +432,7 @@ public function getMetadata()
 		$metadatas->clearIterator();
 		$pageMetadatas->clearIterator();
 		
-		Curry_Core::$cache->save($meta, $cacheName);
+		\Curry\App::getInstance()->cache->save($meta, $cacheName);
 	}
 	
 	return $meta;
@@ -441,8 +442,8 @@ public function toTwig()
 {
 	$self = $this;
 	$p = $this->toArray();
-	$p['parent'] = new Curry_OnDemand(array($this, 'twigGetParent'));
-	$p['subpages'] = new Curry_OnDemand(function() use ($self) {
+	$p['parent'] = new \Curry\Util\OnDemand(array($this, 'twigGetParent'));
+	$p['subpages'] = new \Curry\Util\OnDemand(function() use ($self) {
 		if ($self->isLeaf())
 			return array();
 		return PageQuery::create()
@@ -450,7 +451,7 @@ public function toTwig()
 			->childrenOf($this)
 			->filterByVisible(true);
 	});
-	$p['allSubpages'] = new Curry_OnDemand(function() use ($self) {
+	$p['allSubpages'] = new \Curry\Util\OnDemand(function() use ($self) {
 		if ($self->isLeaf())
 			return array();
 		return PageQuery::create()
@@ -458,10 +459,10 @@ public function toTwig()
 			->childrenOf($this);
 	});
 	
-	$p['meta'] = new Curry_OnDemand(array($this, 'getMetadata'));
+	$p['meta'] = new \Curry\Util\OnDemand(array($this, 'getMetadata'));
 	
 	$p['FullUrl'] = url($this->getUrl())->getAbsolute();
-	$p['FinalUrl'] = new Curry_OnDemand(array($this, 'getFinalUrl'));
+	$p['FinalUrl'] = new \Curry\Util\OnDemand(array($this, 'getFinalUrl'));
 	$p['BodyId'] = $this->getBodyId();
 
 	$isInternal = $this->getRedirectPageId() !== null;
@@ -486,14 +487,12 @@ public function getSearchDocument()
 	if(!$this->getEnabled() || !$this->getActivePageRevision() || !$this->getIncludeInIndex())
 		return null;
 	
-	$preventRedirect = Curry_URL::setPreventRedirect(true);
-	$pageGenerator = Curry_Application::getInstance()->createPageGenerator($this->getActivePageRevision(), new Curry_Request('GET', $this->getUrl()));
+	$pageGenerator = \Curry\Generator\AbstractGenerator::create(\Curry\App::getInstance(), $this->getActivePageRevision());
 	$language = $this->getInheritedProperty('Language');
 	if($language)
 		Curry_Language::setLanguage($language);
 	$content = $pageGenerator->render(array(), array('indexing' => true));
-	Curry_URL::setPreventRedirect($preventRedirect);
-	
+
 	$doc = Zend_Search_Lucene_Document_Html::loadHTML($content, true);
 	if($language)
 	    $doc->addField(Zend_Search_Lucene_Field::Keyword('locale', $language->getLangcode()));
@@ -521,7 +520,7 @@ public static function postMigrate($version)
 				$pm->setPageId($pr->getPageId());
 				$pm->save();
 			} else {
-				trace_warning('Unable to migrate page module.');
+				\Curry\App::getInstance()->logger->notice('Unable to migrate page module.');
 			}
 		}
 	}
@@ -572,10 +571,10 @@ public static function migrateData(&$table, array &$data, $version)
 			$rm->setPageRevisionId($data['PageRevisionId']);
 			$rm->save();
 			$data['PageId'] = 0;
-			$data['Uid'] = Curry_Util::getUniqueId();
+			$data['Uid'] = \Curry\Util\Helper::getUniqueId();
 			self::$migrate0Modules[$data['PageModuleId']] = $data['PageRevisionId'];
 		} else if ($table == 'Page') {
-			$data['Uid'] = Curry_Util::getUniqueId();
+			$data['Uid'] = \Curry\Util\Helper::getUniqueId();
 			switch ($data['RedirectMethod']) {
 				case 'clone': break;
 				case 'subpage': break;

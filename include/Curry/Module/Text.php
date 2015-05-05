@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Module;
 
 /**
  * Text module (single-line of text).
@@ -25,7 +26,7 @@
  * 
  * @package Curry\Module
  */
-class Curry_Module_Text extends Curry_Module {
+class Text extends AbstractModule {
 	/**
 	 * Text content.
 	 *
@@ -34,7 +35,7 @@ class Curry_Module_Text extends Curry_Module {
 	protected $content = "Hello world!";
 
 	/** {@inheritdoc} */
-	public function showFront(Curry_Twig_Template $template = null)
+	public function showFront(\Curry_Twig_Template $template = null)
 	{
 		return $template ? parent::showFront($template) : $this->content;
 	}
@@ -48,7 +49,7 @@ class Curry_Module_Text extends Curry_Module {
 	/** {@inheritdoc} */
 	public function showBack()
 	{
-		$form = new Curry_Form_SubForm(array(
+		$form = new \Curry_Form_SubForm(array(
 		    'elements' => array(
 		    	'content' => array('text', array(
 		    		'label' => 'Content',
@@ -61,7 +62,7 @@ class Curry_Module_Text extends Curry_Module {
 	}
 
 	/** {@inheritdoc} */
-	public function saveBack(Zend_Form_SubForm $form)
+	public function saveBack(\Zend_Form_SubForm $form)
 	{
 		$values = $form->getValues(true);
 		$this->content = $values['content'];

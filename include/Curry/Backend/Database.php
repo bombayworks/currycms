@@ -15,13 +15,20 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
- 
+use Curry\URL;
+use Curry\Tree\Tree;
+use Curry\Util\ArrayHelper;
+use Curry\Util\Console;
+use Curry\Util\Helper;
+use Curry\Util\Propel;
+use Curry\Util\StringHelper;
+
 /**
  * Manage the database.
  * 
  * @package Curry\Backend
  */
-class Curry_Backend_Database extends Curry_Backend
+class Curry_Backend_Database extends \Curry\Backend\AbstractLegacyBackend
 {
 	/**#@+
 	 * Propel-gen method constants.
@@ -50,7 +57,7 @@ class Curry_Backend_Database extends Curry_Backend
 	/**#@-*/
 	
 	/** {@inheritdoc} */
-	public static function getGroup()
+	public function getGroup()
 	{
 		return "System";
 	}
@@ -58,9 +65,9 @@ class Curry_Backend_Database extends Curry_Backend
 	/**
 	 * Constructor.
 	 */
-	public function __construct()
+	public function __construct(\Curry\App $app)
 	{
-		parent::__construct();
+		parent::__construct($app);
 
 		// Override and increase max execution time if set
 		$timeLimit = ini_get('max_execution_time');
@@ -68,11 +75,11 @@ class Curry_Backend_Database extends Curry_Backend
 			@set_time_limit(250);
 		}
 
-		Propel::disableInstancePooling();
-		Propel::setLogger(null);
+		\Propel::disableInstancePooling();
+		\Propel::setLogger(null);
 		
 		// make sure all classes are included
-		foreach(Curry_Propel::getModels() as $classes)
+		foreach(Propel::getModels() as $classes)
 			foreach($classes as $clazz)
 				class_exists($clazz.'Peer', true);
 	}
@@ -103,7 +110,7 @@ class Curry_Backend_Database extends Curry_Backend
 		$this->addMenuItem("Propel", url('', array("module", "view"=>"Propel")));
 		$this->addMenuItem("SQL", url('', array("module", "view"=>"SQL")));
 
-		$tree = new Curry_Tree(array(
+		$tree = new Tree(array(
 			'persist' => false,
 			'ajaxUrl' => (string)url('', array('module','view'=>'Main', 'json' => 1)),
 			'nodeCallback' => array($this, 'getTreeJson'),
@@ -123,7 +130,7 @@ class Curry_Backend_Database extends Curry_Backend
 	public function getTreeJson()
 	{
 		$packages = array();
-		foreach(Curry_Propel::getModels() as $package => $classes) {
+		foreach(Propel::getModels() as $package => $classes) {
 			$p = array(
 				'title' => $package,
 				'iconClass' => 'icon-folder-open',
@@ -149,7 +156,7 @@ class Curry_Backend_Database extends Curry_Backend
 			}
 			$packages[] = $p;
 		}
-		Curry_Application::returnJson($packages);
+		return $packages;
 	}
 	
 	/**
@@ -186,7 +193,7 @@ class Curry_Backend_Database extends Curry_Backend
 				}
 			}
 		}
-		$this->returnJson( $this->getTableGrid()->getJSON() );
+		self::returnJson( $this->getTableGrid()->getJSON() );
 	}
 	
 	/**
@@ -218,15 +225,15 @@ class Curry_Backend_Database extends Curry_Backend
 		$editUrl = url('', array("module", "table","view"=>"Row"));
 		$flexigrid->addAddButton($editUrl);
 		$flexigrid->addEditButton($editUrl);
-		$flexigrid->addCommandButton('Delete', 'icon_delete', 'dodelete'); // TODO: Add confirmation.
+		$flexigrid->addCommandButton('Delete', 'icon-minus-sign', 'dodelete'); // TODO: Add confirmation.
 		$flexigrid->addSeparator();
-		$flexigrid->addCommandButton('Empty', 'icon_bin_empty', 'empty'); // TODO: Add confirmation.
-		$flexigrid->addLinkButton('Check relations', 'icon_wrench', (string)url('', array('module','view'=>'Cleanup','table')));
+		$flexigrid->addCommandButton('Empty', 'icon-trash', 'empty'); // TODO: Add confirmation.
+		$flexigrid->addLinkButton('Check relations', 'icon-wrench', (string)url('', array('module','view'=>'Cleanup','table')));
 		if(array_key_exists('nested_set', $tableMap->getBehaviors()))
-			$flexigrid->addLinkButton('Repair nested set', 'icon_wrench', (string)url('', array('module','view'=>'RepairNestedSet','table')));
+			$flexigrid->addLinkButton('Repair nested set', 'icon-wrench', (string)url('', array('module','view'=>'RepairNestedSet','table')));
 		$flexigrid->addSeparator();
-		$flexigrid->addLinkButton('Import', 'icon_page_excel', (string)url('', array('module','view'=>'Import','table')));
-		$flexigrid->addLinkButton('Export', 'icon_page_excel', (string)url('', array('module','view'=>'Export','table')));
+		$flexigrid->addLinkButton('Import', 'icon-table', (string)url('', array('module','view'=>'Import','table')));
+		$flexigrid->addLinkButton('Export', 'icon-table', (string)url('', array('module','view'=>'Export','table')));
 		
 		return $flexigrid;
 	}
@@ -253,10 +260,10 @@ class Curry_Backend_Database extends Curry_Backend
 		$form = Curry_Backend_DatabaseHelper::getRowForm($row);
 		if (isPost() && $form->isValid($_POST)) {
 			Curry_Backend_DatabaseHelper::saveRow($row, $form);
-			$this->returnPartial('');
+			self::returnPartial('');
 		}
 		
-		$this->returnPartial($form);
+		self::returnPartial($form);
 	}
 
 	/**
@@ -278,7 +285,7 @@ class Curry_Backend_Database extends Curry_Backend
 	{
 		$modelClass = $_GET['table'];
 		$tableMap = PropelQuery::from($modelClass)->getTableMap();
-		$columnOptions = Curry_Array::objectsToArray($tableMap->getColumns(), 'getName', 'getPhpName');
+		$columnOptions = ArrayHelper::objectsToArray($tableMap->getColumns(), 'getName', 'getPhpName');
 		$pks = array();
 		foreach($tableMap->getColumns() as $column) {
 			if($column->isPrimaryKey()) {
@@ -376,7 +383,7 @@ class Curry_Backend_Database extends Curry_Backend
 			$deleted = 0;
 			$updated = 0;
 			$inserted = 0;
-			$con = Propel::getConnection(PropelQuery::from($modelClass)->getDbName());
+			$con = \Propel::getConnection(PropelQuery::from($modelClass)->getDbName());
 			$con->beginTransaction();
 			try {
 				// Replace will empty the table
@@ -474,7 +481,7 @@ class Curry_Backend_Database extends Curry_Backend
 		$output = Curry_Backend_DatabaseHelper::propelGen($cmd);
 		$success = Curry_Backend_DatabaseHelper::getPropelGenStatus($output);
 		$this->beginDetails("Running propel-gen $cmd", $success ? self::MSG_SUCCESS : self::MSG_ERROR, !$success);
-		$this->addMainContent('<pre class="console">'.Curry_Console::colorize($output).'</pre>');
+		$this->addMainContent('<pre class="console">'.Console::colorize($output).'</pre>');
 		$this->endDetails();
 		return $success;
 	}
@@ -571,23 +578,22 @@ class Curry_Backend_Database extends Curry_Backend
 	 */
 	public function doAutoRebuild()
 	{
-		if(!is_writable(Curry_Core::$config->curry->configPath)) {
+		if(!is_writable($this->app['configPath'])) {
 			$this->addMessage("Configuration file doesn't seem to be writable.", self::MSG_ERROR);
 			return;
 		}
-		$config = new Zend_Config(require(Curry_Core::$config->curry->configPath), true);
+		$config = $this->app->openConfiguration();
 		$restoreConfig = clone $config;
 		
-		$config->curry->backend->noauth = true;
-		if(!$config->curry->maintenance->enabled || $config->curry->maintenance->page) {
-			$config->curry->maintenance->enabled = true;
-			$config->curry->maintenance->page = false;
-			$config->curry->maintenance->message = "Rebuilding database, please wait...";
+		$config->backend->noauth = true;
+		if(!$config->maintenance->enabled || $config->maintenance->page) {
+			$config->maintenance->enabled = true;
+			$config->maintenance->page = false;
+			$config->maintenance->message = "Rebuilding database, please wait...";
 		}
-		
-		$writer = new Zend_Config_Writer_Array();
-		$writer->write(Curry_Core::$config->curry->configPath, $config);
-		
+
+		$this->app->writeConfiguration($config);
+
 		try {
 			$filename = Curry_Backend_DatabaseHelper::createBackupName('backup_%Y-%m-%d_%H-%M-%S_autorebuild.txt');
 			$this->beginDetails('Dumping database to: '.$filename);
@@ -614,8 +620,7 @@ class Curry_Backend_Database extends Curry_Backend
 		}
 		
 		if($restoreConfig !== null) {
-			$writer = new Zend_Config_Writer_Array();
-			$writer->write(Curry_Core::$config->curry->configPath, $restoreConfig);
+			$this->app->writeConfiguration($restoreConfig);
 		}
 	}
 	
@@ -665,7 +670,7 @@ class Curry_Backend_Database extends Curry_Backend
 	{
 		// restore from temp file
 		try {
-			if(!Curry_URL::validate())
+			if(!URL::validate())
 				throw new Exception('Invalid hash');
 				
 			if(!Curry_Backend_DatabaseHelper::restoreFromFile($_GET['file']))
@@ -801,7 +806,7 @@ class Curry_Backend_Database extends Curry_Backend
 			$this->addMainContent($form);
 			if($form->scan->isChecked()) {
 				$numInvalidRows = 0;
-				foreach(Curry_Propel::getModels() as $classes) {
+				foreach(Propel::getModels() as $classes) {
 					foreach($classes as $clazz) {
 						$this->addMessage("Scanning table $clazz");
 						$numInvalidRows += Curry_Backend_DatabaseHelper::scanTable($clazz, $form->fix->getValue(), $form->delete->getValue(), $this);
@@ -859,7 +864,7 @@ class Curry_Backend_Database extends Curry_Backend
 		
 		$tables = array();
 		$selectedTables = array();
-		foreach(Curry_Propel::getModels() as $package => $classes) {
+		foreach(Propel::getModels() as $package => $classes) {
 			$selectedTables = array_merge($selectedTables, array_values($classes));
 			$tables[$package] = array();
 			foreach($classes as $table)
@@ -904,8 +909,8 @@ class Curry_Backend_Database extends Curry_Backend
 				$fp = fopen("php://temp", 'r+');
 				Curry_Backend_DatabaseHelper::dumpDatabase($fp, $values['tables'], $this);
 				rewind($fp);
-				$name = Curry_String::getRewriteString(Curry_Core::$config->curry->name).'-db.txt';
-				Curry_Application::returnData($fp, 'application/octet-stream', $name);
+				$name = StringHelper::getRewriteString($this->app['name']).'-db.txt';
+				self::returnData($fp, 'application/octet-stream', $name);
 			} else if($values['type'] == 'online') {
 				$filename = Curry_Backend_DatabaseHelper::createBackupName($values['name']);
 				$status = Curry_Backend_DatabaseHelper::dumpDatabase($filename, $values['tables'], $this);
@@ -925,7 +930,7 @@ class Curry_Backend_Database extends Curry_Backend
 		$tables = array();
 		$selectedTables = array();
 		$disabledTables = array();
-		foreach(Curry_Propel::getModels() as $package => $classes) {
+		foreach(Propel::getModels() as $package => $classes) {
 			$tables[$package] = array();
 			foreach($classes as $table) {
 				$tables[$package][$table] = $table;
@@ -943,7 +948,7 @@ class Curry_Backend_Database extends Curry_Backend
 		);
 		$path = Curry_Backend_DatabaseHelper::createBackupName('*.txt');
 		foreach(array_reverse(glob($path)) as $file)
-			$files[$file] = basename($file). ' ('.Curry_Util::humanReadableBytes(filesize($file)).')';
+			$files[$file] = basename($file). ' ('.Helper::humanReadableBytes(filesize($file)).')';
 			
 		$form = new Curry_Form(array(
 			'action' => url('', array("module","view","page_id")),
@@ -1030,7 +1035,7 @@ class Curry_Backend_Database extends Curry_Backend
 	 */
 	public function showContinueRestore()
 	{
-		if(!Curry_URL::validate())
+		if(!URL::validate())
 			throw new Exception('Invalid hash');
 		
 		Curry_Backend_DatabaseHelper::restoreFromFile($_GET['file'], $_GET['tables'], $_GET['max_execution_time'], $_GET['line'], $this);

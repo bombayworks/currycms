@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry;
 
 /**
  * Class to create/build URLs.
@@ -23,7 +24,7 @@
  *
  * @package Curry
  */
-class Curry_URL {
+class URL {
 	/**
 	 * Scheme part of URL.
 	 *
@@ -88,13 +89,6 @@ class Curry_URL {
 	protected $reverseRoute = true;
 	
 	/**
-	 * If true, will prevent redirects and cause redirect() to throw an Exception.
-	 *
-	 * @var bool
-	 */
-	protected static $preventRedirect = false;
-	
-	/**
 	 * Callback function to run when reverse-routing.
 	 *
 	 * @var callback|null
@@ -126,10 +120,12 @@ class Curry_URL {
 	 * Helper function for constructor.
 	 *
 	 * @param string $url
-	 * @return Curry_URL
+	 * @return URL
 	 */
-	public static function create($url = "") {
-		return new Curry_URL($url);
+	public static function create($url = "", array $vars = array()) {
+		$u = new URL($url);
+		$u->add($vars);
+		return $u;
 	}
 
 	/**
@@ -160,27 +156,6 @@ class Curry_URL {
 	{
 		return self::$defaultSecret;
 	}
-
-	/**
-	 * If set to true, this will prevent redirects and cause redirect() to throw an Exception.
-	 *
-	 * @param bool $value Enable or disable.
-	 * @return bool	Returns the old value.
-	 */
-	public static function setPreventRedirect($value) {
-		$oldValue = self::$preventRedirect;
-		self::$preventRedirect = (bool)$value;
-		return $oldValue;
-	}
-	
-	/**
-	 * Get the value of prevent redirect.
-	 *
-	 * @return bool
-	 */
-	public static function getPreventRedirect() {
-		return self::$preventRedirect;
-	}
 	
 	/**
 	 * Set callback function for reverse-routing.
@@ -206,7 +181,7 @@ class Curry_URL {
 	 * Set scheme part of URL.
 	 *
 	 * @param string $scheme
-	 * @return Curry_URL Returns self for chainability.
+	 * @return URL Returns self for chainability.
 	 */
 	public function setScheme($scheme)
 	{
@@ -228,7 +203,7 @@ class Curry_URL {
 	 * Set host part of URL.
 	 *
 	 * @param string $host
-	 * @return Curry_URL Returns self for chainability.
+	 * @return URL Returns self for chainability.
 	 */
 	public function setHost($host)
 	{
@@ -250,7 +225,7 @@ class Curry_URL {
 	 * Set port part of URL.
 	 *
 	 * @param integer $port
-	 * @return Curry_URL Returns self for chainability.
+	 * @return URL Returns self for chainability.
 	 */
 	public function setPort($port)
 	{
@@ -272,7 +247,7 @@ class Curry_URL {
 	 * Set username part of URL.
 	 *
 	 * @param string $user
-	 * @return Curry_URL Returns self for chainability.
+	 * @return URL Returns self for chainability.
 	 */
 	public function setUser($user)
 	{
@@ -294,7 +269,7 @@ class Curry_URL {
 	 * Set password part of URL.
 	 *
 	 * @param string $password
-	 * @return Curry_URL Returns self for chainability.
+	 * @return URL Returns self for chainability.
 	 */
 	public function setPassword($password)
 	{
@@ -320,7 +295,7 @@ class Curry_URL {
 	 *   leading '~' means relative to script path
 	 *
 	 * @param string $path
-	 * @return Curry_URL Returns self for chainability.
+	 * @return URL Returns self for chainability.
 	 */
 	public function setPath($path)
 	{
@@ -344,7 +319,7 @@ class Curry_URL {
 	 * Set query string part of URL.
 	 *
 	 * @param string|array $queryString
-	 * @return Curry_URL Returns self for chainability.
+	 * @return URL Returns self for chainability.
 	 */
 	public function setQueryString($queryString)
 	{
@@ -366,7 +341,7 @@ class Curry_URL {
 	 * Set fragment part of URL.
 	 *
 	 * @param string $fragment
-	 * @return Curry_URL Returns self for chainability.
+	 * @return URL Returns self for chainability.
 	 */
 	public function setFragment($fragment)
 	{
@@ -388,7 +363,7 @@ class Curry_URL {
 	 * Enable/disable reverse routing for this URL.
 	 *
 	 * @param bool $reverseRoute
-	 * @return Curry_URL Returns self for chainability.
+	 * @return URL Returns self for chainability.
 	 */
 	public function setReverseRoute($reverseRoute)
 	{
@@ -439,7 +414,7 @@ class Curry_URL {
 	 * /test/?foo=1&bar=2#fragment
 	 *
 	 * @param string $url
-	 * @return Curry_URL
+	 * @return URL
 	 */
 	public function setUrl($url) {
 		$urlinfo = self::parse($url);
@@ -544,7 +519,7 @@ class Curry_URL {
 	 *
 	 * @param array $vars
 	 * @param bool $overwrite
-	 * @return Curry_URL
+	 * @return URL
 	 */
 	public function add(array $vars = array(), $overwrite = true) {
 		if (is_string($this->queryString)) {
@@ -568,7 +543,7 @@ class Curry_URL {
 	 * Remove GET variables from the query string.
 	 *
 	 * @param string|array $var
-	 * @return Curry_URL
+	 * @return URL
 	 */
 	public function remove($var) {
 		if (is_string($this->queryString)) {
@@ -595,7 +570,7 @@ class Curry_URL {
 		if ($secret === true || $secret === null)
 			$secret = self::$defaultSecret;
 		if (!$secret)
-			throw new Exception('No secret specified');
+			throw new \Exception('No secret specified');
 
 		// remove hash from query string
 		$url = clone $this;
@@ -615,7 +590,7 @@ class Curry_URL {
 	 * @return bool
 	 */
 	public static function validate($secret = null) {
-		return Curry_URL::create(self::getRequestUri())->add($_GET)->isValid($secret);
+		return URL::create(self::getRequestUri(), $_GET)->isValid($secret);
 	}
 
 	/**
@@ -693,27 +668,7 @@ class Curry_URL {
 
 		return $ret;
 	}
-	
-	/**
-	 * Do a browser redirect and exit.
-	 * 
-	 * 301 Moved permanently
-	 * 302 Found
-	 * 303 See other
-	 * 307 Temporary redirect
-	 *
-	 * @param integer $code
-	 * @param bool $secure
-	 */
-	public function redirect($code = 302, $secure = false) {
-		$url = $this->getAbsolute('&', $secure);
-		if(self::$preventRedirect)
-			throw new Curry_Exception_RedirectPrevented($url);
-			
-		header('Location: ' . $url, true, $code);
-		exit;
-	}
-	
+
 	/**
 	 * Get full URL including all parts.
 	 *
@@ -863,7 +818,7 @@ class Curry_URL {
 			return $_SERVER['REQUEST_URI'];
 		if(isset($_SERVER['HTTP_X_REWRITE_URL']))
 			return $_SERVER['HTTP_X_REWRITE_URL'];
-		throw new Exception('Unable to get request uri.');
+		throw new \Exception('Unable to get request uri.');
 	}
 	
 	/**
@@ -877,9 +832,7 @@ class Curry_URL {
 			$urlInfo = parse_url(self::getRequestUri());
 			return $urlInfo['path'];
 		}
-		catch (Exception $e) {
-			//trace_warning($e->getMessage());
-		}
+		catch (\Exception $e) { }
 		return "/";
 	}
 	

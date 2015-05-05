@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Controller\Backend;
 
 /**
  * Shows the Live edit (aka Inline Admin) view of the webpage.
@@ -22,16 +23,16 @@
  * @package Curry\Backend
  *
  */
-class Curry_Backend_InlineAdmin extends Curry_Backend
+class Curry_Backend_InlineAdmin extends \Curry\Backend\AbstractLegacyBackend
 {
 	/** {@inheritdoc} */
-	public static function getGroup()
+	public function getGroup()
 	{
 		return "Content";
 	}
 
 	/** {@inheritdoc} */
-	public static function getName()
+	public function getName()
 	{
 		return "Live edit";
 	}
@@ -39,8 +40,8 @@ class Curry_Backend_InlineAdmin extends Curry_Backend
 	/** {@inheritdoc} */
 	public function showMain()
 	{
-		if(!Curry_Core::$config->curry->liveEdit) {
-			$this->addMessage('Live edit is not enabled, go to <a href="'.url('', array('module' => 'Curry_Backend_System')).'">System Settings</a> to enable it.', Curry_Backend::MSG_WARNING, false);
+		if(!$this->app['liveEdit']) {
+			$this->addMessage('Live edit is not enabled, go to <a href="'.url('', array('module' => 'Curry_Backend_System')).'">System Settings</a> to enable it.', self::MSG_WARNING, false);
 			return;
 		}
 		
@@ -60,9 +61,9 @@ class Curry_Backend_InlineAdmin extends Curry_Backend
 	public function showPage($url)
 	{
 		$url .= '?curry_inline_admin=true';
-		Curry_Admin::getInstance()->addBodyClass('tpl-fullscreen');
-		url($url)->redirect();
-		$this->addMainContent('<iframe id="inline-admin-preview" src="'.$url.'" frameborder="0" width="100%" height="100%"></iframe>');
+		self::redirect($url);
+		//$this->addBodyClass('tpl-fullscreen');
+		//$this->addMainContent('<iframe id="inline-admin-preview" src="'.$url.'" frameborder="0" width="100%" height="100%"></iframe>');
 	}
 
 }

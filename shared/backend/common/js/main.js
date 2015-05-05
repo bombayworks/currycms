@@ -5,7 +5,6 @@
 	$.registerComponent('.ctrlsave', 'ctrlsave');
 	$.registerComponent('.ajaxsubmit', 'ajaxsubmit');
 	$.registerComponent('.trigger-change', 'change');
-	$.registerComponent('.datepicker', 'datepicker', ['jquery-ui']);
 	$.registerComponent('.chosen', 'chosen', ['chosen']);
 	$.registerComponent('.modelview', 'modelview', ['modelview']);
 
@@ -41,35 +40,10 @@
 			return false;
 		});
 	});
-	
-	$.registerComponent('.colorpicker', function($obj) {
-		$obj.ColorPicker({
-			onSubmit: function(hsb, hex, rgb, el) {
-				$(el).val('#'+hex);
-				$(el).ColorPickerHide();
-			},
-			onBeforeShow: function () {
-				$(this).ColorPickerSetColor(this.value);
-			},
-			onShow: function (colpkr) {
-				$(colpkr).fadeIn(500);
-				return false;
-			},
-			onHide: function (colpkr) {
-				$(colpkr).fadeOut(500);
-				return false;
-			},
-			onChange: function (hsb, hex, rgb) {
-				var el = $(this).data('colorpicker').el;
-				$(el).val('#' + hex);
-			}
-		});
-	}, ['colorpicker']);
-
 
 	// Show ajax loader
 	var numLoading = 0;
-	var $loader = $('<div id="loader"/>');
+	var $loader = $('<div id="loader"/>').toggle(false);
 	function startLoad() { $loader.toggle(!!++numLoading); }
 	function endLoad() { $loader.toggle(!!--numLoading); }
 	$(document)

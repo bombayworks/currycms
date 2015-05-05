@@ -13,7 +13,6 @@ Curry CMS also depend on the following 3rd party libraries:
 * Zend Framework
 * Propel
 * Twig
-* Minify
 
 ## Getting started
 

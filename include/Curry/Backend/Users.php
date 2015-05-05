@@ -15,30 +15,33 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Backend\AbstractLegacyBackend;
+use Curry\Module\AbstractModule;
+use Curry\Util\ArrayHelper;
 
 /**
  * Manage users and user permissions.
  * 
  * @package Curry\Backend
  */
-class Curry_Backend_Users extends Curry_Backend
+class Curry_Backend_Users extends AbstractLegacyBackend
 {
 	const PERMISSION_USERS = 'Users';
 	const PERMISSION_ROLES = 'Roles';
 	const PERMISSION_FILEACCESS = 'FileAccess';
 
 	/** {@inheritdoc} */
-	public static function getGroup()
+	public function getGroup()
 	{
 		return "Accounts";
 	}
 
-	public static function getName()
+	public function getName()
 	{
 		return "Users and roles";
 	}
 
-	public static function getPermissions()
+	public function getPermissions()
 	{
 		return array(
 			self::PERMISSION_USERS,
@@ -74,7 +77,7 @@ class Curry_Backend_Users extends Curry_Backend
 		// Redirect to first view
 		reset($views);
 		list($view, $name) = each($views);
-		url('', array('module','view'=>$view))->redirect();
+		self::redirect(url('', array('module','view'=>$view)));
 	}
 
 	public function showUsers()
@@ -108,7 +111,7 @@ class Curry_Backend_Users extends Curry_Backend
 				'single' => true,
 			));
 		}
-		$list->show($this);
+		$this->addMainContent($list);
 	}
 
 	public function showRoles()
@@ -119,7 +122,7 @@ class Curry_Backend_Users extends Curry_Backend
 		$this->addMenu();
 
 		$user = User::getUser();
-		$backendModules = Curry_Backend::getBackendList();
+		$backendModules = AbstractLegacyBackend::getBackendList();
 
 		$disable = array();
 		$backend = array("*" => "All");
@@ -129,7 +132,7 @@ class Curry_Backend_Users extends Curry_Backend
 			$backend[$backendClass] = $backendName;
 			$permissions = method_exists($backendClass, 'getPermissions') ? call_user_func(array($backendClass, 'getPermissions')) : array();
 			foreach($permissions as $permission) {
-				$backend[$backendClass."/".$permission] = Curry_Core::SELECT_TREE_PREFIX . $permission;
+				$backend[$backendClass."/".$permission] = "\xC2\xA0\xC2\xA0\xC2\xA0" . $permission;
 				if (!$user->hasAccess($backendClass."/".$permission))
 					$disable[] = $backendClass."/".$permission;
 			}
@@ -138,7 +141,7 @@ class Curry_Backend_Users extends Curry_Backend
 		}
 
 		$content = array();
-		$contentAccess = array("*" => "All") + Curry_Module::getModuleList();
+		$contentAccess = array("*" => "All") + AbstractModule::getModuleList();
 		$allContentAccess = $user->hasAccess('Curry_Backend_Content/*');
 		foreach($contentAccess as $k => $v) {
 			$content['Curry_Backend_Content/'.$k] = $v;
@@ -149,7 +152,7 @@ class Curry_Backend_Users extends Curry_Backend
 		$form = new Curry_ModelView_Form('UserRole', array(
 			'elements' => array(
 				'backend' => array('multiselect', array(
-					'label' => 'Backend access',
+					'label' => 'Curry\Controller\Backend access',
 					'multiOptions' => $backend,
 					'size' => 10,
 					'order' => 1,
@@ -200,7 +203,7 @@ class Curry_Backend_Users extends Curry_Backend
 			'class' => 'inline',
 			'single' => true,
 		));
-		$list->show($this);
+		$this->addMainContent($list);
 	}
 
 	public function showFileAccess()
@@ -264,7 +267,7 @@ class Curry_Backend_Users extends Curry_Backend
 			),
 		);
 		$list = $this->getFileAccessList($q, $formOptions, $listOptions);
-		$list->show($this);
+		$this->addMainContent($list);
 	}
 
 	protected function getValidRoles()
@@ -309,7 +312,7 @@ class Curry_Backend_Users extends Curry_Backend
 				))
 			),
 		);
-		Curry_Array::extend($o, $formOptions);
+		ArrayHelper::extend($o, $formOptions);
 
 		$modelForm = new Curry_Form_ModelForm('FilebrowserAccess', $o);
 		$modelForm->path->getValidator('callback')->setMessage("Invalid permissions to path '%value%'");
@@ -325,7 +328,7 @@ class Curry_Backend_Users extends Curry_Backend
 				),
 			)
 		);
-		Curry_Array::extend($o, $listOptions);
+		ArrayHelper::extend($o, $listOptions);
 		$list = new Curry_ModelView_List($query, $o);
 
 		return $list;
@@ -401,7 +404,7 @@ class Curry_Backend_Users extends Curry_Backend
 			$this->createModelUpdateEvent(get_class($user), $user->getPrimaryKey(), $user->isNew() ? 'insert' : 'update');
 			$this->saveUser($user, $form);
 			if (isAjax())
-				Curry_Application::returnPartial('');
+				self::returnPartial('');
 		}
 		
 		// Render
@@ -511,7 +514,7 @@ class Curry_Backend_Users extends Curry_Backend
 
 		$home = self::getUserHome($user, true);
 		if($values['create_home_folder']) {
-			$folder = Curry_Core::$config->curry->wwwPath . DIRECTORY_SEPARATOR;
+			$folder = $this->app['wwwPath'] . DIRECTORY_SEPARATOR;
 			$folder .= str_replace('/', DIRECTORY_SEPARATOR, rtrim($home->getPath(), '/'));
 			if (!file_exists($folder))
 				@mkdir($folder, 0777, true);

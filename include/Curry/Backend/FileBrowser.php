@@ -15,16 +15,23 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Controller\Frontend;
+use Curry\Util\ArrayHelper;
+use Curry\Util\Helper;
+use Curry\Util\Html;
+use Curry\Util\StringHelper;
+use Curry\Util\Flash;
+use Curry\Util\PathHelper;
 
 /**
  * This module allows you to browse the filesystem.
  *
  * @package Curry\Backend
  */
-class Curry_Backend_FileBrowser extends Curry_Backend
+class Curry_Backend_FileBrowser extends \Curry\Backend\AbstractLegacyBackend
 {
 	/** {@inheritdoc} */
-	public static function getName()
+	public function getName()
 	{
 		return "Files";
 	}
@@ -32,10 +39,10 @@ class Curry_Backend_FileBrowser extends Curry_Backend
 	/**
 	 * Constructor
 	 */
-	public function __construct()
+	public function __construct(\Curry\App $app)
 	{
-		parent::__construct();
-		$this->rootPath = Curry_Core::$config->curry->wwwPath.DIRECTORY_SEPARATOR;
+		parent::__construct($app);
+		$this->rootPath = $this->app['wwwPath'].DIRECTORY_SEPARATOR;
 	}
 	
 	/**
@@ -80,7 +87,7 @@ class Curry_Backend_FileBrowser extends Curry_Backend
 		$roots = array();
 		foreach($fbas as $fba) {
 			$path = $fba->getPath();
-			$realpath = realpath(Curry_Core::$config->curry->wwwPath . DIRECTORY_SEPARATOR . $fba->getPath());
+			$realpath = realpath(\Curry\App::getInstance()['wwwPath'] . DIRECTORY_SEPARATOR . $fba->getPath());
 			if($realpath) {
 				$roots[$fba->getName()] = array(
 					'path' => $path,
@@ -162,7 +169,7 @@ class Curry_Backend_FileBrowser extends Curry_Backend
 	 */
 	public static function physicalToPublic($physical)
 	{
-		$www = Curry_Core::$config->curry->wwwPath;
+		$www = \Curry\App::getInstance()['wwwPath'];
 		if(substr($physical, 0, strlen($www)) == $www)
 			return substr($physical, strlen($www) + 1);
 		throw new Curry_Exception('Unable to map "'.$physical.'" to public path');
@@ -178,7 +185,7 @@ class Curry_Backend_FileBrowser extends Curry_Backend
 	{
 		$roots = self::getRoots();
 		foreach($roots as $root) {
-			if ($root['writable'] && Curry_String::startsWith($physical.'/', $root['realpath'].'/'))
+			if ($root['writable'] && StringHelper::startsWith($physical.'/', $root['realpath'].'/'))
 				return true;
 		}
 		return false;
@@ -205,11 +212,11 @@ class Curry_Backend_FileBrowser extends Curry_Backend
 				if(!method_exists($this, $method))
 					throw new Curry_Exception('Action does not exist.');
 				$contentType = isset($_GET['iframe']) ? 'text/html' : 'application/json';
-				Curry_Application::returnJson($this->$method($_REQUEST), "", $contentType);
+				self::returnJson($this->$method($_REQUEST), "", $contentType);
 			}
 			catch(Exception $e) {
 				if(isAjax())
-					$this->returnJson( array('status'=>0, 'error'=>$e->getMessage()) );
+					self::returnJson( array('status'=>0, 'error'=>$e->getMessage()) );
 				else
 					$this->addMessage($e->getMessage(), self::MSG_ERROR);
 			}
@@ -226,7 +233,7 @@ class Curry_Backend_FileBrowser extends Curry_Backend
   {% for path in paths %}
   <ul class="folder {{path.IsRoot?'root':''}}" data-finder='{"path":"{{path.Path}}","action":"{{path.UploadUrl}}"}'>
     {% for file in path.files %}
-    <li class="{{file.IsSelected?'selected':(file.IsHighlighted?'highlighted':'')}} {{file.Icon}}"><a href="{{file.Url}}" class="navigate" data-finder='{"name":"{{file.Name}}","path":"{{file.Path}}"}'>{{file.Name}}</a></li>
+    <li class="{{(file.IsFolder?'is-folder':'is-file')~(file.IsSelected?' selected':(file.IsHighlighted?' highlighted':''))}}"><a href="{{file.Url}}" class="navigate" data-finder='{"name":"{{file.Name}}","path":"{{file.Path}}"}'><span class="{{file.Icon}}"></span>{{file.Name}}</a></li>
     {% endfor %}
   </ul>
   {% endfor %}
@@ -328,9 +335,9 @@ TPL
 		$vars['paths'] = self::getPaths($selected);
 		$content = $template->render($vars);
 		if(isAjax()) {
-			$this->returnJson(array(
+			self::returnJson(array(
 				'content' => $content,
-				'maxUploadSize' => Curry_Util::computerReadableBytes(get_cfg_var('upload_max_filesize')),
+				'maxUploadSize' => Helper::computerReadableBytes(get_cfg_var('upload_max_filesize')),
 				'path' => $selected,
 			));
 		} else {
@@ -419,19 +426,19 @@ TPL
 		
 		if($zip) {
 			require_once 'pclzip/pclzip.lib.php';
-			$tempfile = tempnam(Curry_Core::$config->curry->tempPath, "curry-download");
+			$tempfile = tempnam($this->app['tempPath'], "curry-download");
 			$archive = new PclZip($tempfile);
 			if(!$archive->create($physicals, PCLZIP_OPT_REMOVE_PATH, dirname($physicals[0]))) {
 				$this->addMessage('Unable to create zip.');
 				if(file_exists($tempfile))
 					@unlink($tempfile);
 			} else {
-				Curry_Application::returnFile($tempfile, 'application/octet-stream', $name, false);
+				self::returnFile($tempfile, 'application/octet-stream', $name, false);
 				@unlink($tempfile);
 				exit;
 			}
 		} else {
-			Curry_Application::returnFile($physicals[0], 'application/octet-stream', $name);
+			self::returnFile($physicals[0], 'application/octet-stream', $name);
 		}
 	}
 	
@@ -443,7 +450,7 @@ TPL
 	 */
 	public static function filterFilename($filename)
 	{
-		$filename = iconv(Curry_Core::$config->curry->internalEncoding, 'ASCII//TRANSLIT', $filename);
+		$filename = iconv('utf-8', 'ASCII//TRANSLIT', $filename);
 		$filename = preg_replace('/\s+/', '_', $filename);
 		$filename = preg_replace('/([^a-z0-9._-]+)/i', '-', $filename);
 		return $filename;
@@ -531,7 +538,7 @@ TPL
 		$overwrite = array();
 		foreach((array)$_FILES['file']['error'] as $key => $error) {
 			if($error)
-				throw new Exception('Upload error: '.Curry_Util::uploadCodeToMessage($error));
+				throw new Exception('Upload error: '.Helper::uploadCodeToMessage($error));
 			$name = self::filterFilename($_FILES['file']['name'][$key]);
 			$source = $_FILES['file']['tmp_name'][$key];
 			$target = $targetPath . '/' . $name;
@@ -545,7 +552,7 @@ TPL
 						'target' => $target,
 						'temp' => $sourceHash,
 					);
-					$target = Curry_Core::$config->curry->tempPath . DIRECTORY_SEPARATOR . $sourceHash;
+					$target = $this->app['tempPath'] . DIRECTORY_SEPARATOR . $sourceHash;
 					move_uploaded_file($source, $target);
 					continue;
 				}
@@ -555,7 +562,7 @@ TPL
 			$result['uploaded_virtual'][] = $virtualPath . '/' . $name;
 			$result['uploaded_public'][] = self::physicalToPublic($target);
 		}
-		$ses = new Zend_Session_Namespace(__CLASS__);
+		$ses = new \Zend\Session\Container(__CLASS__);
 		$ses->uploadOverwrite = $overwrite;
 		return $result;
 	}
@@ -569,13 +576,13 @@ TPL
 	public function actionUploadOverwrite($params)
 	{
 		$files = (array)$params['overwrite'];
-		$ses = new Zend_Session_Namespace(__CLASS__);
+		$ses = new \Zend\Session\Container(__CLASS__);
 		$sessionFiles = (array)$ses->uploadOverwrite;
 		foreach($files as $name => $overwrite) {
 			if(!isset($sessionFiles[$name]))
 				throw new Exception('File to overwrite not found in session');
 			$sessionFile = $sessionFiles[$name];
-			$tempFile = Curry_Core::$config->curry->tempPath . DIRECTORY_SEPARATOR . $sessionFile['temp'];
+			$tempFile = $this->app['tempPath'] . DIRECTORY_SEPARATOR . $sessionFile['temp'];
 			if($overwrite === 'true') {
 				if(file_exists($sessionFile['target']))
 					self::trashFile($sessionFile['target']);
@@ -615,7 +622,7 @@ TPL
 				'IsSelected' => ($name == $root) && (count($parts) == 0),
 				'Url' => (string)url('', array('module','path' => $name)),
 				'Path' => $name,
-				'Icon' => 'icon_folder',
+				'Icon' => 'icon-folder-'.($name == $root ? 'open' : 'close'),
 			);
 		}
 		
@@ -627,7 +634,7 @@ TPL
 		$current = '';
 		while(1) {
 			$currentPath = $rootPath . $current;
-			if(!is_dir(Curry_Core::$config->curry->wwwPath . DIRECTORY_SEPARATOR . $currentPath))
+			if(!is_dir($this->app['wwwPath'] . DIRECTORY_SEPARATOR . $currentPath))
 				break;
 			$next = count($parts) ? $parts[0] : '';
 			$paths[] = $this->getPathInfo($currentPath, $root . $current, $next, $selected);
@@ -657,7 +664,7 @@ TPL
 			'files' => array(),
 		);
 		
-		$realpath = realpath(Curry_Core::$config->curry->wwwPath .DIRECTORY_SEPARATOR. $path);
+		$realpath = realpath($this->app['wwwPath'] .DIRECTORY_SEPARATOR. $path);
 		
 		$dit = new DirectoryIterator($realpath);
 		foreach($dit as $entry) {
@@ -676,12 +683,12 @@ TPL
 				'IsHighlighted' => $name == $highlighted,
 				'IsSelected' => in_array($vpath, $selected),
 				'IsFolder' => $entry->isDir(),
-				'Icon' => $entry->isDir() ? 'icon_folder' : Curry_Util::getIconFromExtension(pathinfo($entry->getPathname(), PATHINFO_EXTENSION)),
+				'Icon' => $entry->isDir() ? 'icon-folder-'.($name == $highlighted ? 'open' : 'close') : PathHelper::getIconFromExtension(pathinfo($entry->getPathname(), PATHINFO_EXTENSION)),
 				'Url' => (string)url('', array('module','path' => $vpath)),
 				'Path' => $vpath,
 			);
 		}
-		Curry_Array::sortOn($p['files'], array('IsFolder', 'Name'), array(Curry_Array::SORT_PROPERTY|Curry_Array::SORT_REVERSE, Curry_Array::SORT_PROPERTY|Curry_Array::SORT_CASEINSENSITIVE));
+		ArrayHelper::sortOn($p['files'], array('IsFolder', 'Name'), array(ArrayHelper::SORT_PROPERTY|ArrayHelper::SORT_REVERSE, ArrayHelper::SORT_PROPERTY|ArrayHelper::SORT_CASEINSENSITIVE));
 		return $p;
 	}
 	
@@ -732,9 +739,9 @@ TPL
 				$fi = array(
 					'Name' => '<h2>'.basename($physical).'</h2>',
 					'Preview' => '',
-					'Size' => '<strong>Size: </strong>' . Curry_Util::humanReadableBytes(filesize($physical)),
+					'Size' => '<strong>Size: </strong>' . Helper::humanReadableBytes(filesize($physical)),
 					'Writable' => '<strong>Writable: </strong>'.(self::isWritable($physical)?'Yes':'No'),
-					'Permissions' => '<strong>Permissions: </strong>' . Curry_Util::getFilePermissions($physical),
+					'Permissions' => '<strong>Permissions: </strong>' . PathHelper::getFilePermissions($physical),
 					'Owner' => '<strong>Owner: </strong>' . $owner . ' / ' . $group,
 				);
 				
@@ -764,14 +771,14 @@ TPL
 						break;
 					case 'swf':
 						$size = getimagesize($physical);
-						$flash = Curry_Flash::embed(Curry_Flash::SWFOBJECT_STATIC, $public, $size[0], $size[1], '9.0.0', array());
+						$flash = Flash::embed(Flash::SWFOBJECT_STATIC, $public, $size[0], $size[1], '9.0.0', array());
 						$fi['Preview'] = $flash['html'];
 						break;
 				}
 				return $fi;
 			}
 			catch (Exception $e) {
-				trace_error($e->getMessage());
+				$this->app->logger->error($e->getMessage());
 			}
 		} else {
 			$totalSize = 0;
@@ -781,7 +788,7 @@ TPL
 			}
 			return array(
 				'Name' => '<h2>'.count($selected).' files</h2>',
-				'Size' => '<strong>Size: </strong>' . Curry_Util::humanReadableBytes($totalSize),
+				'Size' => '<strong>Size: </strong>' . Helper::humanReadableBytes($totalSize),
 			);
 		}
 		return null;
@@ -811,7 +818,7 @@ TPL
 	 */
 	protected function trashFile($file)
 	{
-		$trashPath = Curry_Core::$config->curry->trashPath . DIRECTORY_SEPARATOR;
+		$trashPath = $this->app['trashPath'] . DIRECTORY_SEPARATOR;
 		if($trashPath) {
 			if(!file_exists($trashPath))
 				mkdir($trashPath, 0777, true);
@@ -865,11 +872,11 @@ TPL
 			'exit' => $exitUrl,
 			'method' => 'get',
 			'image' => $imageUrl,
-			'referrer' => Curry_Core::$config->curry->name,
+			'referrer' => $this->app['name'],
 			'title' => basename($image),
 		));
 		
-		$this->addMainContent(Curry_Html::createTag('iframe', array(
+		$this->addMainContent(Html::tag('iframe', array(
 			'frameborder' => 0,
 			'style' => 'width: 100%; height: 100%; border: none; display: block;',
 			'src' => $pixlrUrl,

@@ -15,11 +15,17 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Controller\Backend;
+use Curry\Controller\Frontend;
+use Curry\Tree\FilesystemTree;
+use Curry\Tree\Tree;
+use Curry\Util\Helper;
+use Curry\Util\PathHelper;
 
 /**
  * Simple backend to create and edit files.
  */
-abstract class Curry_Backend_FileEditor extends Curry_Backend {
+abstract class Curry_Backend_FileEditor extends \Curry\Backend\AbstractLegacyBackend {
 	/**
 	 * Directory to edit files in.
 	 * @var string
@@ -27,7 +33,7 @@ abstract class Curry_Backend_FileEditor extends Curry_Backend {
 	protected $root = '.';
 
 	/** {@inheritdoc} */
-	public static function getGroup()
+	public function getGroup()
 	{
 		return "";
 	}
@@ -52,11 +58,11 @@ abstract class Curry_Backend_FileEditor extends Curry_Backend {
 	/**
 	 * Get folder tree used by addMenu.
 	 *
-	 * @return Curry_Tree_Filesystem
+	 * @return FilesystemTree
 	 */
 	protected function getTree()
 	{
-		return new Curry_Tree_Filesystem($this->root, array(
+		return new FilesystemTree($this->root, array(
 			'ajaxUrl' => (string)url('', $_GET)->add(array('json'=>1)),
 			'nodeCallback' => array($this, 'getNodeJson'),
 		));
@@ -66,7 +72,7 @@ abstract class Curry_Backend_FileEditor extends Curry_Backend {
 	 * Get file node properties.
 	 *
 	 * @param string $path
-	 * @param Curry_Tree $tree
+	 * @param Tree $tree
 	 * @param int $depth
 	 * @return array
 	 */
@@ -131,7 +137,7 @@ abstract class Curry_Backend_FileEditor extends Curry_Backend {
 				// Save content and preserve EOL style
 				$values = $form->getValues();
 				$code = $values['content'];
-				$eol = Curry_Util::getStringEol($code);
+				$eol = Helper::getStringEol($code);
 				$targetEol = urldecode($values['eol']);
 				if($eol !== $targetEol)
 					$code = str_replace($eol, $targetEol, $code);
@@ -148,12 +154,12 @@ abstract class Curry_Backend_FileEditor extends Curry_Backend {
 			if ($_POST['_ajaxsubmit']) {
 				$form->render(); // fixes issue with csrf-token
 				$ajax['values'] = $form->getValues();
-				Curry_Application::returnJson($ajax);
+				self::returnJson($ajax);
 			}
 		}
 
-		Curry_Admin::getInstance()->addBodyClass('tpl-fullscreen');
-		Curry_Admin::getInstance()->addBodyClass('tpl-fileeditor');
+		$this->addBodyClass('tpl-fullscreen');
+		$this->addBodyClass('tpl-fileeditor');
 		$this->addMenu($_GET['file']);
 		$this->addMainContent($form);
 	}
@@ -167,7 +173,7 @@ abstract class Curry_Backend_FileEditor extends Curry_Backend {
 	protected function getEditForm(SplFileInfo $file)
 	{
 		$content = file_get_contents($file->getPathname());
-		$eol = Curry_Util::getStringEol($content);
+		$eol = Helper::getStringEol($content);
 		$form = new Curry_Form(array(
 			'action' => url('', $_GET),
 			'method' => 'post',
@@ -199,8 +205,8 @@ abstract class Curry_Backend_FileEditor extends Curry_Backend {
 		$form = $this->getNewForm();
 		if (isPost() && $form->isValid($_POST)) {
 			$values = $form->getValues();
-			$path = $values['location'] ? Curry_Util::path($values['location'], $values['name']) : $values['name'];
-			$target = Curry_Util::path($this->root, $path);
+			$path = $values['location'] ? PathHelper::path($values['location'], $values['name']) : $values['name'];
+			$target = PathHelper::path($this->root, $path);
 			touch($target);
 			self::redirect(url('', array('module','view'=>'Edit','file'=>$path)));
 		} else {
@@ -216,7 +222,7 @@ abstract class Curry_Backend_FileEditor extends Curry_Backend {
 		$form = $this->getNewForm();
 		if (isPost() && $form->isValid($_POST)) {
 			$values = $form->getValues();
-			$target = Curry_Util::path($this->root, $values['location'], $values['name']);
+			$target = PathHelper::path($this->root, $values['location'], $values['name']);
 			mkdir($target);
 			self::redirect(url('', array('module','view'=>'Main')));
 		} else {
@@ -235,7 +241,7 @@ abstract class Curry_Backend_FileEditor extends Curry_Backend {
 		$rii = $this->getFileIterator();
 		foreach($rii as $entry) {
 			if($entry->isDir())
-				$dirs[$rii->getSubPathname()] = str_repeat(Curry_Core::SELECT_TREE_PREFIX, $rii->getDepth() + 1) . $entry->getFilename();
+				$dirs[$rii->getSubPathname()] = str_repeat("\xC2\xA0", ($rii->getDepth() + 1) * 3) . $entry->getFilename();
 		}
 		$form = new Curry_Form(array(
 			'action' => url('', $_GET),

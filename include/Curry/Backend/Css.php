@@ -24,16 +24,16 @@
 class Curry_Backend_Css extends Curry_Backend_FileEditor
 {
 	/** {@inheritdoc} */
-	public static function getGroup()
+	public function getGroup()
 	{
 		return "Appearance";
 	}
 
 	/** {@inheritdoc} */
-	public function __construct()
+	public function __construct(\Curry\App $app)
 	{
-		parent::__construct();
-		$this->root = Curry_Core::$config->curry->wwwPath.DIRECTORY_SEPARATOR.'css';
+		parent::__construct($app);
+		$this->root = $this->app['wwwPath'].DIRECTORY_SEPARATOR.'css';
 	}
 
 	/** {@inheritdoc} */

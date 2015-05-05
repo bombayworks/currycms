@@ -15,6 +15,10 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Module;
+
+use Curry\Util\ArrayHelper;
+use Curry\Util\Flash as FlashUtil;
 
 /**
  * Module to embed flash content.
@@ -29,7 +33,7 @@
  * 
  * @package Curry\Module
  */
-class Curry_Module_Flash extends Curry_Module {
+class Flash extends AbstractModule {
 	/**
 	 * Flash source file.
 	 *
@@ -49,7 +53,7 @@ class Curry_Module_Flash extends Curry_Module {
 	 *
 	 * @var string
 	 */
-	protected $method = Curry_Flash::SWFOBJECT_DYNAMIC;
+	protected $method = FlashUtil::SWFOBJECT_DYNAMIC;
 	
 	/**
 	 * Flash width.
@@ -84,7 +88,7 @@ class Curry_Module_Flash extends Curry_Module {
 	 *
 	 * @var string
 	 */
-	protected $expressInstall = '';
+	protected $expressInstall = 'expressInstall.swf';
 	
 	/**
 	 * Add GET/POST/COOKIE to flashvars?
@@ -117,7 +121,7 @@ class Curry_Module_Flash extends Curry_Module {
 	/**
 	 * Embedded (inner) module.
 	 *
-	 * @var Curry_Module|null
+	 * @var AbstractModule|null
 	 */
 	protected $module = null;
 	
@@ -147,17 +151,8 @@ class Curry_Module_Flash extends Curry_Module {
 	 */
 	public function __construct()
 	{
-		$this->expressInstall = Curry_Flash::SWFOBJECT_PATH.'expressInstall.swf';
+		parent::__construct();
 		$this->target = 'flash-'.time();
-	}
-	
-	/** {@inheritdoc} */
-	public function showFront(Curry_Twig_Template $template = null)
-	{
-		$head = $this->getPageGenerator()->getHtmlHead();
-		$head->addScript(Curry_Flash::SWFOBJECT_PATH.'swfobject.js');
-		
-		return parent::showFront($template);
 	}
 	
 	/** {@inheritdoc} */
@@ -168,16 +163,16 @@ class Curry_Module_Flash extends Curry_Module {
 			$flashvars[$flashvar['name']] = $flashvar['value'];
 		
 		if($this->module) {
-			$moduleTemplate = $this->template ? Curry_Twig_Template::loadTemplate($this->template) : null;
+			$moduleTemplate = $this->template ? \Curry_Twig_Template::loadTemplate($this->template) : null;
 			$flashvars[$this->moduleFlashvar] = $this->module->showFront($moduleTemplate);
 		}
 		
 		if(in_array("get", $this->addToFlashvars))
-			Curry_Array::extend($flashvars, $_GET);
+			ArrayHelper::extend($flashvars, $_GET);
 		if(in_array("post", $this->addToFlashvars))
-			Curry_Array::extend($flashvars, $_POST);
+			ArrayHelper::extend($flashvars, $_POST);
 		if(in_array("cookie", $this->addToFlashvars))
-			Curry_Array::extend($flashvars, $_COOKIE);
+			ArrayHelper::extend($flashvars, $_COOKIE);
 		
 		$options = array();
 		$options['expressInstall'] = $this->expressInstall;
@@ -186,7 +181,7 @@ class Curry_Module_Flash extends Curry_Module {
 		$options['params'] = count($this->params) ? $this->params : null;
 		$options['flashvars'] = count($flashvars) ? $flashvars : null;
 		$options['alternativeContent'] = $this->alternativeContent;
-		$flashContent = Curry_Flash::embed($this->method, $this->flash, $this->width, $this->height, $this->version, $options);
+		$flashContent = FlashUtil::embed($this->method, $this->flash, $this->width, $this->height, $this->version, $options);
 		
 		return array(
 			'Source' => $this->flash,
@@ -219,35 +214,35 @@ TPL;
 	/** {@inheritdoc} */
 	public function showBack()
 	{
-		$form = new Curry_Form_SubForm();
-		$form->addSubForm(new Curry_Form_SubForm(array(
+		$form = new \Curry_Form_SubForm();
+		$form->addSubForm(new \Curry_Form_SubForm(array(
 			'legend' => 'Embed properties',
 			'class' => ($this->module ? 'advanced' : ''),
-		    'elements' => array(
-		    	'flash' => array('filebrowser', array(
-		    		'label' => 'Flash',
-		    		'required' => true,
-		    		'value' => $this->flash,
-		    	)),
-		    	'method' => array('select', array(
-		    		'label' => 'Method',
-		    		'multiOptions' => array(
-		    			Curry_Flash::SWFOBJECT_DYNAMIC => "swfobject (dynamic)",
-		    			Curry_Flash::SWFOBJECT_STATIC => "swfobject (static)",
-		    		),
-		    		'required' => true,
-		    		'value' => $this->method,
-		    	)),
-		    	'width' => array('text', array(
-		    		'label' => 'Width',
-		    		'required' => true,
-		    		'value' => $this->width,
-		    	)),
-		    	'height' => array('text', array(
-		    		'label' => 'Height',
-		    		'required' => true,
-		    		'value' => $this->height,
-		    	)),
+			'elements' => array(
+				'flash' => array('filebrowser', array(
+					'label' => 'Flash',
+					'required' => true,
+					'value' => $this->flash,
+				)),
+				'method' => array('select', array(
+					'label' => 'Method',
+					'multiOptions' => array(
+						FlashUtil::SWFOBJECT_DYNAMIC => "swfobject (dynamic)",
+						FlashUtil::SWFOBJECT_STATIC => "swfobject (static)",
+					),
+					'required' => true,
+					'value' => $this->method,
+				)),
+				'width' => array('text', array(
+					'label' => 'Width',
+					'required' => true,
+					'value' => $this->width,
+				)),
+				'height' => array('text', array(
+					'label' => 'Height',
+					'required' => true,
+					'value' => $this->height,
+				)),
 				'target' => array('text', array(
 					'label' => 'Target Id',
 					'required' => true,
@@ -277,7 +272,7 @@ TPL;
 			),
 		)), 'embed');
 		
-		$form->addSubForm(new Curry_Form_SubForm(array(
+		$form->addSubForm(new \Curry_Form_SubForm(array(
 			'legend' => 'Attributes',
 			'class' => 'advanced',
 			'elements' => array(
@@ -292,7 +287,7 @@ TPL;
 			),
 		)), 'attributes');
 		
-		$form->addSubForm(new Curry_Form_SubForm(array(
+		$form->addSubForm(new \Curry_Form_SubForm(array(
 			'legend' => 'Parameters',
 			'class' => 'advanced',
 			'elements' => array(
@@ -372,7 +367,7 @@ TPL;
 			),
 		)), 'params');
 		
-		$variableForm = new Curry_Form_Dynamic(array(
+		$variableForm = new \Curry_Form_Dynamic(array(
 			'legend' => 'Variable',
 			'elements' => array(
 				'name' => array('text', array(
@@ -385,16 +380,16 @@ TPL;
 			),
 		));
 		
-		$form->addSubForm(new Curry_Form_MultiForm(array(
+		$form->addSubForm(new \Curry_Form_MultiForm(array(
 			'legend' => 'Flashvars',
 			'class' => 'advanced',
 			'cloneTarget' => $variableForm,
 			'defaults' => $this->flashvars,
 		)), 'flashvars');
 		
-		$templatesSelect = array(null => "[ None ]") + Curry_Backend_Template::getTemplateSelect();
-		$classNames = array(null => "[ None ]") + Curry_Module::getModuleList();
-		$form->addSubForm(new Curry_Form_SubForm(array(
+		$templatesSelect = array(null => "[ None ]") + \Curry_Backend_Template::getTemplateSelect();
+		$classNames = array(null => "[ None ]") + AbstractModule::getModuleList();
+		$form->addSubForm(new \Curry_Form_SubForm(array(
 			'legend' => 'Embedded module',
 			'class' => 'advanced',
 			'elements' => array(
@@ -423,7 +418,7 @@ TPL;
 	}
 	
 	/** {@inheritdoc} */
-	public function saveBack(Zend_Form_SubForm $form)
+	public function saveBack(\Zend_Form_SubForm $form)
 	{
 		$values = $form->getValues(true);
 		

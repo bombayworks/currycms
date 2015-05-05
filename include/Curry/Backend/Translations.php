@@ -15,25 +15,27 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Backend\AbstractBackend;
+use Curry\Backend\AbstractLegacyBackend;
 
 /**
- * Backend module for managing languages and translation-strings.
+ * Curry\Controller\Backend module for managing languages and translation-strings.
  * 
  * @package Curry\Backend
  */
-class Curry_Backend_Translations extends Curry_Backend {
+class Curry_Backend_Translations extends AbstractLegacyBackend {
 	const PERMISSION_TRANSLATIONS = 'Translations';
 	const PERMISSION_LANGUAGES = 'Languages';
 	const PERMISSION_FIELDS = 'Fields';
 
 	/** {@inheritdoc} */
-	public static function getGroup()
+	public function getGroup()
 	{
 		return "Content";
 	}
 
 	/** {@inheritdoc} */
-	public static function getPermissions()
+	public function getPermissions()
 	{
 		return array(
 			self::PERMISSION_TRANSLATIONS,
@@ -42,7 +44,7 @@ class Curry_Backend_Translations extends Curry_Backend {
 		);
 	}
 
-	public static function addLanguageForm(Curry_Backend $backend, $user = null)
+	public static function addLanguageForm(AbstractLegacyBackend $backend, $user = null)
 	{
 		if (!$user)
 			$user = User::getUser();
@@ -192,7 +194,7 @@ class Curry_Backend_Translations extends Curry_Backend {
 			'modelForm' => $form,
 			'maxPerPage' => 0,
 		));
-		$list->show($this);
+		$this->addMainContent($list);
 	}
 
 	/**
@@ -217,7 +219,7 @@ class Curry_Backend_Translations extends Curry_Backend {
 				),
 			),
 		));
-		$list->show($this);
+		$this->addMainContent($list);
 	}
 
 	/**

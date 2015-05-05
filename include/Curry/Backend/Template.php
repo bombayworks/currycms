@@ -24,16 +24,16 @@
 class Curry_Backend_Template extends Curry_Backend_FileEditor
 {
 	/** {@inheritdoc} */
-	public static function getGroup()
+	public function getGroup()
 	{
 		return "Appearance";
 	}
 
 	/** {@inheritdoc} */
-	public function __construct()
+	public function __construct(\Curry\App $app)
 	{
-		parent::__construct();
-		$this->root = Curry_Core::$config->curry->template->root;
+		parent::__construct($app);
+		$this->root = $this->app['template.root'];
 	}
 
 	/** {@inheritdoc} */
@@ -49,7 +49,7 @@ class Curry_Backend_Template extends Curry_Backend_FileEditor
 	 */
 	public static function getTemplateSelect()
 	{
-		$backend = new self();
+		$backend = new self(\Curry\App::getInstance());
 		$items = array_keys($backend->getFileList());
 		return array_combine($items, $items);
 	}

@@ -15,21 +15,22 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Module\AbstractModule;
 
 /**
  * Manage predefined modules.
  *
  * @package Curry\Backend
  */
-class Curry_Backend_PredefinedModules extends Curry_Backend {
+class Curry_Backend_PredefinedModules extends \Curry\Backend\AbstractLegacyBackend {
 	/** {@inheritdoc} */
-	public static function getName()
+	public function getName()
 	{
 		return 'Predefined modules';
 	}
 
 	/** {@inheritdoc} */
-	public static function getGroup()
+	public function getGroup()
 	{
 		return 'System';
 	}
@@ -38,7 +39,7 @@ class Curry_Backend_PredefinedModules extends Curry_Backend {
 	public function showMain()
 	{
 		$modules = array();
-		foreach(Curry_Module::getModuleList() as $className) {
+		foreach(AbstractModule::getModuleList() as $className) {
 			$parts = explode("_", str_replace("_Module_", "_", $className));
 			$package = array_shift($parts);
 			$modules[$package][$className] = join(" / ", $parts);
@@ -62,6 +63,6 @@ class Curry_Backend_PredefinedModules extends Curry_Backend {
 		$list = new Curry_ModelView_List('Module', array(
 			'modelForm' => $form,
 		));
-		$list->show($this);
+		$this->addMainContent($list);
 	}
 }

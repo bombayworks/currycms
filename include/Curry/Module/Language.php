@@ -15,6 +15,8 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Module;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Module to redirect to different pages depending on the detected browser language.
@@ -23,7 +25,7 @@
  * 
  * @package Curry\Module
  */
-class Curry_Module_Language extends Curry_Module {
+class Language extends AbstractModule {
 	/**
 	 * List of languages.
 	 *
@@ -32,7 +34,7 @@ class Curry_Module_Language extends Curry_Module {
 	protected $languages = array();
 	
 	/** {@inheritdoc} */
-	public function showFront(Curry_Twig_Template $template = null)
+	public function showFront(\Curry_Twig_Template $template = null)
 	{
 		if(is_array($this->languages) && count($this->languages)) {
 			// allowed languages
@@ -50,13 +52,13 @@ class Curry_Module_Language extends Curry_Module {
 				}
 			}
 			
-			$page = PageQuery::create()->findPk($language['page_id']);
+			$page = \PageQuery::create()->findPk($language['page_id']);
 			if($page)
-				url($page->getUrl(), $_GET)->redirect();
+				return RedirectResponse::create(url($page->getUrl(), $_GET));
 			else
-				Curry_Core::log('Redirect page not found', Zend_Log::WARN);
+				$this->app->logger->notice('Redirect page not found');
 		} else
-			Curry_Core::log('No languages found', Zend_Log::WARN);
+			$this->app->logger->notice('No languages found');
 		
 		return '';
 	}
@@ -106,7 +108,7 @@ class Curry_Module_Language extends Curry_Module {
 	/** {@inheritdoc} */
 	public function showBack()
 	{
-		$languageForm = new Curry_Form_Dynamic(array(
+		$languageForm = new \Curry_Form_Dynamic(array(
 			'legend' => 'Language',
 			'elements' => array(
 				'code' => array('text', array(
@@ -117,13 +119,13 @@ class Curry_Module_Language extends Curry_Module {
 				'page_id' => array('select', array(
 					'label' => 'Redirect to page',
 					'required' => true,
-					'multiOptions' => PagePeer::getSelect(),
+					'multiOptions' => \PagePeer::getSelect(),
 					'description' => 'When this language is detected from the users browser, the user will be redirected to this page.',
 				)),
 			),
 		));
 		
-		$form = new Curry_Form_MultiForm(array(
+		$form = new \Curry_Form_MultiForm(array(
 			'legend' => 'Languages',
 			'cloneTarget' => $languageForm,
 			'defaults' => $this->languages,
@@ -133,7 +135,7 @@ class Curry_Module_Language extends Curry_Module {
 	}
 	
 	/** {@inheritdoc} */
-	public function saveBack(Zend_Form_SubForm $form)
+	public function saveBack(\Zend_Form_SubForm $form)
 	{
 		$values = $form->getValues(true);
 		$this->languages = $values;

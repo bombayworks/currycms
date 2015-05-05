@@ -300,28 +300,4 @@
         </foreign-key>
     </table>
 
-    <table name="repository">
-        <column name="repository_id" type="INTEGER" required="true" autoIncrement="true" primaryKey="true"/>
-        <column name="url" type="VARCHAR" size="255" required="true" primaryString="true"/>
-    </table>
-
-    <table name="package">
-        <column name="name" type="VARCHAR" size="255" required="true" primaryKey="true" primaryString="true"/>
-        <column name="version" type="VARCHAR" size="255" required="true"/>
-    </table>
-
-    <table name="package_file">
-        <column name="package_file_id" type="INTEGER" required="true" autoIncrement="true" primaryKey="true"/>
-        <column name="package_name" size="255" type="VARCHAR" required="true"/>
-        <column name="filename" type="VARCHAR" size="255" required="true" primaryString="true"/>
-        <!-- sha1 hash of file -->
-        <column name="checksum" type="VARCHAR" size="40" required="true"/>
-        <foreign-key foreignTable="package" onDelete="cascade">
-            <reference local="package_name" foreign="name"/>
-        </foreign-key>
-        <behavior name="inject_file">
-            <parameter name="object" value="inject/core/PackageFile.php"/>
-        </behavior>
-    </table>
-
 </database>

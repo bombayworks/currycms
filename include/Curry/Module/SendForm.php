@@ -15,6 +15,8 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Module;
+use Curry\Mail;
 
 /**
  * Module to send POST-data to an email.
@@ -26,7 +28,7 @@
  * 
  * @package Curry\Module
  */
-class Curry_Module_SendForm extends Curry_Module {
+class SendForm extends AbstractModule {
 	/**
 	 * Email address to send the mail to.
 	 *
@@ -60,10 +62,11 @@ class Curry_Module_SendForm extends Curry_Module {
 	 */
 	public function __construct()
 	{
+		parent::__construct();
 		$this->to = "";
-		$this->from = Curry_Core::$config->curry->adminEmail;
-		$this->sender = Curry_Core::$config->curry->name;
-		$this->subject = Curry_Core::$config->curry->name . ', form';
+		$this->from = $this->app['adminEmail'];
+		$this->sender = $this->app['name'];
+		$this->subject = $this->app['name'] . ', form';
 	}
 	
 	/** {@inheritdoc} */
@@ -71,17 +74,16 @@ class Curry_Module_SendForm extends Curry_Module {
 	{
 		$success = false;
 		$error = false;
-		if($this->getRequest()->isPost()) {
+		if($this->app->request->getMethod() == 'POST') {
 			try {
 				$this->sendMail();
 				$success = true;
 			}
-			catch (Exception $e) {
+			catch (\Exception $e) {
 				$error = $e->getMessage();
 			}
 		}
 		return array(
-			'Sent' => $success, // deprecated, use Success instead
 			'Success' => $success,
 			'Error' => $error,
 		);
@@ -90,16 +92,17 @@ class Curry_Module_SendForm extends Curry_Module {
 	/** {@inheritdoc} */
 	protected function sendMail()
 	{
+		$r = $this->app->request;
 		$html = $this->getMailHtml();
 		$text = strip_tags($html);
 		
-		$mail = new Curry_Mail();
+		$mail = new Mail();
 		$mail->setBodyText($text);
 		$mail->setBodyHtml($html);
 		$mail->setSubject($this->subject);
 		$mail->setFrom($this->from, $this->sender);
-		if(isset($this->getRequest()->post['email']))
-			$mail->setReplyTo($this->getRequest()->post['email']);
+		if ($r->request->get('email'))
+			$mail->setReplyTo($r->request->get('email'));
 		foreach(explode(",", $this->to) as $email)
 			$mail->addTo(trim($email));
 		$mail->send();
@@ -113,7 +116,7 @@ class Curry_Module_SendForm extends Curry_Module {
 	protected function getMailHtml()
 	{
 		$html = "<html><body><h1>".$this->subject."</h1>\n";
-		foreach($this->getRequest()->post as $key => $value)
+		foreach($this->app->request->request->all() as $key => $value)
 			$html .= "<p><strong>$key:</strong><br />".nl2br(htmlspecialchars($value))."</p>\n";
 		$html .= "<hr />\n".
 			"<p>Submitted at: ".date("r")."<br />\n".
@@ -125,7 +128,7 @@ class Curry_Module_SendForm extends Curry_Module {
 	/** {@inheritdoc} */
 	public function showBack()
 	{
-		$form = new Curry_Form_SubForm(array(
+		$form = new \Curry_Form_SubForm(array(
 			'elements' => array(
 				'to' => array('text', array(
 					'label' => 'To',
@@ -153,7 +156,7 @@ class Curry_Module_SendForm extends Curry_Module {
 	}
 	
 	/** {@inheritdoc} */
-	public function saveBack(Zend_Form_SubForm $form)
+	public function saveBack(\Zend_Form_SubForm $form)
 	{
 		$values = $form->getValues(true);
 		$this->to = $values['to'];

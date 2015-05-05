@@ -15,13 +15,18 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Archive;
+
+use Exception;
+use SplFileInfo;
 
 /**
  * Class used to write an archive to a file.
- * 
+ *
  * @package Curry\Archive
  */
-class Curry_Archive_Writer extends Curry_Archive_Reader {
+class Writer extends Reader
+{
 	/**
 	 * Construct an archive writer.
 	 *
@@ -32,7 +37,7 @@ class Curry_Archive_Writer extends Curry_Archive_Reader {
 	{
 		parent::__construct($filename, $compression);
 	}
-	
+
 	/**
 	 * Open file
 	 */
@@ -42,7 +47,7 @@ class Curry_Archive_Writer extends Curry_Archive_Reader {
 		if (!$this->file)
 			throw new Exception('Unable to open in write mode \'' . $this->filename . '\'');
 	}
-	
+
 	/**
 	 * Write block to file.
 	 *
@@ -54,13 +59,13 @@ class Curry_Archive_Writer extends Curry_Archive_Reader {
 	{
 		if (!$this->file)
 			throw new Exception('Invalid file descriptor');
-			
+
 		if ($len === null)
 			return $this->call('write', $this->file, $data);
 		else
 			return $this->call('write', $this->file, $data, $len);
 	}
-	
+
 	/**
 	 * Write footer (two empty 512 byte blocks).
 	 */
@@ -70,7 +75,7 @@ class Curry_Archive_Writer extends Curry_Archive_Reader {
 			throw new Exception('Invalid file descriptor');
 		$this->writeBlock(pack('a1024', ''));
 	}
-	
+
 	/**
 	 * Write an entry to archive, including header and content.
 	 *
@@ -83,7 +88,7 @@ class Curry_Archive_Writer extends Curry_Archive_Reader {
 			$data = self::createLongHeader($archiveName);
 		else
 			$data = '';
-		
+
 		$mode = 0600;
 		$typeflag = '0';
 		$size = 0;
@@ -93,13 +98,13 @@ class Curry_Archive_Writer extends Curry_Archive_Reader {
 		$uname = '';
 		$gname = '';
 		$linkname = '';
-		
-		if($entry === null) {
+
+		if ($entry === null) {
 			$typeflag = '5';
-		} else if(is_string($entry)) {
+		} else if (is_string($entry)) {
 			$size = strlen($entry);
 			$mode = 0700;
-		} else if($entry instanceof SplFileInfo) {
+		} else if ($entry instanceof SplFileInfo) {
 			$mode = $entry->getPerms();
 			$mtime = $entry->getMTime();
 			$uid = $entry->getOwner();
@@ -112,7 +117,7 @@ class Curry_Archive_Writer extends Curry_Archive_Reader {
 			} else {
 				$size = $entry->getSize();
 			}
-			
+
 			if (function_exists('posix_getpwuid')) {
 				$userinfo = posix_getpwuid($uid);
 				$groupinfo = posix_getgrgid($gid);
@@ -121,15 +126,15 @@ class Curry_Archive_Writer extends Curry_Archive_Reader {
 			}
 		} else
 			throw new Exception('Invalid argument');
-		
+
 		$data .= self::createHeader($archiveName, $mode, $uid, $gid, $size, $mtime, $typeflag, $linkname, 'ustar ', ' ', $uname, $gname);
-		if(strlen($data) % 512)
+		if (strlen($data) % 512)
 			throw new Exception('Invalid header size! ' . strlen($data));
 		$this->writeBlock($data);
-		
-		if($size) {
+
+		if ($size) {
 			$len = 0;
-			if(is_string($entry)) {
+			if (is_string($entry)) {
 				$this->writeBlock($entry);
 				$len = strlen($entry);
 			} else {
@@ -140,14 +145,14 @@ class Curry_Archive_Writer extends Curry_Archive_Reader {
 				}
 				fclose($file);
 			}
-			if($len !== $size)
+			if ($len !== $size)
 				throw new Exception('Invalid size when writing content');
 			// add padding
-			if($len % 512)
-				$this->writeBlock(pack('a'.(512 - ($len % 512)), ''));
+			if ($len % 512)
+				$this->writeBlock(pack('a' . (512 - ($len % 512)), ''));
 		}
 	}
-	
+
 	/**
 	 * Create a long header, using two blocks.
 	 *
@@ -158,10 +163,10 @@ class Curry_Archive_Writer extends Curry_Archive_Reader {
 	{
 		$data = self::createHeader('././@LongLink', 0, 0, 0, strlen($filename), 0, 'L');
 		$contentLength = ceil(strlen($filename) / 512) * 512;
-		$data .= pack('a'.$contentLength, $filename);
+		$data .= pack('a' . $contentLength, $filename);
 		return $data;
 	}
-	
+
 	/**
 	 * Creates a tar entry header.
 	 *
@@ -183,24 +188,24 @@ class Curry_Archive_Writer extends Curry_Archive_Reader {
 	 * @return string
 	 */
 	protected static function createHeader($filename, $perms, $uid, $gid, $size, $mtime, $typeflag,
-		$linkname = '', $magic = '', $version = '', $uname = '', $gname = '', $devmajor = '', $devminor = '', $prefix = '')
+	                                       $linkname = '', $magic = '', $version = '', $uname = '', $gname = '', $devmajor = '', $devminor = '', $prefix = '')
 	{
 		$size = sprintf("%011o", $size);
 		$uid = sprintf("%07o", $uid);
 		$gid = sprintf("%07o", $gid);
 		$perms = sprintf("%07o", $perms & 0777);
 		$mtime = sprintf("%011o", $mtime);
-		
+
 		$data = pack('a100a8a8a8a12a12a8a1a100a6a2a32a32a8a8a155a12',
 			$filename, $perms, $uid, $gid, $size, $mtime, str_repeat(' ', 8),
 			$typeflag, $linkname, $magic,
 			$version, $uname, $gname,
 			$devmajor, $devminor, $prefix, '');
-		
+
 		$checksum = 0;
 		for ($i = 0; $i < 512; ++$i)
 			$checksum += ord($data[$i]);
-		
+
 		$checksum = sprintf("%06o ", $checksum);
 		return substr_replace($data, pack("a8", $checksum), 148, 8);
 	}

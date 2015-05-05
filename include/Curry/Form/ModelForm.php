@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Curry CMS
  *
@@ -16,6 +17,8 @@
  * @link       http://currycms.com
  */
 
+namespace Curry\Form;
+
 /**
  * Creates Zend Forms automagically from The TableMap of the model.
  * 
@@ -24,7 +27,7 @@
  * 
  * @package Curry\Form
  */
-class Curry_Form_ModelForm extends Curry_Form
+class ModelForm extends Form
 {
 	/**
 	 * Model class.
@@ -36,7 +39,7 @@ class Curry_Form_ModelForm extends Curry_Form
 	/**
 	 * Model table map.
 	 *
-	 * @var TableMap
+	 * @var \TableMap
 	 */
 	protected $modelMap;
 
@@ -55,14 +58,14 @@ class Curry_Form_ModelForm extends Curry_Form
 	protected $ignoreFks = true;
 
 	/**
-	 * Specify type and options for column elements.
+	 * Specify type and options for column fields.
 	 *
 	 * @var array
 	 */
-	protected $columnElements = array();
+	protected $columnFields = array();
 
 	/**
-	 * Create elements from relations.
+	 * Create fields from relations.
 	 *
 	 * @var array
 	 */
@@ -84,7 +87,7 @@ class Curry_Form_ModelForm extends Curry_Form
 	protected $onFillForm = null;
 
 	/**
-	 * Creates the form with all the elements.
+	 * Creates the form with all the fields.
 	 *
 	 * Options are:
 	 *
@@ -100,8 +103,8 @@ class Curry_Form_ModelForm extends Curry_Form
 	{
 		parent::__construct($options);
 		$this->modelClass = $modelClass;
-		$this->modelMap = PropelQuery::from($this->modelClass)->getTableMap();
-		$this->createElements();
+		$this->modelMap = \PropelQuery::from($this->modelClass)->getTableMap();
+		$this->createFields();
 	}
 
 	/**
@@ -139,21 +142,20 @@ class Curry_Form_ModelForm extends Curry_Form
 	/**
 	 * Fills the model with the values from the form. Doesn't save the model
 	 * 
-	 * @param BaseObject $instance
+	 * @param \BaseObject $instance
 	 */
-	public function fillModel(BaseObject $instance) {
-		$values = $this->getValues();
-		foreach($this->getElementColumns() as $column) {
-			$name = strtolower($column->getName());
-			$element = $this->getElement($name);
-			if($element && !$element->disabled && array_key_exists($name, $values))
-				$this->setColumnValue($instance, $column, $values[$name]);
+	public function fillModel(\BaseObject $instance) {
+		$values = $this->getValue();
+		foreach($this->getFieldColumns() as $column) {
+			$field = $this->getField($this->getColumnName($column));
+			if($field)
+				$this->setColumnValue($instance, $column, $field->getValue());
 		}
 		foreach($this->modelMap->getRelations() as $relation) {
 			$name = 'relation__'.strtolower($relation->getName());
-			$element = $this->getElement($name);
-			if($element && !$element->disabled && array_key_exists($name, $values))
-				$this->setRelationValue($instance, $relation, $values[$name]);
+			$field = $this->getField($name);
+			if($field)
+				$this->setRelationValue($instance, $relation, $field->getValue());
 		}
 		if (is_callable($this->onFillModel))
 			call_user_func($this->onFillModel, $instance, $this, $values);
@@ -162,19 +164,19 @@ class Curry_Form_ModelForm extends Curry_Form
 	/**
 	 * Fills the form with the values from a model instance.
 	 * 
-	 * @param BaseObject $instance
+	 * @param \BaseObject $instance
 	 */
-	public function fillForm(BaseObject $instance) {
-		foreach($this->getElementColumns() as $column) {
-			$element = $this->getElement(strtolower($column->getName()));
-			if($element)
-				$element->setValue($this->getColumnValue($instance, $column));
+	public function fillForm(\BaseObject $instance) {
+		foreach($this->getFieldColumns() as $column) {
+			$field = $this->getField($this->getColumnName($column));
+			if ($field)
+				$field->setValue($this->getColumnValue($instance, $column));
 		}
 		foreach($this->modelMap->getRelations() as $relation) {
 			$name = 'relation__'.strtolower($relation->getName());
-			$element = $this->getElement($name);
-			if($element)
-				$element->setValue($this->getRelationValue($instance, $relation));
+			$field = $this->getField($name);
+			if($field)
+				$field->setValue($this->getRelationValue($instance, $relation));
 		}
 		if (is_callable($this->onFillForm))
 			call_user_func($this->onFillForm, $instance, $this);
@@ -183,15 +185,15 @@ class Curry_Form_ModelForm extends Curry_Form
 	/**
 	 * Get column value from instance.
 	 *
-	 * @param BaseObject $instance
-	 * @param ColumnMap $column
+	 * @param \BaseObject $instance
+	 * @param \ColumnMap $column
 	 * @return mixed
 	 */
-	protected function getColumnValue(BaseObject $instance, ColumnMap $column) {
+	protected function getColumnValue(\BaseObject $instance, \ColumnMap $column) {
 		$value = $instance->{'get'.$column->getPhpName()}();
 		if(is_resource($value))
 			$value = stream_get_contents($value);
-		if($column->getType() == PropelColumnTypes::PHP_ARRAY && $value !== null)
+		if($column->getType() == \PropelColumnTypes::PHP_ARRAY && $value !== null)
 			$value = join("\n", $value);
 		return $value;
 	}
@@ -199,12 +201,12 @@ class Curry_Form_ModelForm extends Curry_Form
 	/**
 	 * Set column value from instance.
 	 *
-	 * @param BaseObject $instance
-	 * @param ColumnMap $column
+	 * @param \BaseObject $instance
+	 * @param \ColumnMap $column
 	 * @param mixed $value
 	 */
-	protected function setColumnValue(BaseObject $instance, ColumnMap $column, $value) {
-		if($column->getType() === PropelColumnTypes::PHP_ARRAY && !is_array($value)) {
+	protected function setColumnValue(\BaseObject $instance, \ColumnMap $column, $value) {
+		if($column->getType() === \PropelColumnTypes::PHP_ARRAY && !is_array($value)) {
 			if(is_string($value) && !empty($value))
 				$value = explode("\n", $value);
 			else if($value !== null)
@@ -216,47 +218,48 @@ class Curry_Form_ModelForm extends Curry_Form
 	/**
 	 * Get relation value from instance.
 	 *
-	 * @param BaseObject $instance
-	 * @param RelationMap $relation
+	 * @param \BaseObject $instance
+	 * @param \RelationMap $relation
 	 * @return mixed
 	 */
-	protected function getRelationValue(BaseObject $instance, RelationMap $relation) {
+	protected function getRelationValue(\BaseObject $instance, \RelationMap $relation) {
 		switch($relation->getType()) {
-			case RelationMap::ONE_TO_MANY:
-			case RelationMap::MANY_TO_MANY:
+			case \RelationMap::ONE_TO_MANY:
+			case \RelationMap::MANY_TO_MANY:
 				$getter = 'get'.$relation->getPluralName();
 				$value = $instance->{$getter}();
 				return $value->toKeyValue('PrimaryKey','PrimaryKey');
 				break;
-			case RelationMap::MANY_TO_ONE:
-			case RelationMap::ONE_TO_ONE:
+			case \RelationMap::MANY_TO_ONE:
+			case \RelationMap::ONE_TO_ONE:
 				$getter = 'get'.$relation->getName();
 				$value = $instance->{$getter}();
 				return $value ? $value->getPrimaryKey() : null;
 				break;
 		}
+		return null;
 	}
 
 	/**
 	 * Set relation value from instance.
 	 *
-	 * @param BaseObject $instance
-	 * @param RelationMap $relation
+	 * @param \BaseObject $instance
+	 * @param \RelationMap $relation
 	 * @param mixed $value
 	 */
-	protected function setRelationValue(BaseObject $instance, RelationMap $relation, $value) {
+	protected function setRelationValue(\BaseObject $instance, \RelationMap $relation, $value) {
 		switch($relation->getType()) {
-			case RelationMap::ONE_TO_MANY:
-			case RelationMap::MANY_TO_MANY:
+			case \RelationMap::ONE_TO_MANY:
+			case \RelationMap::MANY_TO_MANY:
 				$setter = 'set'.$relation->getPluralName();
 				$otherTable = $relation->getRightTable()->getPhpName();
-				$instance->{$setter}(PropelQuery::from($otherTable)->findPks($value));
+				$instance->{$setter}(\PropelQuery::from($otherTable)->findPks($value));
 				break;
-			case RelationMap::MANY_TO_ONE:
-			case RelationMap::ONE_TO_ONE:
+			case \RelationMap::MANY_TO_ONE:
+			case \RelationMap::ONE_TO_ONE:
 				$setter = 'set'.$relation->getName();
 				$otherTable = $relation->getRightTable()->getPhpName();
-				$instance->{$setter}(PropelQuery::from($otherTable)->findPk($value));
+				$instance->{$setter}(\PropelQuery::from($otherTable)->findPk($value));
 				break;
 		}
 	}
@@ -269,17 +272,17 @@ class Curry_Form_ModelForm extends Curry_Form
 	/**
 	 * @param array $value
 	 */
-	public function setColumnElements(array $value)
+	public function setColumnFields(array $value)
 	{
-		$this->columnElements = $value;
+		$this->columnFields = $value;
 	}
 
 	/**
 	 * @return array
 	 */
-	public function getColumnElements()
+	public function getColumnFields()
 	{
-		return $this->columnElements;
+		return $this->columnFields;
 	}
 
 	/**
@@ -334,138 +337,139 @@ class Curry_Form_ModelForm extends Curry_Form
 		return $this->ignoreFks;
 	}
 
-	public function createElement($type, $name, $options = null)
+	public function createField($name, $options = null)
 	{
-		$columnElement = isset($this->columnElements[$name]) ? $this->columnElements[$name] : null;
-		if($columnElement === false)
+		$columnField = isset($this->columnFields[$name]) ? $this->columnFields[$name] : array();
+		if($columnField === false)
 			return null;
 
-		if(is_string($columnElement)) {
-			$type = $columnElement;
-		} else if(is_array($columnElement)) {
-			list($type, $o) = $columnElement;
-			$options = array_merge((array)$options, $o);
+		if(is_string($columnField)) {
+			$options['type'] = $columnField;
+		} else if(is_array($columnField)) {
+			$options = array_merge((array)$options, $columnField);
+		} else {
+			throw new \Exception('Invalid field specification for field `'.$name.'`.');
 		}
-
-		return parent::createElement($type, $name, $options);
+		return $this->addField($name, $options);
 	}
 
-	protected function getColumnNameAndOptions(ColumnMap $column)
+	protected function getColumnName(\ColumnMap $column)
 	{
-		$name = strtolower($column->getName());
+		return strtolower($column->getName());
+	}
+
+	protected function getColumnOptions(\ColumnMap $column)
+	{
+		$name = self::getColumnName($column);
 		$relation = $column->getRelation();
 		$options = array(
+			'type' => 'text',
 			'label' => $relation ? $relation->getName() : ucfirst(str_replace("_", " ", $name)),
 			'id' => 'table-'.str_replace('_', '-', $column->getTableName()).'-column-'.str_replace("_", "-", $name).rand(),
 		);
-		return array($name, $options);
+		return $options;
 	}
 
 	/**
-	 * Creates a form element from a columnMap.
+	 * Creates a form field from a columnMap.
 	 * 
-	 * @param ColumnMap $column
-	 * @return Zend_Form_Element
+	 * @param \ColumnMap $column
+	 * @return Entity
 	 */
-	public function createElementFromColumn(ColumnMap $column) {
-		$type = 'text';
-		list($name, $options) = $this->getColumnNameAndOptions($column);
-
+	public function createFieldFromColumn(\ColumnMap $column) {
+		$options = $this->getColumnOptions($column);
 		switch($column->getType()) {
-		case PropelColumnTypes::PHP_ARRAY; // array contains one element per row
-			$type = 'textarea';
+		case \PropelColumnTypes::PHP_ARRAY; // array contains one field per row
+			$options['widget'] = 'TextArea';
 			$options['wrap'] = 'off';
 			$options['rows'] = 6;
 			$options['cols'] = 50;
 			break;
-		case PropelColumnTypes::LONGVARCHAR:
-			$type = 'textarea';
+		case \PropelColumnTypes::LONGVARCHAR:
+			$options['widget'] = 'TextArea';
 			$options['rows'] = 6;
 			$options['cols'] = 50;
 			break;
-		case PropelColumnTypes::DATE:
-			$type = 'date';
+		case \PropelColumnTypes::DATE:
+			$options['type'] = 'date';
 			break;
-		case PropelColumnTypes::TIMESTAMP:
-			$type = 'dateTime';
+		case \PropelColumnTypes::TIMESTAMP:
+			$options['type'] = 'datetime';
 			break;
-		case PropelColumnTypes::BOOLEAN:
-			$type = 'checkbox';
+		case \PropelColumnTypes::BOOLEAN:
+			$options['type'] = 'boolean';
 			break;
-		case PropelColumnTypes::ENUM;
-			$type = 'select';
-			$options['multiOptions'] = array_combine($column->getValueSet(), $column->getValueSet());
+		case \PropelColumnTypes::ENUM;
+			$options['type'] = 'choice';
+			$options['choices'] = array_combine($column->getValueSet(), $column->getValueSet());
 			break;
-		case PropelColumnTypes::DOUBLE:
-		case PropelColumnTypes::FLOAT:
-		case PropelColumnTypes::INTEGER:
-		case PropelColumnTypes::VARCHAR:
+		case \PropelColumnTypes::DOUBLE:
+		case \PropelColumnTypes::FLOAT:
+		case \PropelColumnTypes::INTEGER:
+			$options['type'] = 'number';
+			break;
+		case \PropelColumnTypes::VARCHAR:
 		default:
 			break;
 		}
-		return $this->createElement($type, $name, $options);
+		return $this->createField($this->getColumnName($column), $options);
 	}
 
 	/**
-	 * Create form element from foreign key.
+	 * Create form field from foreign key.
 	 *
-	 * @param ColumnMap $column
-	 * @return Zend_Form_Element
+	 * @param \ColumnMap $column
+	 * @return Entity
 	 */
-	public function createElementFromForeignKey(ColumnMap $column) {
-		list($name, $options) = $this->getColumnNameAndOptions($column);
-		// Find the related elements in another table
+	public function createFieldFromForeignKey(\ColumnMap $column) {
+		$options = $this->getColumnOptions($column);
+		// Find the related fields in another table
 		$related = array();
 		$relColName = $column->getRelatedColumn()->getPhpName();
-		$query = PropelQuery::from($column->getRelatedTable()->getPhpName())
-			->setFormatter(ModelCriteria::FORMAT_ON_DEMAND);
+		$query = \PropelQuery::from($column->getRelatedTable()->getPhpName())
+			->setFormatter(\ModelCriteria::FORMAT_ON_DEMAND);
 		foreach($query->find() as $obj) {
 			$k = (string)$obj->{'get'.$relColName}();
 			$v = method_exists($obj, "__toString") ? (string)$obj : $k;
 			$related[$k] = $v;
 		}
-		$options['multiOptions'] = $related;
-		return $this->createElement('select', $name, $options);
+		$options['choices'] = $related;
+		return $this->createField($this->getColumnName($column), $options);
+	}
+
+	protected static function isRelationTypeToMany($type)
+	{
+		return $type === \RelationMap::ONE_TO_MANY || $type === \RelationMap::MANY_TO_MANY;
 	}
 
 	/**
-	 * Create form element from relation.
+	 * Create form field from relation.
 	 *
-	 * @param RelationMap $relation
-	 * @return Zend_Form_Element
+	 * @param \RelationMap $relation
+	 * @return Entity
 	 */
-	public function createElementFromRelation(RelationMap $relation) {
+	public function createFieldFromRelation(\RelationMap $relation) {
 		$name = 'relation__'.strtolower($relation->getName());
+		$toMany = self::isRelationTypeToMany($relation->getType());
 		$options = array(
 			'id' => $name.rand(),
-			'multiOptions' => $this->getMultiOptsFromRelation($relation),
+			'type' => $toMany ? 'multiplechoice' : 'choice',
+			'label' => $relation->getName().($toMany ? 's' : ''),
+			'choices' => $this->getChoicesFromRelation($relation),
 		);
-		switch($relation->getType()) {
-		case RelationMap::ONE_TO_MANY:
-		case RelationMap::MANY_TO_MANY:
-			$options['label'] = $relation->getName().'s';
-			$element = $this->createElement('multiselect', $name, $options);
-
-			break;
-		case RelationMap::MANY_TO_ONE:
-		case RelationMap::ONE_TO_ONE:
-			$options['label'] = $relation->getName();
-			$element = $this->createElement('select', $name, $options);
-			break;
-		}
-		return $element;
+		$this->createField($name, $options);
 	}
 
 	/**
 	 * Create array of options for relation.
 	 *
-	 * @param RelationMap $relation
+	 * @param \RelationMap $relation
 	 * @return array
 	 */
-	public function getMultiOptsFromRelation(RelationMap $relation) {
+	public function getChoicesFromRelation(\RelationMap $relation) {
 		$otherTable = $relation->getRightTable();
-		$objs = PropelQuery::from($otherTable->getPhpName())
-			->setFormatter(ModelCriteria::FORMAT_ON_DEMAND)
+		$objs = \PropelQuery::from($otherTable->getPhpName())
+			->setFormatter(\ModelCriteria::FORMAT_ON_DEMAND)
 			->find();
 		$opts = array();
 		foreach($objs as $obj) {
@@ -479,11 +483,11 @@ class Curry_Form_ModelForm extends Curry_Form
 	}
 
 	/**
-	 * Get columns to create elements from.
+	 * Get columns to create fields from.
 	 *
 	 * @return array
 	 */
-	public function getElementColumns() {
+	public function getFieldColumns() {
 		$columns = array();
 		foreach($this->modelMap->getColumns() as $column) {
 			if($column->isForeignKey() && $this->ignoreFks) {
@@ -501,16 +505,14 @@ class Curry_Form_ModelForm extends Curry_Form
 	}
 
 	/**
-	 * Create elements for columns.
+	 * Create fields for columns.
 	 */
-	protected function createElements() {
-		foreach($this->getElementColumns() as $column) {
+	protected function createFields() {
+		foreach($this->getFieldColumns() as $column) {
 			if($column->isForeignKey())
-				$element = $this->createElementFromForeignKey($column);
+				$this->createFieldFromForeignKey($column);
 			else
-				$element = $this->createElementFromColumn($column);
-			if($element)
-				$this->addElement($element);
+				$this->createFieldFromColumn($column);
 		}
 		foreach($this->withRelations as $relation) {
 			$this->withRelation($relation);
@@ -518,12 +520,12 @@ class Curry_Form_ModelForm extends Curry_Form
 	}
 
 	/**
-	 * Create element from relation.
+	 * Create field from relation.
 	 *
 	 * @param $name
 	 */
 	public function withRelation($name) {
-		$this->addElement($this->createElementFromRelation($this->modelMap->getRelation($name)));
+		$this->createFieldFromRelation($this->modelMap->getRelation($name));
 	}
 }
 

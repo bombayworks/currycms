@@ -15,6 +15,8 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Module;
+use Curry\Util\ArrayHelper;
 
 /**
  * Module to show a set of links.
@@ -29,7 +31,7 @@
  * 
  * @package Curry\Module
  */
-class Curry_Module_Links extends Curry_Module {
+class Links extends AbstractModule {
 	/**
 	 * List of links.
 	 *
@@ -41,7 +43,7 @@ class Curry_Module_Links extends Curry_Module {
 	public function toTwig()
 	{
 		return array(
-			'links' => Curry_Array::objectsToArray($this->links, null, array($this, 'getLinkProperties')),
+			'links' => ArrayHelper::objectsToArray($this->links, null, array($this, 'getLinkProperties')),
 		);
 	}
 	
@@ -80,7 +82,7 @@ TPL
 	{
 		$targets = array(null => "[ Default ]", "_self" => "_self", "_blank" => "_blank", "_top" => "_top");
 		
-		$linkForm = new Curry_Form_Dynamic(array(
+		$linkForm = new \Curry_Form_Dynamic(array(
 			'legend' => 'Link',
 			'elements' => array(
 				'title' => array('text', array(
@@ -98,7 +100,7 @@ TPL
 			),
 		));
 		
-		$form = new Curry_Form_MultiForm(array(
+		$form = new \Curry_Form_MultiForm(array(
 			'legend' => 'Links',
 			'cloneTarget' => $linkForm,
 			'defaults' => $this->links,
@@ -108,7 +110,7 @@ TPL
 	}
 	
 	/** {@inheritdoc} */
-	public function saveBack(Zend_Form_SubForm $form)
+	public function saveBack(\Zend_Form_SubForm $form)
 	{
 		$values = $form->getValues(true);
 		$this->links = $values;

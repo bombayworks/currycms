@@ -15,6 +15,9 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Module;
+use Curry\Util\OnDemand;
+use Curry\Util\ArrayHelper;
 
 /**
  * Navigation module.
@@ -43,7 +46,7 @@
  * 
  * @package Curry\Module
  */
-class Curry_Module_Navigation extends Curry_Module {
+class Navigation extends AbstractModule {
 	/**
 	 * Sort by sortindex in ascending order.
 	 */
@@ -104,24 +107,24 @@ class Curry_Module_Navigation extends Curry_Module {
 	{
 		// find selected page
 		if($this->pageId === null)
-			$page = $this->getPageGenerator()->getPage();
+			$page = $this->app->page;
 		else
-			$page = PageQuery::create()->findPk($this->pageId);
+			$page = \PageQuery::create()->findPk($this->pageId);
 		
 		// offset
 		if($this->depthOffset < 0) {
 			// walk up
 			for($i = $this->depthOffset; $i < 0 && $page; ++$i)
-				$page = Page::getCachedParent($page);
+				$page = \Page::getCachedParent($page);
 		} else if($this->depthOffset > 0) {
 			// walk down
 			$path = array();
-			$activePage = $this->getPageGenerator()->getPage();
+			$activePage = $this->app->page;
 			while($activePage) {
 				if($activePage === $page)
 					break;
 				$path[] = $activePage;
-				$activePage = Page::getCachedParent($activePage);
+				$activePage = \Page::getCachedParent($activePage);
 			}
 			if ($activePage && $this->depthOffset <= count($path))
 				$page = $path[ count($path) - $this->depthOffset ];
@@ -130,9 +133,9 @@ class Curry_Module_Navigation extends Curry_Module {
 		}
 
 		// if we dont have any subpages...
-		if($this->useParentPage && $page && !count(Page::getCachedChildren($page))) {
+		if($this->useParentPage && $page && !count(\Page::getCachedChildren($page))) {
 			// ...use the parent page if it exists
-			$parent = Page::getCachedParent($page);
+			$parent = \Page::getCachedParent($page);
 			if($parent)
 				$page = $parent;
 		}
@@ -208,18 +211,18 @@ TPL
 	/**
 	 * Get twig properties for page.
 	 *
-	 * @param Page $page
+	 * @param \Page $page
 	 * @return array
 	 */
-	public function twigGetPage(Page $page)
+	public function twigGetPage(\Page $page)
 	{
 		$p = $page->toTwig();
-		$p['parent'] = new Curry_OnDemand(array($this, 'twigGetParent'), $page);
-		$p['subpages'] = new Curry_OnDemand(array($this, 'twigGetSubpages'), $page);
+		$p['parent'] = new OnDemand(array($this, 'twigGetParent'), $page);
+		$p['subpages'] = new OnDemand(array($this, 'twigGetSubpages'), $page);
 		
-		$activePage = $this->getPageGenerator()->getPage();
+		$activePage = $this->app->page;
 		$p['IsActive'] = $activePage->getUrl() === $page->getUrl();
-		$p['IsActiveSubpage'] = new Curry_OnDemand(array($this, 'twigGetActiveSubpage'), $page, $activePage);
+		$p['IsActiveSubpage'] = new OnDemand(array($this, 'twigGetActiveSubpage'), $page, $activePage);
 		
 		return $p;
 	}
@@ -227,12 +230,12 @@ TPL
 	/**
 	 * Twig callback to get parent page.
 	 *
-	 * @param Page $page
+	 * @param \Page $page
 	 * @return array|null
 	 */
-	public function twigGetParent(Page $page)
+	public function twigGetParent(\Page $page)
 	{
-		$parentPage = Page::getCachedParent($page);
+		$parentPage = \Page::getCachedParent($page);
 		if($parentPage)
 			return $this->twigGetPage($parentPage);
 		return null;
@@ -241,47 +244,48 @@ TPL
 	/**
 	 * Twig callback to get subpages for page.
 	 *
-	 * @param Page $page
-	 * @return array|Curry_Twig_CollectionWrapper
+	 * @param \Page $page
+	 * @return array|\Curry_Twig_CollectionWrapper
 	 */
-	public function twigGetSubpages(Page $page)
+	public function twigGetSubpages(\Page $page)
 	{
 		if($page->isLeaf())
 			return array();
 		
 		$subpages = array();
-		$children = Page::getCachedChildren($page);
+		/** @var \Page[] $children */
+		$children = \Page::getCachedChildren($page);
 		foreach($children as $subpage) {
 			if($subpage->getEnabled() && ($this->showHidden || $subpage->getVisible()))
 				$subpages[] = $subpage;
 		}
-		if($children instanceof PropelCollection)
+		if($children instanceof \PropelCollection)
 			$children->clearIterator();
 		
 		// set order
 		switch($this->sortOrder) {
 			case self::ORDER_SORTINDEX_DESC:
-				Curry_Array::sortOn($subpages, 'getTreeLeft', Curry_Array::SORT_REVERSE);
+				ArrayHelper::sortOn($subpages, 'getTreeLeft', ArrayHelper::SORT_REVERSE);
 				break;
 			case self::ORDER_NAME_ASC:
-				Curry_Array::sortOn($subpages, 'getName');
+				ArrayHelper::sortOn($subpages, 'getName');
 				break;
 			case self::ORDER_NAME_DESC:
-				Curry_Array::sortOn($subpages, 'getName', Curry_Array::SORT_REVERSE);
+				ArrayHelper::sortOn($subpages, 'getName', ArrayHelper::SORT_REVERSE);
 				break;
 		}
 		
-		return new Curry_Twig_CollectionWrapper($subpages, array($this, 'twigGetPage'));
+		return new \Curry_Twig_CollectionWrapper($subpages, array($this, 'twigGetPage'));
 	}
 	
 	/**
 	 * Twig callback to decide if a page is the active page or below it.
 	 *
-	 * @param Page $page
-	 * @param Page $activePage
+	 * @param \Page $page
+	 * @param \Page $activePage
 	 * @return bool
 	 */
-	public function twigGetActiveSubpage(Page $page, Page $activePage)
+	public function twigGetActiveSubpage(\Page $page, \Page $activePage)
 	{
 		while($activePage) {
 			if($activePage->getUrl() == $page->getUrl())
@@ -295,38 +299,38 @@ TPL
 	public function showBack()
 	{
 		$pages = array(null => "[ Active Page ]");
-		$pages += PagePeer::getSelect();
+		$pages += \PagePeer::getSelect();
 		
-		$form = new Curry_Form_SubForm(array(
-		    'elements' => array(
-		    	'page_id' => array('select', array(
-		    		'label' => 'Page',
-		    		'multiOptions' => $pages,
-		    		'value' => $this->pageId,
-		    	)),
-		    	'sort_order' => array('select', array(
-		    		'label' => 'Sort order',
-		    		'multiOptions' => array(
-		    			self::ORDER_SORTINDEX_ASC => 'Page order',
-		    			self::ORDER_SORTINDEX_DESC => 'Page order reversed',
-		    			self::ORDER_NAME_ASC => 'Page name',
-		    			self::ORDER_NAME_DESC => 'Page name reversed',
-		    		),
-		    		'value' => $this->sortOrder,
-		    	)),
-		    	'depth_offset' => array('text', array(
-		    		'label' => 'Depth Offset',
-		    		'description' => 'If positive, the selected page will move down the page tree towards the active page. If negative, the selected page will move up in the page tree towards the root.',
-		    		'value' => $this->depthOffset,
-		    	)),
-		    	'use_parent_page' => array('checkbox', array(
-		    		'label' => 'Use parent page if there are no subpages',
-		    		'value' => $this->useParentPage,
-		    	)),
-		    	'show_hidden' => array('checkbox', array(
-		    		'label' => 'Show hidden pages',
-		    		'value' => $this->showHidden,
-		    	)),
+		$form = new \Curry_Form_SubForm(array(
+			'elements' => array(
+				'page_id' => array('select', array(
+					'label' => 'Page',
+					'multiOptions' => $pages,
+					'value' => $this->pageId,
+				)),
+				'sort_order' => array('select', array(
+					'label' => 'Sort order',
+					'multiOptions' => array(
+						self::ORDER_SORTINDEX_ASC => 'Page order',
+						self::ORDER_SORTINDEX_DESC => 'Page order reversed',
+						self::ORDER_NAME_ASC => 'Page name',
+						self::ORDER_NAME_DESC => 'Page name reversed',
+					),
+					'value' => $this->sortOrder,
+				)),
+				'depth_offset' => array('text', array(
+					'label' => 'Depth Offset',
+					'description' => 'If positive, the selected page will move down the page tree towards the active page. If negative, the selected page will move up in the page tree towards the root.',
+					'value' => $this->depthOffset,
+				)),
+				'use_parent_page' => array('checkbox', array(
+					'label' => 'Use parent page if there are no subpages',
+					'value' => $this->useParentPage,
+				)),
+				'show_hidden' => array('checkbox', array(
+					'label' => 'Show hidden pages',
+					'value' => $this->showHidden,
+				)),
 			)
 		));
 		
@@ -336,7 +340,7 @@ TPL
 	}
 	
 	/** {@inheritdoc} */
-	public function saveBack(Zend_Form_SubForm $form)
+	public function saveBack(\Zend_Form_SubForm $form)
 	{
 		$values = $form->getValues(true);
 		

@@ -36,7 +36,7 @@ public function getInheritedProperty($name, $default = null, $cache = true, $for
 	// attempt to load value from cache
 	$value = false;
 	if ($cache && !$forceUpdate)
-		$value = Curry_Core::$cache->load($cacheName);
+		$value = \Curry\App::getInstance()->cache->load($cacheName);
 	
 	// if value is not set...
 	if($value === false) {
@@ -51,9 +51,9 @@ public function getInheritedProperty($name, $default = null, $cache = true, $for
 		}
         if($cache) {
         	if($value !== false) {
-        		Curry_Core::$cache->save($value, $cacheName);
+        		\Curry\App::getInstance()->cache->save($value, $cacheName);
         	} else {
-        		trace_warning("Unable to store $name for $this->getUrl()");
+        		\Curry\App::getInstance()->logger->notice("Unable to store $name for $this->getUrl()");
         	}
         }
 	}
@@ -63,7 +63,7 @@ public function getInheritedProperty($name, $default = null, $cache = true, $for
 public function getModules()
 {
 	$parents = $this->getInheritanceChain(true);
-	$parentIds = Curry_Array::objectsToArray($parents, null, 'getPageRevisionId');
+	$parentIds = \Curry\Util\ArrayHelper::objectsToArray($parents, null, 'getPageRevisionId');
 
 	PageModulePeer::clearInstancePool();
 	RevisionModulePeer::clearInstancePool();
@@ -125,7 +125,7 @@ public function getPageModuleWrappers($langcode = null)
 	// create wrappers
 	$wrappers = array();
 	foreach($this->getModules() as $pageModule)
-		$wrappers[$pageModule->getPageModuleId()] = new Curry_PageModuleWrapper($pageModule, $this, $langcode);
+		$wrappers[$pageModule->getPageModuleId()] = new \Curry\Module\PageModuleWrapper($pageModule, $this, $langcode);
 	
 	return $wrappers;
 }

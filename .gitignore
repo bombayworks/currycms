@@ -4,3 +4,5 @@ vendor/*
 doc/
 test/fixtures/propel/build
 composer.phar
+/shared/libs/bower_components
+/shared/libs/node_modules

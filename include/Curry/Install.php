@@ -15,6 +15,7 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Archive\Archive;
 
 /**
  * Static class used by installation script.
@@ -123,7 +124,7 @@ MESSAGE;
 			@set_time_limit(300);
 			$symlinkFallback = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' || !function_exists('symlink');
 			$symlinks = array();
-			$tar = new Curry_Archive($bundle);
+			$tar = new Archive($bundle);
 			$tar->extract(array(
 				array(
 					// Collect and skip symlinks if we're using the symlink fallback

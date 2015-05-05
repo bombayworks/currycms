@@ -15,6 +15,9 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Module\PageModuleWrapper;
+use Curry\Util\ArrayHelper;
+use Curry\Util\Helper;
 
 /**
  * Helper functions for copy-paste and page-sync functionality.
@@ -91,7 +94,7 @@ class Curry_Backend_PageSyncHelper
 			$basePage = $p->data['revision']['base_page'];
 			if ($basePage && isset($pageDatas[$basePage]) && !isset($alreadyMoved[$basePage])) {
 				$alreadyMoved[$basePage] = true;
-				Curry_Array::insertBefore($pageDatas, array($basePage => $pageDatas[$basePage]), $url);
+				ArrayHelper::insertBefore($pageDatas, array($basePage => $pageDatas[$basePage]), $url);
 			}
 		}
 		// Restore page data
@@ -132,7 +135,7 @@ class Curry_Backend_PageSyncHelper
 
 		// Add module data...
 		$order = array();
-		$parentPages = Curry_Array::objectsToArray($page->getWorkingPageRevision()->getInheritanceChain(true), null, 'getPageId');
+		$parentPages = ArrayHelper::objectsToArray($page->getWorkingPageRevision()->getInheritanceChain(true), null, 'getPageId');
 		$inheritedModules = $pr->getModules();
 		foreach($pageData['revision']['modules'] as $module) {
 			$pm = null;
@@ -141,7 +144,7 @@ class Curry_Backend_PageSyncHelper
 				if ($pm && !in_array($pm->getPageId(), $parentPages)) {
 					// Page module exists, but is not in our "inheritance chain"
 					// Give the module a new unique-id, and create the module here
-					$pm->setUid(Curry_Util::getUniqueId());
+					$pm->setUid(Helper::getUniqueId());
 					$pm->save();
 					$pm = null;
 				}
@@ -174,7 +177,7 @@ class Curry_Backend_PageSyncHelper
 		}
 		$pr->save();
 
-		$modules = Curry_Array::objectsToArray($pr->getModules(), 'getUid');
+		$modules = ArrayHelper::objectsToArray($pr->getModules(), 'getUid');
 		if (array_keys($modules) !== $order) {
 			foreach($order as $uid) {
 				$module = $modules[$uid];
@@ -280,10 +283,10 @@ class Curry_Backend_PageSyncHelper
 	/**
 	 * Get "copy code" for module.
 	 *
-	 * @param Curry_PageModuleWrapper $module
+	 * @param PageModuleWrapper $module
 	 * @return array
 	 */
-	public static function getModuleCode(Curry_PageModuleWrapper $module)
+	public static function getModuleCode(PageModuleWrapper $module)
 	{
 		$datas = array();
 		$moduleDatas = ModuleDataQuery::create()

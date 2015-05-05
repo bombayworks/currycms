@@ -15,15 +15,19 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Controller\Frontend;
+use Curry\URL;
+use Curry\Util\Propel;
+use Curry\Util\Html;
 
 /**
  * Manage search index.
  * 
  * @package Curry\Backend
  */
-class Curry_Backend_Indexer extends Curry_Backend {
+class Curry_Backend_Indexer extends \Curry\Backend\AbstractLegacyBackend {
 	/** {@inheritdoc} */
-	public static function getGroup()
+	public function getGroup()
 	{
 		return "System";
 	}
@@ -63,7 +67,7 @@ class Curry_Backend_Indexer extends Curry_Backend {
 		if (isPost() && $form->isValid($_POST)) {
 			$this->addMainContent($form);
 			
-			$index = Curry_Core::getSearchIndex();
+			$index = $this->app->index;
 			$hits = $index->find($form->keywords->getValue());
 			
 			$html = "";
@@ -72,7 +76,7 @@ class Curry_Backend_Indexer extends Curry_Backend {
 				$title = in_array('title', $fieldNames) ? (string)$hit->title : '<Untitled>';
 				$url = in_array('url', $fieldNames) ? (string)$hit->url : null;
 				$model = in_array('model', $fieldNames) ? (string)$hit->model : 'Unknown type';
-				$item = ($url !== null) ? Curry_Html::createTag('a', array('href' => $url), $title) : $title;
+				$item = ($url !== null) ? Html::tag('a', array('href' => $url), $title) : $title;
 				$item .= ' ('.htmlspecialchars($model).')<br/>';
 				$html .= '<li>'.$item.'<small>Fields: '.htmlspecialchars(join(', ', $fieldNames)).'</small></li>';
 			}
@@ -90,7 +94,7 @@ class Curry_Backend_Indexer extends Curry_Backend {
 	{
 		$this->addMainMenu();
 		
-		Curry_Core::getSearchIndex(true);
+		throw new Exception('Not implemented.');
 		$this->addMessage('Index created', self::MSG_SUCCESS);
 	}
 
@@ -102,10 +106,10 @@ class Curry_Backend_Indexer extends Curry_Backend {
 	 */
 	public static function doRebuild($ajax = false)
 	{
-		$ses = new Zend_Session_Namespace(__CLASS__);
-		$index = Curry_Core::getSearchIndex();
-		$app = new Curry_Application();
-		Curry_URL::setReverseRouteCallback(array($app, 'reverseRoute'));
+		$ses = new \Zend\Session\Container(__CLASS__);
+		$index = \Curry\App::getInstance()->index;
+		$app = new Frontend(\Curry\App::getInstance());
+		URL::setReverseRouteCallback(array($app, 'reverseRoute'));
 
 		try {
 			while ($ses->model < count($ses->models)) {
@@ -113,7 +117,7 @@ class Curry_Backend_Indexer extends Curry_Backend {
 				if ($model === '@custom') {
 					// Trigger custom indexer
 					$ses->model++;
-					$indexerClass = Curry_Core::$config->curry->indexerClass;
+					$indexerClass = \Curry\App::getInstance()['indexerClass'];
 					if($indexerClass && is_callable(array($indexerClass, 'build'))) {
 						call_user_func(array($indexerClass, 'build'));
 					}
@@ -148,7 +152,7 @@ class Curry_Backend_Indexer extends Curry_Backend {
 					// Return current status
 					$part = 1 / count($ses->models);
 					$progress = $ses->model * $part + ($ses->offset / $maxItems) * $part;
-					Curry_Application::returnJson(array(
+					self::returnJson(array(
 						'progress' => round(100 * $progress),
 						'continue' => true,
 						'status' => "Indexing ".$ses->models[$ses->model]."...",
@@ -161,7 +165,7 @@ class Curry_Backend_Indexer extends Curry_Backend {
 				if ($ses->failed) {
 					$status .= ' '.$ses->failed.' items failed.';
 				}
-				Curry_Application::returnJson(array(
+				self::returnJson(array(
 					'progress' => 100,
 					'continue' => false,
 					'status' => $status,
@@ -170,7 +174,7 @@ class Curry_Backend_Indexer extends Curry_Backend {
 		}
 		catch (Exception $e) {
 			if ($ajax)
-				Curry_Application::returnJson(array('continue' => false, 'status' => $e->getMessage()));
+				self::returnJson(array('continue' => false, 'status' => $e->getMessage()));
 			else
 				throw $e;
 		}
@@ -186,7 +190,7 @@ class Curry_Backend_Indexer extends Curry_Backend {
 	{
 		$model = get_class($item);
 		if (!$index)
-			$index = Curry_Core::getSearchIndex();
+			$index = \Curry\App::getInstance()->index;
 		$hits = $index->find("model:$model");
 		$pk = serialize($item->getPrimaryKey());
 		foreach ($hits as $hit) {
@@ -208,7 +212,7 @@ class Curry_Backend_Indexer extends Curry_Backend {
 		$model = get_class($item);
 		try {
 			if (!$index)
-				$index = Curry_Core::getSearchIndex();
+				$index = \Curry\App::getInstance()->index;
 			if ($removeOld)
 				self::removeItem($item, $index);
 			$hasI18n = in_array('i18n', array_keys(PropelQuery::from($model)->getTableMap()->getBehaviors()));
@@ -224,7 +228,7 @@ class Curry_Backend_Indexer extends Curry_Backend {
 			return true;
 		}
 		catch (Exception $e) {
-			trace_error($model.'('.(string)$item.'): '.$e->getMessage());
+			\Curry\App::getInstance()->logger->error($model.'('.(string)$item.'): '.$e->getMessage());
 			return false;
 		}
 	}
@@ -261,17 +265,17 @@ class Curry_Backend_Indexer extends Curry_Backend {
 	public static function initRebuild()
 	{
 		$models = array();
-		foreach(Curry_Propel::getModels() as $classes) {
+		foreach(Propel::getModels() as $classes) {
 			foreach($classes as $model) {
 				if(in_array('Curry_ISearchable', class_implements($model)))
 					$models[] = $model;
 			}
 		}
 
-		if (Curry_Core::$config->curry->indexerClass)
+		if (\Curry\App::getInstance()['indexerClass'])
 			$models[] = '@custom';
 
-		$ses = new Zend_Session_Namespace(__CLASS__);
+		$ses = new \Zend\Session\Container(__CLASS__);
 		$ses->models = $models;
 		$ses->model = 0;
 		$ses->offset = 0;
@@ -332,7 +336,7 @@ HTML;
 	 */
 	public function showRebuildAll()
 	{
-		if (Curry_URL::validate()) {
+		if (URL::validate()) {
 			// Override and increase max execution time if set
 			$timeLimit = ini_get('max_execution_time');
 			if($timeLimit && $timeLimit < 250) {
@@ -341,7 +345,7 @@ HTML;
 
 			Curry_Backend_Indexer::initRebuild();
 			Curry_Backend_Indexer::doRebuild();
-			$ses = new Zend_Session_Namespace(__CLASS__);
+			$ses = new \Zend\Session\Container(__CLASS__);
 			if ($ses->failed)
 				$this->addMessage($ses->failed.' entries failed indexing.', self::MSG_WARNING);
 
@@ -359,7 +363,7 @@ HTML;
 	{
 		$this->addMainMenu();
 		
-		$index = Curry_Core::getSearchIndex();
+		$index = $this->app->index;
 		$index->optimize();
 		$this->addMessage('Index successfully optimized', self::MSG_SUCCESS);
 	}
@@ -371,7 +375,7 @@ HTML;
 	{
 		$this->addMainMenu();
 		
-		$index = Curry_Core::getSearchIndex();
+		$index = $this->app->index;
 		$this->addMessage('Number of documents: '.$index->numDocs());
 		$this->addMessage('Number of deleted documents: ' . ($index->count() - $index->numDocs()));
 		$this->addMessage('Number of terms: '.count($index->terms()));

@@ -15,16 +15,36 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Backend;
+use Curry\App;
+use Curry\Archive\Archive;
+use Curry\Form\Form;
+use Curry\Mail;
+use Curry\Util\PathHelper;
+use Curry\Util\StringHelper;
+use Symfony\Component\HttpFoundation\Request;
+use Zend\Config\Config;
 
 /**
  * Change system settings.
  * 
  * @package Curry\Backend
  */
-class Curry_Backend_System extends Curry_Backend {
-	
+class System extends AbstractBackend
+{
+
+	public function initialize() {
+		$this->addViewFunction('testemail', array($this, 'showTestEmail'));
+		$this->addViewFunction('bundle', array($this, 'showBundle'));
+		$this->addViewFunction('cache', array($this, 'showClearCache'));
+		$this->addViewFunction('info', array($this, 'showInfo'))
+			->addViewFunction('phpinfo', array($this, 'showPhpInfo'));
+		$this->addViewFunction('upgrade', array($this, 'showUpgrade'));
+	}
+
+
 	/** {@inheritdoc} */
-	public static function getGroup()
+	public function getGroup()
 	{
 		return "System";
 	}
@@ -34,163 +54,168 @@ class Curry_Backend_System extends Curry_Backend {
 	 */
 	public function addMainMenu()
 	{
-		$this->addMenuItem("Settings", url('', array("module","view"=>"Main")));
-		$this->addMenuItem("Bundle", url('', array("module","view"=>"Bundle")));
-		$this->addMenuItem("Clear cache", url('', array("module","view"=>"ClearCache")));
-		$this->addMenuItem("Info", url('', array("module","view"=>"Info")));
-		$this->addMenuItem("Upgrade", url('', array("module","view"=>"Upgrade")));
+		$this->addMenuItem("Settings", $this->url());
+		$this->addMenuItem("Bundle", $this->bundle->url());
+		$this->addMenuItem("Clear cache", $this->cache->url());
+		$this->addMenuItem("Info", $this->info->url());
+		$this->addMenuItem("Upgrade", $this->upgrade->url());
 	}
 	
 	/** {@inheritdoc} */
-	public function showMain()
+	public function show(Request $request)
 	{
 		$this->addMainMenu();
 		
-		$configFile = Curry_Core::$config->curry->configPath;
+		$configFile = $this->app['configPath'];
 		if(!$configFile)
 			$this->addMessage("Configuration file not set.", self::MSG_ERROR);
 		else if(!is_writable($configFile))
 			$this->addMessage("Configuration file doesn't seem to be writable.", self::MSG_ERROR);
 			
-		$config = new Zend_Config($configFile ? require($configFile) : array(), true);
-		$defaultConfig = Curry_Core::getDefaultConfiguration();
+		$config = $this->app->openConfiguration();
+		$defaultConfig = $this->app->getDefaultConfiguration();
 		
-		$form = new Curry_Form(array(
+		$form = new \Curry_Form(array(
 			'action' => url('', array("module","view")),
 			'method' => 'post'
 		));
 
 		$themes = array();
-		$backendPath = Curry_Util::path(true, Curry_Core::$config->curry->wwwPath, 'shared', 'backend');
+		$backendPath = PathHelper::path(true, $this->app['wwwPath'], 'shared', 'backend');
 		if($backendPath) {
-			foreach (new DirectoryIterator($backendPath) as $entry) {
+			foreach (new \DirectoryIterator($backendPath) as $entry) {
 				$name = $entry->getFilename();
 				if (!$entry->isDot() && $entry->isDir() && $name !== 'common') {
 					$themes[$name] = $name;
 				}
 			}
 		}
-		$activeTheme = isset($config->curry->backend->theme) ? $config->curry->backend->theme : false;
+		$activeTheme = isset($config->backend->theme) ? $config->backend->theme : false;
 		if($activeTheme && !array_key_exists($activeTheme, $themes)) {
 			$themes[$activeTheme] = $activeTheme;
 		}
 
-		$pages = PagePeer::getSelect();
+		$pages = \PagePeer::getSelect();
+
+		$loggers = $this->getDefaultLoggers($config);
+		$enabledLoggers = isset($config->log) ? array_filter($config->log->toArray(), function($log) {
+			return !isset($log['enabled']) || $log['enabled'];
+		}) : array();
 		
 		// General
-		$form->addSubForm(new Curry_Form_SubForm(array(
+		$form->addSubForm(new \Curry_Form_SubForm(array(
 			'legend' => 'General',
 			'elements' => array(
 				'name' => array('text', array(
 					'label' => 'Name',
 					'required' => true,
-					'value' => isset($config->curry->name) ? $config->curry->name : '',
+					'value' => isset($config->name) ? $config->name : '',
 					'description' => 'Name of site, shown in backend header and page title by default.',
-					'placeholder' => $defaultConfig->curry->name,
+					'placeholder' => $defaultConfig->name,
 				)),
 				'baseUrl' => array('text', array(
 					'label' => 'Base URL',
-					'value' => isset($config->curry->baseUrl) ? $config->curry->baseUrl : '',
+					'value' => isset($config->baseUrl) ? $config->baseUrl : '',
 					'description' => 'The URL to use when creating absolute URLs. This should end with a slash, and may include a path.',
-					'placeholder' => $defaultConfig->curry->baseUrl,
+					'placeholder' => $defaultConfig->baseUrl,
 				)),
 				'adminEmail' => array('text', array(
 					'label' => 'Admin email',
-					'value' => isset($config->curry->adminEmail) ? $config->curry->adminEmail : '',
+					'value' => isset($config->adminEmail) ? $config->adminEmail : '',
 				)),
 				'divertOutMailToAdmin' => array('checkbox', array(
-						'label' => 'Divert outgoing email to adminEmail',
-						'value' => isset($config->curry->divertOutMailToAdmin) ? $config->curry->divertOutMailToAdmin : '',
-						'description' => 'All outgoing Curry_Mail will be diverted to adminEmail.',
+						'label' => 'Divert outgoing email to admin email',
+						'value' => isset($config->divertOutMailToAdmin) ? $config->divertOutMailToAdmin : '',
+						'description' => 'All outgoing Curry\Mail will be diverted to admin email.',
 				)),
 				'developmentMode' => array('checkbox', array(
 					'label' => 'Development mode',
-					'value' => isset($config->curry->developmentMode) ? $config->curry->developmentMode : '',
+					'value' => isset($config->developmentMode) ? $config->developmentMode : '',
 				)),
 				'forceDomain' => array('checkbox', array(
 					'label' => 'Force domain',
-					'value' => isset($config->curry->forceDomain) ? $config->curry->forceDomain : '',
+					'value' => isset($config->forceDomain) ? $config->forceDomain : '',
 					'description' => 'If the domain of the requested URL doesn\'t match the domain set by Base URL, the user will be redirected to the correct domain.',
 				)),
 				'fallbackLanguage' => array('select', array(
 					'label' => 'Fallback Language',
-					'multiOptions' => array('' => '[ None ]') + LanguageQuery::create()->find()->toKeyValue('PrimaryKey','Name'),
-					'value' => isset($config->curry->fallbackLanguage) ? $config->curry->fallbackLanguage : '',
+					'multiOptions' => array('' => '[ None ]') + \LanguageQuery::create()->find()->toKeyValue('PrimaryKey','Name'),
+					'value' => isset($config->fallbackLanguage) ? $config->fallbackLanguage : '',
 					'description' => 'The language used when no language has been specified for the rendered page. Also the language used in backend context.',
 				)),
 			)
 		)), 'general');
 		
 		// Backend
-		$form->addSubForm(new Curry_Form_SubForm(array(
+		$form->addSubForm(new \Curry_Form_SubForm(array(
 			'legend' => 'Backend',
 			'class' => 'advanced',
 			'elements' => array(
 				'theme' => array('select', array(
 					'label' => 'Theme',
 					'multiOptions' => array('' => '[ Default ]') + $themes,
-					'value' => isset($config->curry->backend->theme) ? $config->curry->backend->theme : '',
+					'value' => isset($config->backend->theme) ? $config->backend->theme : '',
 					'description' => 'Theme for the administrative back-end.',
 				)),
 				'logotype' => array('filebrowser', array(
 					'label' => 'Backend Logotype',
-					'value' => isset($config->curry->backend->logotype) ? $config->curry->backend->logotype : '',
+					'value' => isset($config->backend->logotype) ? $config->backend->logotype : '',
 					'description' => 'Path to the backend logotype. The height of this image should be 100px.',
 				)),
 				'templatePage' => array('select', array(
 					'label' => 'Template page',
 					'multiOptions' => array('' => '[ None ]') + $pages,
-					'value' => isset($config->curry->backend->templatePage) ? $config->curry->backend->templatePage : '',
+					'value' => isset($config->backend->templatePage) ? $config->backend->templatePage : '',
 					'description' => 'The page containing page templates (i.e. pages to be used as base pages). When creating new pages or editing a page using the Content tab, only this page and pages below will be shown as base pages.',
 				)),
 				'defaultEditor' => array('text', array(
 					'label' => 'Default HTML editor',
-					'value' => isset($config->curry->defaultEditor) ? $config->curry->defaultEditor : '',
+					'value' => isset($config->defaultEditor) ? $config->defaultEditor : '',
 					'description' => 'The default WYSIWYG editor to use with the article module.',
-					'placeholder' => $defaultConfig->curry->defaultEditor,
+					'placeholder' => $defaultConfig->defaultEditor,
 				)),
 				'autoBackup' => array('text', array(
 					'label' => 'Automatic database backup',
-					'value' => isset($config->curry->autoBackup) ? $config->curry->autoBackup : '',
-					'placeholder' => $defaultConfig->curry->autoBackup,
+					'value' => isset($config->autoBackup) ? $config->autoBackup : '',
+					'placeholder' => $defaultConfig->autoBackup,
 					'description' => 'Specifies the number of seconds since last backup to create automatic database backups when logged in to the backend.',
 				)),
 				'revisioning' => array('checkbox', array(
 					'label' => 'Revisioning',
-					'value' => isset($config->curry->revisioning) ? $config->curry->revisioning : '',
+					'value' => isset($config->revisioning) ? $config->revisioning : '',
 					'description' => 'When enabled, a new working revision will automatically be created when you create a page. You will also be warned when editing a published page revision',
 				)),
 				'autoPublish' => array('checkbox', array(
 					'label' => 'Auto Publish',
-					'value' => isset($config->curry->autoPublish) ? $config->curry->autoPublish : '',
+					'value' => isset($config->autoPublish) ? $config->autoPublish : '',
 					'description' => 'When enabled, a check will be made on every request to check if there are any pages that should be published (using publish date).',
 				)),
 				'noauth' => array('checkbox', array(
 					'label' => 'Disable Backend Authorization',
-					'value' => isset($config->curry->backend->noauth) ? $config->curry->backend->noauth : '',
+					'value' => isset($config->backend->noauth) ? $config->backend->noauth : '',
 					'description' => 'This will completely disable authorization for the backend.',
 				)),
 				'autoUpdateIndex' => array('checkbox', array(
 					'label' => 'Auto Update Search Index',
-					'value' => isset($config->curry->autoUpdateIndex) ? $config->curry->autoUpdateIndex : '',
+					'value' => isset($config->autoUpdateIndex) ? $config->autoUpdateIndex : '',
 					'description' => 'Automatically update (rebuild) search index when changing page content.',
 				)),
 			)
 		)), 'backend');
 
 		// Live edit
-		$form->addSubForm(new Curry_Form_SubForm(array(
+		$form->addSubForm(new \Curry_Form_SubForm(array(
 			'legend' => 'Live edit',
 			'class' => 'advanced',
 			'elements' => array(
 				'liveEdit' => array('checkbox', array(
 					'label' => 'Enable Live Edit',
-					'value' => isset($config->curry->liveEdit) ? $config->curry->liveEdit : $defaultConfig->curry->liveEdit,
+					'value' => isset($config->liveEdit) ? $config->liveEdit : $defaultConfig->liveEdit,
 					'description' => 'Enables editing of content directly in the front-end.',
 				)),
 				'placeholderExclude' => array('textarea', array(
 					'label' => 'Excluded placeholders',
-					'value' => isset($config->curry->backend->placeholderExclude) ? join(PHP_EOL, $config->curry->backend->placeholderExclude->toArray()) : '',
+					'value' => isset($config->backend->placeholderExclude) ? join(PHP_EOL, $config->backend->placeholderExclude->toArray()) : '',
 					'description' => 'Prevent placeholders from showing up in live edit mode. Use newlines to separate placeholders.',
 					'rows' => 5,
 				)),
@@ -198,47 +223,47 @@ class Curry_Backend_System extends Curry_Backend {
 		)), 'liveEdit');
 		
 		// Error pages
-		$form->addSubForm(new Curry_Form_SubForm(array(
+		$form->addSubForm(new \Curry_Form_SubForm(array(
 			'legend' => 'Error pages',
 			'class' => 'advanced',
 			'elements' => array(
 				'notFound' => array('select', array(
 					'label' => 'Page not found (404)',
 					'multiOptions' => array('' => '[ None ]') + $pages,
-					'value' => isset($config->curry->errorPage->notFound) ? $config->curry->errorPage->notFound : '',
+					'value' => isset($config->errorPage->notFound) ? $config->errorPage->notFound : '',
 				)),
 				'unauthorized' => array('select', array(
 					'label' => 'Unauthorized (401)',
 					'multiOptions' => array('' => '[ None ]') + $pages,
-					'value' => isset($config->curry->errorPage->unauthorized) ? $config->curry->errorPage->unauthorized : '',
+					'value' => isset($config->errorPage->unauthorized) ? $config->errorPage->unauthorized : '',
 				)),
 				'error' => array('select', array(
 					'label' => 'Internal server error (500)',
 					'multiOptions' => array('' => '[ None ]') + $pages,
-					'value' => isset($config->curry->errorPage->error) ? $config->curry->errorPage->error : '',
+					'value' => isset($config->errorPage->error) ? $config->errorPage->error : '',
 				)),
 			)
 		)), 'errorPage');
 		
 		// Maintenance
-		$form->addSubForm(new Curry_Form_SubForm(array(
+		$form->addSubForm(new \Curry_Form_SubForm(array(
 			'legend' => 'Maintenance',
 			'class' => 'advanced',
 			'elements' => array(
 				'enabled' => array('checkbox', array(
 					'label' => 'Enabled',
 					'required' => true,
-					'value' => isset($config->curry->maintenance->enabled) ? $config->curry->maintenance->enabled : '',
+					'value' => isset($config->maintenance->enabled) ? $config->maintenance->enabled : '',
 					'description' => 'When maintenance is enabled, users will not be able to access the pages. Only a page (specified below) will be shown. If no page is specified, the message will be shown.',
 				)),
 				'page' => array('select', array(
 					'label' => 'Page to show',
 					'multiOptions' => array('' => '[ None ]') + $pages,
-					'value' => isset($config->curry->maintenance->page) ? $config->curry->maintenance->page : '',
+					'value' => isset($config->maintenance->page) ? $config->maintenance->page : '',
 				)),
 				'message' => array('textarea', array(
 					'label' => 'Message',
-					'value' => isset($config->curry->maintenance->message) ? $config->curry->maintenance->message : '',
+					'value' => isset($config->maintenance->message) ? $config->maintenance->message : '',
 					'rows' => 6,
 					'cols' => 40,
 				))
@@ -246,33 +271,48 @@ class Curry_Backend_System extends Curry_Backend {
 		)), 'maintenance');
 		
 		// Mail
-		$testEmailUrl = url('', array('module', 'view' => 'TestEmail'));
 		$dlgOpts = array('width' => 600, 'minHeight' => 150);
-		$form->addSubForm(new Curry_Form_SubForm(array(
+		$form->addSubForm(new \Curry_Form_SubForm(array(
 			'legend' => 'Mail',
 			'class' => 'advanced',
 			'elements' => array(
+				'fromEmail' => array('text', array(
+					'label' => 'From email',
+					'value' => isset($config->mail->from->email) ? $config->mail->from->email : '',
+				)),
+				'fromName' => array('text', array(
+					'label' => 'From name',
+					'value' => isset($config->mail->from->name) ? $config->mail->from->name : '',
+				)),
+				'replytoEmail' => array('text', array(
+					'label' => 'ReplyTo email',
+					'value' => isset($config->mail->replyto->email) ? $config->mail->replyto->email : '',
+				)),
+				'replytoName' => array('text', array(
+					'label' => 'ReplyTo name',
+					'value' => isset($config->mail->replyto->name) ? $config->mail->replyto->name : '',
+				)),
 				'method' => array('select', array(
 					'label' => 'Transport',
 					'multiOptions' => array('' => '[ Default ]', 'smtp' => 'SMTP', 'sendmail' => 'PHP mail() function, ie sendmail.'),
-					'value' => isset($config->curry->mail->method) ? $config->curry->mail->method : '',
+					'value' => isset($config->mail->method) ? $config->mail->method : '',
 				)),
 				'host' => array('text', array(
 					'label' => 'Host',
-					'value' => isset($config->curry->mail->host) ? $config->curry->mail->host : '',
+					'value' => isset($config->mail->host) ? $config->mail->host : '',
 				)),
 				'port' => array('text', array(
 					'label' => 'Port',
-					'value' => isset($config->curry->mail->options->port) ? $config->curry->mail->options->port : '',
+					'value' => isset($config->mail->options->port) ? $config->mail->options->port : '',
 				)),
 				'auth' => array('select', array(
 					'label' => 'Auth',
 					'multiOptions' => array('' => '[ Default ]', 'plain' => 'plain', 'login' => 'login', 'cram-md5' => 'cram-md5'),
-					'value' => isset($config->curry->mail->options->auth) ? $config->curry->mail->options->auth : '',
+					'value' => isset($config->mail->options->auth) ? $config->mail->options->auth : '',
 				)),
 				'username' => array('text', array(
 					'label' => 'Username',
-					'value' => isset($config->curry->mail->options->username) ? $config->curry->mail->options->username : '',
+					'value' => isset($config->mail->options->username) ? $config->mail->options->username : '',
 				)),
 				'password' => array('password', array(
 					'label' => 'Password',
@@ -280,96 +320,76 @@ class Curry_Backend_System extends Curry_Backend {
 				'ssl' => array('select', array(
 					'label' => 'SSL',
 					'multiOptions' => array('' => 'Disabled', 'ssl' => 'SSL', 'tls' => 'TLS'),
-					'value' => isset($config->curry->mail->options->ssl) ? $config->curry->mail->options->ssl : '',
+					'value' => isset($config->mail->options->ssl) ? $config->mail->options->ssl : '',
 				)),
 				'mailTest' => array('rawHtml', array(
-					'value' => '<a href="'.$testEmailUrl.'" class="btn dialog" data-dialog="'.htmlspecialchars(json_encode($dlgOpts)).'">Test email</a>',
+					'value' => '<a href="'.$this->testemail->url().'" class="btn dialog" data-dialog="'.htmlspecialchars(json_encode($dlgOpts)).'">Test email</a>',
 				)),
 			)
 		)), 'mail');
 		
 		// Paths
-		$form->addSubForm(new Curry_Form_SubForm(array(
+		$form->addSubForm(new \Curry_Form_SubForm(array(
 			'legend' => 'Paths',
 			'class' => 'advanced',
 			'elements' => array(
 				'basePath' => array('text', array(
 					'label' => 'Base path',
-					'value' => isset($config->curry->basePath) ? $config->curry->basePath : '',
-					'placeholder' => $defaultConfig->curry->basePath
+					'value' => isset($config->basePath) ? $config->basePath : '',
+					'placeholder' => $defaultConfig->basePath
 				)),
 				'projectPath' => array('text', array(
 					'label' => 'Project Path',
-					'value' => isset($config->curry->projectPath) ? $config->curry->projectPath : '',
-					'placeholder' => $defaultConfig->curry->projectPath
+					'value' => isset($config->projectPath) ? $config->projectPath : '',
+					'placeholder' => $defaultConfig->projectPath
 				)),
 				'wwwPath' => array('text', array(
 					'label' => 'WWW path',
-					'value' => isset($config->curry->wwwPath) ? $config->curry->wwwPath : '',
-					'placeholder' => $defaultConfig->curry->wwwPath
+					'value' => isset($config->wwwPath) ? $config->wwwPath : '',
+					'placeholder' => $defaultConfig->wwwPath
 				)),
 				'vendorPath' => array('text', array(
 					'label' => 'Vendor path',
-					'value' => isset($config->curry->vendorPath) ? $config->curry->vendorPath : '',
-					'placeholder' => $defaultConfig->curry->vendorPath
+					'value' => isset($config->vendorPath) ? $config->vendorPath : '',
+					'placeholder' => $defaultConfig->vendorPath
 				)),
 			)
 		)), 'paths');
 		
-		// Encoding
-		$form->addSubForm(new Curry_Form_SubForm(array(
-			'legend' => 'Encoding',
-			'class' => 'advanced',
-			'elements' => array(
-				'internal' => array('text', array(
-					'label' => 'Internal Encoding',
-					'value' => isset($config->curry->internalEncoding) ? $config->curry->internalEncoding : '',
-					'description' => 'The internal encoding for PHP.',
-					'placeholder' => $defaultConfig->curry->internalEncoding,
-				)),
-				'output' => array('text', array(
-					'label' => 'Output Encoding',
-					'value' => isset($config->curry->outputEncoding) ? $config->curry->outputEncoding : '',
-					'description' => 'The default output encoding for pages.',
-					'placeholder' => $defaultConfig->curry->outputEncoding,
-				)),
-			)
-		)), 'encoding');
-		
 		// Misc
-		$form->addSubForm(new Curry_Form_SubForm(array(
+		$form->addSubForm(new \Curry_Form_SubForm(array(
 			'legend' => 'Misc',
 			'class' => 'advanced',
 			'elements' => array(
 				'error_notification' => array('checkbox', array(
 					'label' => 'Error notification',
-					'value' => isset($config->curry->errorNotification) ? $config->curry->errorNotification : '',
+					'value' => isset($config->errorNotification) ? $config->errorNotification : '',
 					'description' => 'If enabled, an attempt to send error-logs to the admin email will be performed when an error occur.'
 				)),
 				'log_propel' => array('checkbox', array(
 					'label' => 'Propel Logging',
-					'value' => isset($config->curry->propel->logging) ? $config->curry->propel->logging : '',
+					'value' => isset($config->propel->logging) ? $config->propel->logging : '',
 					'description' => 'Database queries and other debug information will be logged to the selected logging facility.'
 				)),
 				'debug_propel' => array('checkbox', array(
 					'label' => 'Debug Propel',
-					'value' => isset($config->curry->propel->debug) ? $config->curry->propel->debug : '',
+					'value' => isset($config->propel->debug) ? $config->propel->debug : '',
 					'description' => 'Enables query counting but doesn\'t log queries.',
 				)),
-				'log' => array('select', array(
+				'log' => array('multiselect', array(
 					'label' => 'Logging',
-					'multiOptions' => array('' => '[ Other ]', 'none' => 'Disable logging', 'firebug' => 'Firebug'),
-					'value' => isset($config->curry->log->method) ? $config->curry->log->method : '',
+					'multiOptions' => array_combine(array_keys($loggers), array_keys($loggers)),
+					'value' => array_keys($enabledLoggers),
 				)),
 				'update_translations' => array('checkbox', array(
 					'label' => 'Update Language strings',
-					'value' => isset($config->curry->updateTranslationStrings) ? $config->curry->updateTranslationStrings : '',
+					'value' => isset($config->updateTranslationStrings) ? $config->updateTranslationStrings : '',
 					'description' => 'Add strings as they are used and record last used timestamp',
 				)),
 
 			)
 		)), 'misc');
-		
+
 		$form->addElement('submit', 'save', array(
 			'label' => 'Save',
 			'disabled' => $configFile ? null : 'disabled',
@@ -380,112 +400,123 @@ class Curry_Backend_System extends Curry_Backend {
 		}
 		
 		$this->addMainContent($form);
+		return parent::render();
+	}
+
+	protected function getDefaultLoggers(Config $config = null)
+	{
+		$loggers = isset($config->log) ? $config->log->toArray() : array();
+		return $loggers + array(
+			'firebug' => array(
+				'type' => 'Monolog\Handler\FirePHPHandler',
+			),
+			'file' => array(
+				'fingersCrossed' => true,
+				'type' => 'Monolog\Handler\StreamHandler',
+				'arguments' => array(
+					$this->app['projectPath'].'/data/log/app.log',
+				),
+			),
+		);
 	}
 
 	/**
 	 * Save the config file.
 	 *
-	 * @param Zend_Config $config
+	 * @param Config $config
 	 * @param array $values
 	 */
 	private function saveSettings(&$config, array $values)
 	{
 		// General
-		self::setvar($config->curry, 'name', $values['general']['name']);
-		self::setvar($config->curry, 'baseUrl', $values['general']['baseUrl']);
-		self::setvar($config->curry, 'adminEmail', $values['general']['adminEmail']);
-		$config->curry->divertOutMailToAdmin = (bool)$values['general']['divertOutMailToAdmin'];
-		self::setvar($config->curry, 'fallbackLanguage', $values['general']['fallbackLanguage'] ? $values['general']['fallbackLanguage'] : null);
-		$config->curry->developmentMode = (bool)$values['general']['developmentMode'];
-		$config->curry->forceDomain = (bool)$values['general']['forceDomain'];
+		self::setvar($config, 'name', $values['general']['name']);
+		self::setvar($config, 'baseUrl', $values['general']['baseUrl']);
+		self::setvar($config, 'adminEmail', $values['general']['adminEmail']);
+		$config->divertOutMailToAdmin = (bool)$values['general']['divertOutMailToAdmin'];
+		self::setvar($config, 'fallbackLanguage', $values['general']['fallbackLanguage'] ? $values['general']['fallbackLanguage'] : null);
+		$config->developmentMode = (bool)$values['general']['developmentMode'];
+		$config->forceDomain = (bool)$values['general']['forceDomain'];
 		
 		// backend
-		$config->curry->revisioning = (bool)$values['backend']['revisioning'];
-		$config->curry->autoPublish = (bool)$values['backend']['autoPublish'];
-		$config->curry->backend->noauth = (bool)$values['backend']['noauth'];
-		self::setvar($config->curry, 'defaultEditor', $values['backend']['defaultEditor']);
-		self::setvar($config->curry->backend, 'theme', $values['backend']['theme']);
-		self::setvar($config->curry->backend, 'templatePage', $values['backend']['templatePage'] ? (int)$values['backend']['templatePage'] : null);
-		self::setvar($config->curry->backend, 'logotype', $values['backend']['logotype']);
-		self::setvar($config->curry, 'autoBackup', $values['backend']['autoBackup']);
-		self::setvar($config->curry, 'autoUpdateIndex', $values['backend']['autoUpdateIndex']);
+		$config->revisioning = (bool)$values['backend']['revisioning'];
+		$config->autoPublish = (bool)$values['backend']['autoPublish'];
+		$config->backend->noauth = (bool)$values['backend']['noauth'];
+		self::setvar($config, 'defaultEditor', $values['backend']['defaultEditor']);
+		self::setvar($config, 'backend.theme', $values['backend']['theme']);
+		self::setvar($config, 'backend.templatePage', $values['backend']['templatePage'] ? (int)$values['backend']['templatePage'] : null);
+		self::setvar($config, 'backend.logotype', $values['backend']['logotype']);
+		self::setvar($config, 'autoBackup', $values['backend']['autoBackup']);
+		self::setvar($config, 'autoUpdateIndex', $values['backend']['autoUpdateIndex']);
 
 		// Live edit
 		$excludedPlaceholders = array_filter(array_map('trim', explode(PHP_EOL, $values['liveEdit']['placeholderExclude'])));
 		if (!count($excludedPlaceholders))
 			$excludedPlaceholders = null;
-		$config->curry->liveEdit = (bool)$values['liveEdit']['liveEdit'];
-		self::setvar($config->curry->backend, 'placeholderExclude', $excludedPlaceholders);
+		$config->liveEdit = (bool)$values['liveEdit']['liveEdit'];
+		self::setvar($config, 'backend.placeholderExclude', $excludedPlaceholders);
 
-		// Encoding
-		self::setvar($config->curry, 'internalEncoding', $values['encoding']['internal']);
-		self::setvar($config->curry, 'outputEncoding', $values['encoding']['output']);
-		
 		// Paths
-		self::setvar($config->curry, 'basePath', $values['paths']['basePath']);
-		self::setvar($config->curry, 'projectPath', $values['paths']['projectPath']);
-		self::setvar($config->curry, 'wwwPath', $values['paths']['wwwPath']);
-		self::setvar($config->curry, 'vendorPath', $values['paths']['vendorPath']);
+		self::setvar($config, 'basePath', $values['paths']['basePath']);
+		self::setvar($config, 'projectPath', $values['paths']['projectPath']);
+		self::setvar($config, 'wwwPath', $values['paths']['wwwPath']);
+		self::setvar($config, 'vendorPath', $values['paths']['vendorPath']);
 			
 		// Mail
-		if($values['mail']['method']) {
-			if(!$config->curry->mail)
-				$config->curry->mail = array();
-			$config->curry->mail->method = $values['mail']['method'];
-			
-			// Smtp
-			if($values['mail']['method'] == 'smtp') {
-				$config->curry->mail->host = $values['mail']['host'];
-				if(!$config->curry->mail->options)
-					$config->curry->mail->options = array();
-				self::setvar($config->curry->mail->options, 'port', $values['mail']['port']);
-				self::setvar($config->curry->mail->options, 'ssl', $values['mail']['ssl']);
-				self::setvar($config->curry->mail->options, 'auth', $values['mail']['auth']);
-				self::setvar($config->curry->mail->options, 'username', $values['mail']['username']);
-				self::setvar($config->curry->mail->options, 'password', $values['mail']['password']);
-			}
-		} else if(isset($config->curry->mail->method)) {
-			unset($config->curry->mail->method);
+		self::setvar($config, 'mail.from.email', $values['mail']['fromEmail']);
+		self::setvar($config, 'mail.from.name', $values['mail']['fromName']);
+		self::setvar($config, 'mail.replyto.email', $values['mail']['replytoEmail']);
+		self::setvar($config, 'mail.replyto.name', $values['mail']['replytoName']);
+		self::setvar($config, 'mail.method', $values['mail']['method']);
+		// Mail / Smtp
+		if($values['mail']['method'] == 'smtp') {
+			self::setvar($config, 'mail.host', $values['mail']['host']);
+			self::setvar($config, 'mail.options.port', $values['mail']['port']);
+			self::setvar($config, 'mail.options.ssl', $values['mail']['ssl']);
+			self::setvar($config, 'mail.options.auth', $values['mail']['auth']);
+			self::setvar($config, 'mail.options.username', $values['mail']['username']);
+			self::setvar($config, 'mail.options.password', $values['mail']['password']);
 		}
-		
+
 		// Misc
-		$config->curry->errorNotification = (bool)$values['misc']['error_notification'];
-		$config->curry->propel->logging = (bool)$values['misc']['log_propel'];
-		$config->curry->propel->debug = (bool)$values['misc']['debug_propel'];
-		if($values['misc']['log'])
-			$config->curry->log->method = $values['misc']['log'];
-		$config->curry->updateTranslationStrings = (bool)$values['misc']['update_translations'];
+		$config->errorNotification = (bool)$values['misc']['error_notification'];
+		$config->propel->logging = (bool)$values['misc']['log_propel'];
+		$config->propel->debug = (bool)$values['misc']['debug_propel'];
+		$loggers = $this->getDefaultLoggers($config);
+		foreach($loggers as $name => $logger) {
+			if (in_array($name, $values['misc']['log'])) {
+				if (!isset($config->log->$name)) {
+					$config->log->$name = $logger;
+				}
+				unset($config->log->$name->enabled);
+			} else if (isset($config->log->$name)) {
+				$config->log->$name->enabled = false;
+			}
+		}
+		$config->updateTranslationStrings = (bool)$values['misc']['update_translations'];
 			
 		// Error pages
-		$config->curry->errorPage->notFound = $values['errorPage']['notFound'] ? (int)$values['errorPage']['notFound'] : null;
-		$config->curry->errorPage->unauthorized = $values['errorPage']['unauthorized'] ? (int)$values['errorPage']['unauthorized'] : null;
-		$config->curry->errorPage->error = $values['errorPage']['error'] ? (int)$values['errorPage']['error'] : null;
+		$config->errorPage->notFound = $values['errorPage']['notFound'] ? (int)$values['errorPage']['notFound'] : null;
+		$config->errorPage->unauthorized = $values['errorPage']['unauthorized'] ? (int)$values['errorPage']['unauthorized'] : null;
+		$config->errorPage->error = $values['errorPage']['error'] ? (int)$values['errorPage']['error'] : null;
 		
 		// Maintenance
-		$config->curry->maintenance->enabled = (bool)$values['maintenance']['enabled'];
-		$config->curry->maintenance->page = $values['maintenance']['page'] ? (int)$values['maintenance']['page'] : null;
-		$config->curry->maintenance->message = $values['maintenance']['message'];
+		$config->maintenance->enabled = (bool)$values['maintenance']['enabled'];
+		$config->maintenance->page = $values['maintenance']['page'] ? (int)$values['maintenance']['page'] : null;
+		$config->maintenance->message = $values['maintenance']['message'];
 		
 		// Set migration version if missing
-		if (!isset($config->curry->migrationVersion))
-			$config->curry->migrationVersion = Curry_Core::MIGRATION_VERSION;
+		if (!isset($config->migrationVersion))
+			$config->migrationVersion = App::MIGRATION_VERSION;
 			
 		// Unset upgrade version if present
-		if (isset($config->curry->upgradeVersion))
-			unset($config->curry->upgradeVersion);
+		if (isset($config->upgradeVersion))
+			unset($config->upgradeVersion);
 		
 		try {
-			$writer = new Zend_Config_Writer_Array();
-			$writer->write(Curry_Core::$config->curry->configPath, $config);
-			if(extension_loaded('apc')) {
-				if(function_exists('apc_delete_file'))
-					@apc_delete_file(Curry_Core::$config->curry->configPath);
-				else
-					@apc_clear_cache();
-			}
+			$this->app->writeConfiguration($config);
 			$this->addMessage("Settings saved.", self::MSG_SUCCESS);
 		}
-		catch (Exception $e) {
+		catch (\Exception $e) {
 			$this->addMessage($e->getMessage(), self::MSG_ERROR);
 		}
 	}
@@ -493,18 +524,31 @@ class Curry_Backend_System extends Curry_Backend {
 	/**
 	 * Set configuration variable. If value is an empty string, the variable will be unset.
 	 *
-	 * @param Zend_Config $config
+	 * @param Config $config
 	 * @param string $name
 	 * @param string $value
 	 */
-	private static function setvar(&$config, $name, $value)
+	private static function setvar(Config $config, $name, $value)
 	{
-		if($config instanceof Zend_Config) {
-			if($value != '')
-				$config->$name = $value;
-			else
-				unset($config->$name);
+		if (strpos($name, '.') !== false) {
+			$parts = explode('.', $name);
+			do {
+				$name = array_shift($parts);
+				if (!isset($config->$name)) {
+					if ($value === '') {
+						return;
+					}
+					// this will actually be converted to a Config object, so we don't have to use references below.
+					$config->$name = array();
+				}
+				$config = $config->$name;
+			} while (count($parts) > 1);
+			$name = array_shift($parts);
 		}
+		if($value != '')
+			$config->$name = $value;
+		else
+			unset($config->$name);
 	}
 	
 	/**
@@ -517,7 +561,7 @@ class Curry_Backend_System extends Curry_Backend {
 		
 		$this->addMessage('You can install this bundle using <a href="'.url('', array('module','view'=>'InstallScript')).'">this installation script</a>.', self::MSG_NOTICE, false);
 		
-		$form = new Curry_Form(array(
+		$form = new \Curry_Form(array(
 			'action' => url('', array("module","view")),
 			'method' => 'post',
 			'elements' => array(
@@ -529,8 +573,8 @@ class Curry_Backend_System extends Curry_Backend {
 					'label' => 'WWW folder',
 					'value' => true,
 				)),
-				'base' => array('checkbox', array(
-					'label' => 'Curry Core',
+				'vendor' => array('checkbox', array(
+					'label' => 'Vendor',
 					'value' => true,
 				)),
 				'database' => array('checkbox', array(
@@ -540,9 +584,9 @@ class Curry_Backend_System extends Curry_Backend {
 				'compression' => array('select',array(
 					'label' => 'Compression',
 					'multiOptions' => array(
-						Curry_Archive::COMPRESSION_NONE => 'None',
-						Curry_Archive::COMPRESSION_GZ => 'Gzip',
-						//Curry_Archive::COMPRESSION_BZ2 => 'Bzip2',
+						Archive::COMPRESSION_NONE => 'None',
+						Archive::COMPRESSION_GZ => 'Gzip',
+						//Archive::COMPRESSION_BZ2 => 'Bzip2',
 					),
 				)),
 				'save' => array('submit', array(
@@ -555,7 +599,7 @@ class Curry_Backend_System extends Curry_Backend {
 			// create archive
 			@set_time_limit(0);
 			$compression = $form->compression->getValue();
-			$tar = new Curry_Archive('', $compression);
+			$tar = new Archive('', $compression);
 			
 			// set up file list
 			$options = array(
@@ -584,42 +628,33 @@ class Curry_Backend_System extends Curry_Backend {
 			);
 			
 			if($form->project->isChecked()) {
-				$tar->add(Curry_Core::$config->curry->projectPath, 'cms/', array_merge($options, array(
+				$tar->add($this->app['projectPath'], 'cms/', array_merge($options, array(
 					array('path' => 'data/', 'pattern' => 'data/*/*', 'pattern_subject' => 'path', 'skip' => true),
 				)));
 			}
 			
 			if($form->www->isChecked()) {
-				$tar->add(Curry_Core::$config->curry->wwwPath, 'www/', array_merge($options, array(
-					array('path' => 'shared', 'skip' => true),
-					array('path' => 'shared/', 'skip' => true),
-				)));
+				$tar->add($this->app['wwwPath'], 'www/', $options);
 			}
 			
-			if($form->base->isChecked()) {
-				$sharedPath = realpath(Curry_Core::$config->curry->wwwPath . '/shared');
-				if($sharedPath)
-					$tar->add($sharedPath, 'www/shared/', $options);
-				$tar->add(Curry_Core::$config->curry->basePath.'/include', 'curry/include/', $options);
-				$tar->add(Curry_Core::$config->curry->basePath.'/propel', 'curry/propel/', $options);
-				$tar->add(Curry_Core::$config->curry->basePath.'/vendor', 'curry/vendor/', $options);
-				$tar->add(Curry_Core::$config->curry->basePath.'/.htaccess', 'curry/', $options);
+			if($form->vendor->isChecked()) {
+				$tar->add($this->app['projectPath'].'/../vendor', 'vendor/', $options);
 			}
 			
 			if($form->database->isChecked()) {
 				$fiveMBs = 5 * 1024 * 1024;
 				$fp = fopen("php://temp/maxmemory:$fiveMBs", 'r+');
-				if(!Curry_Backend_DatabaseHelper::dumpDatabase($fp))
-					throw new Exception('Aborting: There was an error when dumping the database.');
+				if(!\Curry_Backend_DatabaseHelper::dumpDatabase($fp))
+					throw new \Exception('Aborting: There was an error when dumping the database.');
 				
 				fseek($fp, 0);
 				$tar->addString('db.txt', stream_get_contents($fp));
 				fclose($fp);
 			}
 			
-			$filename = str_replace(" ", "_", Curry_Core::$config->curry->name)."-bundle-".date("Ymd").".tar" . ($compression ? ".$compression" : '');
-			header("Content-type: " . Curry_Archive::getCompressionMimeType($compression));
-			header("Content-disposition: attachment; filename=" . Curry_String::escapeQuotedString($filename));
+			$filename = str_replace(" ", "_", $this->app['name'])."-bundle-".date("Ymd").".tar" . ($compression ? ".$compression" : '');
+			header("Content-type: " . Archive::getCompressionMimeType($compression));
+			header("Content-disposition: attachment; filename=" . StringHelper::escapeQuotedString($filename));
 			
 			// do not use output buffering
 			while(ob_end_clean())
@@ -630,6 +665,7 @@ class Curry_Backend_System extends Curry_Backend {
 		}
 		
 		$this->addMainContent($form);
+		return parent::render();
 	}
 	
 	/**
@@ -639,21 +675,21 @@ class Curry_Backend_System extends Curry_Backend {
 	{
 		$classes = array(
 			'Curry_Install',
-			'Curry_String',
-			'Curry_Util',
+			'Curry\Util\StringHelper',
+			'Curry\Util\Helper',
 			'Curry_Archive_FileInfo',
 			'Curry_Archive_Reader',
 			'Curry_Archive_Iterator',
 			'Curry_Archive',
 		);
-		$contents = "<?php\n\n// CurryCMS v".Curry_Core::VERSION." Installation Script\n// Created on ".strftime('%Y-%m-%d %H:%M:%S')."\n";
+		$contents = "<?php\n\n// CurryCMS v". App::VERSION ." Installation Script\n// Created on ".strftime('%Y-%m-%d %H:%M:%S')."\n";
 		$contents .= str_repeat('/', 60)."\n\n";
 		
 		$contents .= "ini_set('error_reporting', E_ALL & ~E_NOTICE);\n";
 		$contents .= "ini_set('display_errors', 1);\n";
 		$contents .= "umask(0002);\n\n";
 
-		$autoloader = Curry_Core::getAutoloader();
+		$autoloader = $this->app->autoloader;
 		foreach($classes as $clazz) {
 			$file = $autoloader->findFile($clazz);
 			$contents .= "// $clazz ($file)\n";
@@ -664,26 +700,38 @@ class Curry_Backend_System extends Curry_Backend {
 		$contents.= "//////////////////////////////////////////////////////////\n\n";
 		$contents.= 'Curry_Install::show(isset($_GET[\'step\']) ? $_GET[\'step\'] : \'\');';
 
-		$contents = str_replace("{{INSTALL_CSS}}", file_get_contents(Curry_Core::$config->curry->basePath.'/shared/backend/common/css/install.css'), $contents);
+		$contents = str_replace("{{INSTALL_CSS}}", file_get_contents($this->app['basePath'].'/shared/backend/common/css/install.css'), $contents);
 
-		Curry_Application::returnData($contents, 'text/plain', 'install.php');
+		self::returnData($contents, 'text/plain', 'install.php');
 	}
 	
 	/**
 	 * Clear cache.
-	 * 
-	 * @todo Clear templates.
 	 */
-	public function showClearCache()
+	public function showClearCache(Request $request)
 	{
 		$this->addMainMenu();
-		
-		Curry_Core::$cache->clean(Zend_Cache::CLEANING_MODE_ALL);
-		Curry_Twig_Template::getSharedEnvironment()->clearCacheFiles();
-		if(extension_loaded('apc'))
-			@apc_clear_cache();
-		
-		$this->addMessage('Cache cleaned', self::MSG_SUCCESS);
+
+		$form = new Form(array(
+			'fields' => array(
+				'clear' => array(
+					'type' => 'submit',
+					'class' => 'btn btn-danger',
+				),
+			),
+		));
+
+		if ($request->isMethod('POST') && $form->isValid($request->request->all()) && $form->clear->isClicked()) {
+			$this->app->cache->clean(\Zend_Cache::CLEANING_MODE_ALL);
+			\Curry_Twig_Template::getSharedEnvironment()->clearCacheFiles();
+			if(extension_loaded('apc'))
+				@apc_clear_cache();
+			$this->addMessage('Cache cleared!', self::MSG_SUCCESS);
+		} else {
+			$this->addMainContent($form);
+		}
+
+		return parent::render();
 	}
 	
 	/**
@@ -694,17 +742,18 @@ class Curry_Backend_System extends Curry_Backend {
 	{
 		$this->addMainMenu();
 		
-		$this->addMessage('Curry: '. Curry_Core::VERSION);
-		$this->addMessage('PHP: '. PHP_VERSION . ' (<a href="'.url('', array('module','view'=>'PhpInfo')).'">phpinfo</a>)', self::MSG_NOTICE, false);
-		$this->addMessage('Zend Framework: '. Zend_Version::VERSION);
-		$this->addMessage('Propel: '. Propel::VERSION);
-		$this->addMessage('Twig: '. Twig_Environment::VERSION);
+		$this->addMessage('Curry: '. App::VERSION);
+		$this->addMessage('PHP: '. PHP_VERSION . ' (<a href="'.$this->info->phpinfo->url().'">phpinfo</a>)', self::MSG_NOTICE, false);
+		$this->addMessage('Zend Framework: '. \Zend_Version::VERSION);
+		$this->addMessage('Propel: '. \Propel::VERSION);
+		$this->addMessage('Twig: '. \Twig_Environment::VERSION);
 		
-		$license = Curry_Core::$config->curry->basePath.'/LICENSE.txt';
+		$license = $this->app['basePath'].'/LICENSE.txt';
 		if (file_exists($license))
 			$this->addMainContent('<pre>'.htmlspecialchars(file_get_contents($license)).'</pre>');
 		else
 			$this->addMessage('Unable to find license file.', self::MSG_ERROR);
+		return parent::render();
 	}
 	
 	/**
@@ -712,8 +761,9 @@ class Curry_Backend_System extends Curry_Backend {
 	 */
 	public function showPhpInfo()
 	{
+		ob_start();
 		phpinfo();
-		exit;
+		return ob_get_clean();
 	}
 
 	protected static function getReleases()
@@ -722,7 +772,7 @@ class Curry_Backend_System extends Curry_Backend {
 			// Override user agent
 			$opts = array(
 				'http' => array(
-					'header' => "User-Agent: CurryCMS/".Curry_Core::VERSION." (http://currycms.com)\r\n"
+					'header' => "User-Agent: CurryCMS/". App::VERSION ." (http://currycms.com)\r\n"
 				)
 			);
 			$context = stream_context_create($opts);
@@ -738,15 +788,15 @@ class Curry_Backend_System extends Curry_Backend {
 			uksort($versions, 'version_compare');
 			return $versions;
 		}
-		catch (Exception $e) {
-			trace_warning('Failed to fetch release list: '.$e->getMessage());
+		catch (\Exception $e) {
+			App::getInstance()->logger->warning('Failed to fetch release list: '.$e->getMessage());
 			return null;
 		}
 	}
 	
 	protected static function getButtonForm($name, $display)
 	{
-		return new Curry_Form(array(
+		return new \Curry_Form(array(
 			'action' => url('', $_GET),
 			'method' => 'post',
 			'elements' => array(
@@ -770,9 +820,9 @@ class Curry_Backend_System extends Curry_Backend {
 		} else {
 			$latest = count($releases) ? array_pop($releases) : null;
 			if($latest) {
-				$this->addMessage('Installed version: '.Curry_Core::VERSION);
+				$this->addMessage('Installed version: '. App::VERSION);
 				$this->addMessage('Latest version: '.$latest->version);
-				if (version_compare($latest->version, Curry_Core::VERSION, '>')) {
+				if (version_compare($latest->version, App::VERSION, '>')) {
 					$this->addMessage('New release found: '.$latest->name);
 				} else {
 					$this->addMessage('You already have the latest version.', self::MSG_SUCCESS);
@@ -782,23 +832,22 @@ class Curry_Backend_System extends Curry_Backend {
 			}
 		}
 		
-		if(!Curry_Core::requireMigration())
-			return;
+		if(!$this->app->requireMigration())
+			return parent::render();
 		
 		$form = self::getButtonForm('migrate', 'Migrate');
 		if (isPost() && $form->isValid($_POST) && $form->migrate->isChecked()) {
-			$currentVersion = Curry_Core::$config->curry->migrationVersion;
-			while($currentVersion < Curry_Core::MIGRATION_VERSION) {
+			$currentVersion = $this->app['migrationVersion'];
+			while($currentVersion < App::MIGRATION_VERSION) {
 				$nextVersion = $currentVersion + 1;
 				$migrateMethod = 'doMigrate'.$nextVersion;
 				if(method_exists($this, $migrateMethod)) {
 					try {
 						if($this->$migrateMethod()) {
 							// update configuration migrateVersion number
-							$config = new Zend_Config(require(Curry_Core::$config->curry->configPath), true);
-							$config->curry->migrateVersion = $nextVersion;
-							$writer = new Zend_Config_Writer_Array();
-							$writer->write(Curry_Core::$config->curry->configPath, $config);
+							$config = $this->app->openConfiguration();
+							$config->migrateVersion = $nextVersion;
+							$this->app->writeConfiguration($config);
 							$currentVersion = $nextVersion;
 							$this->addMessage('Migration to version '.$nextVersion.' was successful!', self::MSG_SUCCESS);
 						} else {
@@ -806,7 +855,7 @@ class Curry_Backend_System extends Curry_Backend {
 							break;
 						}
 					}
-					catch (Exception $e) {
+					catch (\Exception $e) {
 						$this->addMessage("Unable to migrate to version $nextVersion: ".$e->getMessage(), self::MSG_ERROR);
 						break;
 					}
@@ -817,9 +866,11 @@ class Curry_Backend_System extends Curry_Backend {
 			}
 		} else {
 			$backupUrl = url('', array('module','view'=>'Bundle'));
-			$this->addMessage('Curry CMS has been updated and you need to migrate your project before you can continue using the backend. You should <a href="'.$backupUrl.'">backup</a> your data and click the migrate button when you\'re ready!', Curry_Backend::MSG_WARNING, false);
+			$this->addMessage('Curry CMS has been updated and you need to migrate your project before you can continue using the backend. You should <a href="'.$backupUrl.'">backup</a> your data and click the migrate button when you\'re ready!', self::MSG_WARNING, false);
 			$this->addMainContent($form);
 		}
+
+		return parent::render();
 	}
 	
 	public function showTestEmail()
@@ -828,14 +879,16 @@ class Curry_Backend_System extends Curry_Backend {
 		if (isPost() && $form->isValid($_POST)) {
 			$values = $form->getValues(true);
 			$ret = $this->sendTestEmail($values);
-			Curry_Application::returnPartial('<pre>'.$ret.'</pre>');
+			$this->addMessage($ret);
+		} else {
+			$this->addMainContent($form);
 		}
-		$this->addMainContent($form);
+		return parent::render();
 	}
 	
 	protected function getTestEmailForm()
 	{
-		return new Curry_Form(array(
+		return new \Curry_Form(array(
 			'action' => url('', array('module', 'view')),
 			'method' => 'post',
 			'elements' => array(
@@ -855,7 +908,7 @@ class Curry_Backend_System extends Curry_Backend {
 	
 	protected function sendTestEmail(array $values)
 	{
-		$projectName = Curry_Core::$config->curry->name;
+		$projectName = $this->app['name'];
 		$body =<<<HTML
 <p>If you can read this email message, then you have correctly configured your email settings.</p>
 <p>This is an automated email. Please do not reply.</p>
@@ -867,20 +920,20 @@ class Curry_Backend_System extends Curry_Backend {
 HTML;
 
 		try {
-			$mail = new Curry_Mail();
+			$mail = new Mail();
 			$mail->addTo($values['toEmail'], $values['toEmail'])
-				->setFrom(Curry_Core::$config->curry->adminEmail, $projectName)
-				->setSubject('Test email from '.Curry_Core::$config->curry->name)
+				->setFrom($this->app['adminEmail'], $projectName)
+				->setSubject('Test email from '.$this->app['name'])
 				->setBodyHtml($body)
 				->setBodyText(strip_tags($body))
 				->send()
 				;
-			if (Curry_Core::$config->curry->divertOutMailToAdmin) {
-				$ret = 'Outgoing email was diverted to adminEmail at '.Curry_Core::$config->curry->adminEmail;
+			if ($this->app['divertOutMailToAdmin']) {
+				$ret = 'Outgoing email was diverted to adminEmail at '.$this->app['adminEmail'];
 			} else {
 				$ret = 'An email has been sent to your email address at '.$values['toEmail'];
 			}
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			$ret = 'An exception has been thrown: '.$e->getMessage();
 		}
 		

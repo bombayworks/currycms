@@ -15,6 +15,8 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+namespace Curry\Module;
+use Curry\Util\ArrayHelper;
 
 /**
  * Module to show a set of images.
@@ -31,7 +33,7 @@
  * 
  * @package Curry\Module
  */
-class Curry_Module_Images extends Curry_Module {
+class Images extends AbstractModule {
 	/**
 	 * Array of images
 	 *
@@ -43,7 +45,7 @@ class Curry_Module_Images extends Curry_Module {
 	public function toTwig()
 	{
 		return array(
-			'images' => Curry_Array::objectsToArray($this->images, null, array($this, 'getImageProperties')),
+			'images' => ArrayHelper::objectsToArray($this->images, null, array($this, 'getImageProperties')),
 		);
 	}
 	
@@ -69,7 +71,7 @@ class Curry_Module_Images extends Curry_Module {
 			$vars['Width'] = $width;
 			$vars['Height'] = $height;
 		}
-		catch (Exception $e) {}
+		catch (\Exception $e) {}
 
 		return $vars;
 	}
@@ -97,7 +99,7 @@ TPL
 	{
 		$targets = array(null => "[ Default ]", "_self" => "_self", "_blank" => "_blank", "_top" => "_top");
 		
-		$imageForm = new Curry_Form_Dynamic(array(
+		$imageForm = new \Curry_Form_Dynamic(array(
 			'legend' => 'Image',
 			'elements' => array(
 				'source' => array('previewImage', array(
@@ -123,7 +125,7 @@ TPL
 			),
 		));
 		
-		$form = new Curry_Form_MultiForm(array(
+		$form = new \Curry_Form_MultiForm(array(
 			'legend' => 'Images',
 			'cloneTarget' => $imageForm,
 			'defaults' => $this->images,
@@ -132,7 +134,7 @@ TPL
 	}
 	
 	/** {@inheritdoc} */
-	public function saveBack(Zend_Form_SubForm $form)
+	public function saveBack(\Zend_Form_SubForm $form)
 	{
 		$values = $form->getValues(true);
 		$this->images = $values;

@@ -16,45 +16,41 @@
  * @link       http://currycms.com
  */
 
+namespace Curry\Archive;
+
 /**
  * Iterator classed used to iterate over the entries inside an archive.
- * 
+ *
  * @package Curry\Archive
  */
-class Curry_Archive_Iterator extends Curry_Archive_Reader implements Iterator {
+class Iterator extends Reader implements \Iterator
+{
 	/**
 	 * Current entry.
 	 *
-	 * @var Curry_Archive_FileInfo
+	 * @var FileInfo
 	 */
 	protected $currentEntry = null;
-	
-	/**
-	 * Internal variable to keep track of position from where to read next entry.
-	 *
-	 * @var int|null
-	 */
-	protected $nextPos = null;
-	
+
 	/**
 	 * Options passed to Curry_Archive_FileInfo.
 	 *
 	 * @var array
 	 */
 	protected $options;
-	
+
 	/**
 	 * Create iterator instance.
 	 *
-	 * @param Curry_Archive $archive
+	 * @param Archive $archive
 	 * @param array $options
 	 */
-	public function __construct(Curry_Archive $archive, $options = array())
+	public function __construct(Archive $archive, $options = array())
 	{
 		parent::__construct($archive->getFilename(), $archive->getCompression());
 		$this->options = $options;
 	}
-	
+
 	/**
 	 * Reset iterator to point to the first element.
 	 */
@@ -63,17 +59,17 @@ class Curry_Archive_Iterator extends Curry_Archive_Reader implements Iterator {
 		$this->nextPos = 0;
 		$this->currentEntry = $this->readEntry($this->options);
 	}
-	
+
 	/**
 	 * Get the current element
 	 *
-	 * @return Curry_Archive_FileInfo|null
+	 * @return FileInfo|null
 	 */
 	public function current()
 	{
 		return $this->currentEntry;
 	}
-	
+
 	/**
 	 * The pathname of the current entry
 	 *
@@ -83,7 +79,7 @@ class Curry_Archive_Iterator extends Curry_Archive_Reader implements Iterator {
 	{
 		return $this->currentEntry ? $this->currentEntry->getPathname() : null;
 	}
-	
+
 	/**
 	 * Move iterator to the next entry.
 	 */
@@ -91,7 +87,7 @@ class Curry_Archive_Iterator extends Curry_Archive_Reader implements Iterator {
 	{
 		$this->currentEntry = $this->readEntry($this->options);
 	}
-	
+
 	/**
 	 * Check if we have reached the end of the archive.
 	 *

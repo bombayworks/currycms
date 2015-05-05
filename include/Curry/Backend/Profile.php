@@ -22,10 +22,10 @@
  * @package Curry\Backend
  *
  */
-class Curry_Backend_Profile extends Curry_Backend
+class Curry_Backend_Profile extends \Curry\Backend\AbstractLegacyBackend
 {
 	/** {@inheritdoc} */
-	public static function getGroup()
+	public function getGroup()
 	{
 		return "Accounts";
 	}

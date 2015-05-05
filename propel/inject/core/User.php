@@ -21,7 +21,8 @@ public static function login()
 {
 	$setCookie = false;
 	$redirect = false;
-	$session = Zend_Session::sessionExists() ? new Zend_Session_Namespace(__CLASS__) : null;
+	$sessionManager = \Zend\Session\Container::getDefaultManager();
+	$session = $sessionManager->sessionExists() ? new \Zend\Session\Container(__CLASS__) : null;
 
 	if(isset($_GET['logout'])) {
 		self::doLogout();
@@ -55,9 +56,10 @@ public static function doLogout()
 {
 	self::$user = null;
 
-	if(Zend_Session::sessionExists()) {
-		$session = new Zend_Session_Namespace(__CLASS__);
-		$session->unsetAll();
+	$sessionManager = \Zend\Session\Container::getDefaultManager();
+	if($sessionManager->sessionExists()) {
+		$session = new \Zend\Session\Container(__CLASS__);
+		$session->exchangeArray(array()); // unset all
 	}
 
 	if(isset($_COOKIE[self::COOKIE_NAME]))
@@ -67,13 +69,13 @@ public static function doLogout()
 public function setLoggedIn($setCookie = false)
 {
 	// Store in session
-	$session = new Zend_Session_Namespace(__CLASS__);
+	$session = new \Zend\Session\Container(__CLASS__);
 	$session->token = $this->getLoginToken();
 
 	// Create cookie
 	if($setCookie) {
-		$expiration = ($setCookie === true) ? Curry_Core::$config->curry->backend->loginTokenExpire : intval($setCookie);
-		setcookie(self::COOKIE_NAME, $this->getLoginToken(), time() + $expiration);
+		$expiration = ($setCookie === true) ? \Curry\App::getInstance()['backend.loginTokenExpire'] : intval($setCookie);
+		setcookie(self::COOKIE_NAME, $this->getLoginToken(), time() + $expiration, '/');
 	}
 }
 
@@ -101,7 +103,7 @@ private static function loginUserFromToken($token)
 public function getLoginToken($expiration = null)
 {
 	if ($expiration === null)
-		$expiration = Curry_Core::$config->curry->backend->loginTokenExpire;
+		$expiration = \Curry\App::getInstance()['backend.loginTokenExpire'];
 	$expiration += time();
 	$value = $this->getUserId();
 	$digest = $this->getTokenDigest($value, $expiration);
@@ -117,8 +119,8 @@ protected function getTokenDigest($value, $expiration)
 
 protected function hashPassword($password)
 {
-	$options = Curry_Core::$config->curry->password->options->toArray();
-	$algorithm = Curry_Core::$config->curry->password->algorithm;
+	$options = \Curry\App::getInstance()['password.options'];
+	$algorithm = \Curry\App::getInstance()['password.algorithm'];
 
 	$hash = password_hash($password, $algorithm, $options);
 	if ($hash === false)
@@ -128,8 +130,8 @@ protected function hashPassword($password)
 
 public function verifyPassword($password)
 {
-	$options = Curry_Core::$config->curry->password->options->toArray();
-	$algorithm = Curry_Core::$config->curry->password->algorithm;
+	$options = \Curry\App::getInstance()['password.options'];
+	$algorithm = \Curry\App::getInstance()['password.algorithm'];
 
 	if (password_verify($password, $this->getPassword())) {
 		if (password_needs_rehash($this->getPassword(), $algorithm, $options)) {
@@ -207,10 +209,10 @@ public function hasPagePermission(Page $page, $permission = null)
 /**
  * Check if user has access to module, and if content visibility matches.
  *
- * @param Curry_PageModuleWrapper $wrapper
+ * @param \Curry\Module\PageModuleWrapper $wrapper
  * @return bool
  */
-public function hasModuleAccess(Curry_PageModuleWrapper $wrapper)
+public function hasModuleAccess(\Curry\Module\PageModuleWrapper $wrapper)
 {
 	$anyAccess = $this->hasAccess('Curry_Backend_Content/*', false);
 	$moduleClass = $wrapper->getPageModule()->getModuleClass();

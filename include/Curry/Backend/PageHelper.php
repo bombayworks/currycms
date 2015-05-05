@@ -15,6 +15,11 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Module\AbstractModule;
+use Curry\Module\PageModuleWrapper;
+use Curry\Util\ArrayHelper;
+use Curry\Util\Helper;
+use Curry\Util\Html;
 
 /**
  * Static helper functions for the page backend.
@@ -111,7 +116,7 @@ class Curry_Backend_PageHelper {
 	public static function saveNewPage(array $values)
 	{
 		$subpage = new Page();
-		$subpage->setUid(Curry_Util::getUniqueId());
+		$subpage->setUid(Helper::getUniqueId());
 		$subpage->setVisible($values['visible']);
 		$subpage->setEnabled($values['enabled']);
 		$subpage->setIncludeInIndex($values['index']);
@@ -172,7 +177,7 @@ class Curry_Backend_PageHelper {
 				'value' => $pageMetadata->getValue() !== null ? $pageMetadata->getValue() : $metadata->getDefaultValue(),
 			);
 			if(isset($typeOptions[$metadata->getType()]))
-				Curry_Array::extend($options, $typeOptions[$metadata->getType()]);
+				ArrayHelper::extend($options, $typeOptions[$metadata->getType()]);
 			$form->addElement($metadata->getType(), $metadata->getName(), $options);
 		}
 		$form->addElement('submit', 'save', array('label' => 'Save'));
@@ -295,7 +300,7 @@ class Curry_Backend_PageHelper {
 	 */
 	public static function getNewRevisionForm(Page $page, $copyRevisionId)
 	{
-		$pageRevisions = Curry_Array::objectsToArray($page->getPageRevisions(), 'getPageRevisionId', 'getDescription');
+		$pageRevisions = ArrayHelper::objectsToArray($page->getPageRevisions(), 'getPageRevisionId', 'getDescription');
 		$pageRevisions = array(null => '[ None ]') + $pageRevisions;
 		
 		if($page->getWorkingPageRevisionId())
@@ -498,12 +503,7 @@ class Curry_Backend_PageHelper {
 				'generator' => array('text', array(
 					'label' => 'Generator',
 					'value' => $page->getGenerator(),
-					'placeholder' => Curry_Core::$config->curry->defaultGeneratorClass,
-				)),
-				'encoding' => array('text', array(
-					'label' => 'Encoding',
-					'value' => $page->getEncoding(),
-					'placeholder' => Curry_Core::$config->curry->outputEncoding,
+					'placeholder' => \Curry\App::getInstance()['defaultGeneratorClass'],
 				)),
 			)
 		)), 'advanced');
@@ -593,7 +593,7 @@ class Curry_Backend_PageHelper {
 
 		$dependantPages = array();
 		if ($page) {
-			$dependantPages = Curry_Array::objectsToArray($page->getDependantPages(), null, 'getPageId');
+			$dependantPages = ArrayHelper::objectsToArray($page->getDependantPages(), null, 'getPageId');
 			$dependantPages[] = $page->getPageId();
 		}
 
@@ -636,7 +636,7 @@ class Curry_Backend_PageHelper {
 		$modulePermission = $user->hasPagePermission($pageRevision->getPage(), PageAccessPeer::PERM_MODULES);
 		if ($modulePermission) {
 			$modules = array('Predefined' => $modules);
-			foreach(Curry_Module::getModuleList() as $className) {
+			foreach(AbstractModule::getModuleList() as $className) {
 				$parts = explode("_", str_replace("_Module_", "_", $className));
 				$package = array_shift($parts);
 				$modules[$package][$className] = join(" / ", $parts);
@@ -674,7 +674,7 @@ class Curry_Backend_PageHelper {
 				}
 			}
 			catch (Exception $e) {
-				trace_warning('Error in template: ' . $e->getMessage());
+				\Curry\App::getInstance()->logger->warning('Error in template: ' . $e->getMessage());
 			}
 			if(count($targets))
 				$targets = array_combine(array_values($targets), array_values($targets));
@@ -807,7 +807,7 @@ class Curry_Backend_PageHelper {
 	public static function saveNewModule(PageRevision $pageRevision, array $values)
 	{
 		$pageModule = new PageModule();
-		$pageModule->setUid(Curry_Util::getUniqueId());
+		$pageModule->setUid(Helper::getUniqueId());
 		$pageModule->setPageId($pageRevision->getPageId());
 		if (ctype_digit($values['module_class'])) {
 			$module = ModuleQuery::create()->findPk($values['module_class']);
@@ -823,7 +823,7 @@ class Curry_Backend_PageHelper {
 				$className = $values['module_class'];
 				$predefinedTemplates = call_user_func(array($className, 'getPredefinedTemplates'));
 
-				$root = Curry_Core::$config->curry->template->root;
+				$root = \Curry\App::getInstance()['template.root'];
 				$template = $values['template_name'];
 				$templateFile = $root . DIRECTORY_SEPARATOR . $template;
 				if(!file_exists($templateFile)) {
@@ -846,7 +846,7 @@ class Curry_Backend_PageHelper {
 				throw new Exception('Module target not set');
 
 			$pageModule = new PageModule();
-			$pageModule->setUid(Curry_Util::getUniqueId());
+			$pageModule->setUid(Helper::getUniqueId());
 			$pageModule->setPageId($pageRevision->getPageId());
 			$pageModule->setModuleClass($values['module_class']);
 			$pageModule->setName($values['name']);
@@ -869,7 +869,7 @@ class Curry_Backend_PageHelper {
 		$moduleData->save();
 		
 		// create default data
-		$wrapper = new Curry_PageModuleWrapper($pageModule, $pageRevision, null);
+		$wrapper = new PageModuleWrapper($pageModule, $pageRevision, null);
 		$wrapper->createData();
 		
 		return $pageModule;
@@ -878,10 +878,10 @@ class Curry_Backend_PageHelper {
 	/**
 	 * Module properties form.
 	 *
-	 * @param Curry_PageModuleWrapper $pageModuleWrapper
+	 * @param PageModuleWrapper $pageModuleWrapper
 	 * @return Curry_Form
 	 */
-	public static function getModulePropertiesForm(Curry_PageModuleWrapper $pageModuleWrapper)
+	public static function getModulePropertiesForm(PageModuleWrapper $pageModuleWrapper)
 	{
 		$form = new Curry_Form(array(
 			'action' => url('', $_GET),
@@ -956,10 +956,10 @@ class Curry_Backend_PageHelper {
 	/**
 	 * Save module properties.
 	 *
-	 * @param Curry_PageModuleWrapper $pageModuleWrapper
+	 * @param PageModuleWrapper $pageModuleWrapper
 	 * @param array $values
 	 */
-	public static function saveModuleProperties(Curry_PageModuleWrapper $pageModuleWrapper, array $values)
+	public static function saveModuleProperties(PageModuleWrapper $pageModuleWrapper, array $values)
 	{
 		$modified = false;
 		
@@ -1121,7 +1121,7 @@ class Curry_Backend_PageHelper {
 					$selectedColor = $color;
 					$attr['selected'] = 'selected';
 				}
-				$opts .= Curry_Html::createTag('option', $attr, $optionLabel);
+				$opts .= Html::tag('option', $attr, $optionLabel);
 			}
 			$row.= '<td><select name="'.$fieldName.'" '.($userPermission[$colName] ? '' : 'disabled="disabled" ').'style="color:'.$selectedColor.'" onchange="this.style.color = this.options[this.selectedIndex].style.color">';
 			$row.= $opts;

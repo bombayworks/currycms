@@ -1,7 +1,7 @@
 public function preInsert(PropelPDO $con = null)
 {
 	if ($this->getUid() === null)
-		$this->setUid(Curry_Util::getUniqueId());
+		$this->setUid(\Curry\Util\Helper::getUniqueId());
 	return true;
 }
 

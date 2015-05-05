@@ -2,6 +2,9 @@
 
 namespace Curry\Tests;
 
+use Curry\App;
+use Symfony\Component\HttpFoundation\Request;
+
 class CmsTest extends \PHPUnit_Framework_TestCase {
 	static protected $fixturesDirectory;
 
@@ -10,14 +13,16 @@ class CmsTest extends \PHPUnit_Framework_TestCase {
 		parent::setUpBeforeClass();
 
 		self::$fixturesDirectory = realpath(dirname(dirname(__DIR__)).'/fixtures');
-		\Curry_Core::init(array (
+		$app = App::create(array (
 				'curry' =>
 				array (
 					'name' => 'Curry Unit Tests',
 					'adminEmail' => 'info@currycms.com',
+					'cache' => array('method' => 'none'),
+					'pageCache' => false,
 					'autoBackup' => false,
 					'projectPath' => self::$fixturesDirectory,
-					'migrationVersion' => \Curry_Core::MIGRATION_VERSION,
+					'migrationVersion' => App::MIGRATION_VERSION,
 					'template' => array(
 						'root' => self::$fixturesDirectory.'/templates',
 						'options' => array(
@@ -30,21 +35,22 @@ class CmsTest extends \PHPUnit_Framework_TestCase {
 					),
 				),
 			));
+		$app->boot();
 
 		// Empty database
 		$con = \Propel::getConnection();
 		$con->beginTransaction();
 		try {
-			foreach(\Curry_Propel::getModels(false) as $model)
+			foreach(\Curry\Util\Propel::getModels(false) as $model)
 				\PropelQuery::from($model)->deleteAll();
 			$con->commit();
 		}
-		catch (Exception $e) {
+		catch (\Exception $e) {
 			$con->rollBack();
 			throw $e;
 		}
 
-		$setup = new \Curry_Backend_Setup();
+		$setup = new \Curry_Backend_Setup($app);
 		$setup->saveConfiguration(array(
 				'template' => 'empty',
 				'admin' => array(
@@ -56,34 +62,12 @@ class CmsTest extends \PHPUnit_Framework_TestCase {
 					'password' => 'user',
 				)
 			));
+		$app->cache->clean();
 	}
 
-	protected static function createRequest($method, $uri, $get = array(), $post = array(), $cookie = array(), $env = array())
+	protected static function handleRequest(Request $request)
 	{
-		$request = new \Curry_Request($method, $uri);
-		$request->addParamSource('cookie', $cookie);
-		$request->addParamSource('post', $post);
-		$request->addParamSource('get', $get);
-		$request->addParamSource('env', $env);
-		return $request;
-	}
-
-	protected static function setupRequest($method, $uri, $get = array(), $post = array(), $cookie = array(), $env = array())
-	{
-		$_SERVER['HTTP_METHOD'] = strtoupper($method);
-		$_SERVER['REQUEST_URI'] = $uri;
-		$_GET = $get;
-		$_POST = $post;
-		$_COOKIE = $cookie;
-		$_ENV = $env;
-	}
-
-	protected static function handleRequest(\Curry_Request $request)
-	{
-		ob_start();
-		$app = \Curry_Application::getInstance();
-		$app->handle($request);
-		return ob_get_clean();
+		return App::getInstance()->handle($request);
 	}
 
 	public function testPropelInitialized()
@@ -93,6 +77,8 @@ class CmsTest extends \PHPUnit_Framework_TestCase {
 
 	public function testFrontPage()
 	{
+		$response = self::handleRequest(Request::create('/'));
+		$this->assertEquals(200, $response->getStatusCode());
 		$this->assertEquals('<!DOCTYPE html>
 <html>
 <head>
@@ -100,17 +86,14 @@ class CmsTest extends \PHPUnit_Framework_TestCase {
 </head>
 <body>
 </body>
-</html>', self::handleRequest(self::createRequest('get', '/')));
+</html>', $response->getContent());
 	}
 
 	public function testBackend()
 	{
-		ob_start();
-		self::setupRequest('post', '/admin.php', array(), array('login_username' => 'admin', 'login_password' => 'admin'));
-		$admin = \Curry_Admin::getInstance();
-		$admin->show();
-		$content = ob_get_clean();
-		$this->assertNotEmpty($content);
+		$response = self::handleRequest(Request::create('/admin/', 'POST', array('login_username' => 'admin', 'login_password' => 'admin')));
+		$this->assertEquals(200, $response->getStatusCode());
+		$this->assertNotEmpty($response->getContent());
 	}
 
 }

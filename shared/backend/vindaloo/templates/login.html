@@ -5,7 +5,7 @@
 {% block header %}{% endblock %}
 
 {% block content %}
-<form action="admin.php" method="post" class="form-horizontal">
+<form method="post" class="form-horizontal">
   <h1>CurryCMS Login</h1>
   {% if LoginRedirect %}
   <input type="hidden" name="login_redirect" value="{{LoginRedirect}}" />

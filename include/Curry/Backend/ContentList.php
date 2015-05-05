@@ -15,6 +15,11 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
+use Curry\Backend\AbstractBackend;
+use Curry\Module\PageModuleWrapper;
+use Curry\Util\ArrayHelper;
+use Curry\Util\Propel;
+use Curry\Util\Html;
 
 /**
  * Page content list view.
@@ -22,7 +27,7 @@
  *
  * @package Curry\Backend
  */
-class Curry_Backend_ContentList extends Curry_ModelView_List {
+class Curry_Backend_ContentList {
 	/**
 	 * @var PageRevision
 	 */
@@ -63,7 +68,7 @@ class Curry_Backend_ContentList extends Curry_ModelView_List {
 					'sortable' => false,
 					'escape' => false,
 					'callback' => function($wrapper) {
-						return Curry_Html::createTag('span', array('title' => $wrapper->getClassName()),
+						return Html::tag('span', array('title' => $wrapper->getClassName()),
 							basename(str_replace('_', '/', $wrapper->getClassName()))
 						);
 					}
@@ -91,7 +96,7 @@ class Curry_Backend_ContentList extends Curry_ModelView_List {
 					if (!$wrapper->getTemplate())
 						return 'None';
 					$templateUrl = url('', array('module' => 'Curry_Backend_Template', 'view' => 'Edit', 'file' => $wrapper->getTemplate()));
-					return Curry_Html::createTag('a', array(
+					return Html::tag('a', array(
 						'href' => $templateUrl,
 						'title' => $wrapper->getTemplate(),
 					), basename($wrapper->getTemplate()));
@@ -134,7 +139,7 @@ class Curry_Backend_ContentList extends Curry_ModelView_List {
 
 	protected function getPageInheritance($page, $wrappers)
 	{
-		$ret = Curry_Html::createTag('a', array(
+		$ret = Html::tag('a', array(
 				'href' => url('', array('module','view','page_id'=>$page->getPageId())),
 				'title' => $page->getUrl(),
 			), $page->getName());
@@ -199,8 +204,8 @@ class Curry_Backend_ContentList extends Curry_ModelView_List {
 			->delete();
 
 		$wrappers = $this->pageRevision->getPageModuleWrappers();
-		$unsortedIds = Curry_Array::objectsToArray($wrappers, false, 'getPageModuleId');
-		$wrapperById = Curry_Array::objectsToArray($wrappers, 'getPageModuleId');
+		$unsortedIds = ArrayHelper::objectsToArray($wrappers, false, 'getPageModuleId');
+		$wrapperById = ArrayHelper::objectsToArray($wrappers, 'getPageModuleId');
 
 		// Get primary keys
 		$items = $_POST['item'];
@@ -226,7 +231,7 @@ class Curry_Backend_ContentList extends Curry_ModelView_List {
 			foreach($sortedIds as $id) {
 				$pks[] = array($id, $this->pageRevision->getPageRevisionId());
 			}
-			Curry_Propel::sortableReorder($pks, 'ModuleSortorder');
+			Propel::sortableReorder($pks, 'ModuleSortorder');
 		}
 
 		$this->pageRevision->setUpdatedAt(time());
@@ -239,10 +244,10 @@ class Curry_Backend_ContentList extends Curry_ModelView_List {
 		$pageModule = $pk ? PropelQuery::from($this->getModelClass())->findPk($pk) : null;
 		if (!$pageModule)
 			return null;
-		return new Curry_PageModuleWrapper($pageModule, $this->pageRevision, $this->langcode);
+		return new PageModuleWrapper($pageModule, $this->pageRevision, $this->langcode);
 	}
 
-	public function getInfo(Curry_PageModuleWrapper $wrapper)
+	public function getInfo(PageModuleWrapper $wrapper)
 	{
 		$icons = '';
 		$pageModule = $wrapper->getPageModule();
@@ -304,14 +309,14 @@ class Curry_Backend_ContentList extends Curry_ModelView_List {
 		);
 	}
 
-	public function showDelete(Curry_PageModuleWrapper $wrapper, $backend)
+	public function showDelete(PageModuleWrapper $wrapper, $backend)
 	{
 		if ($wrapper->isInherited() && !$this->pagePermission[PageAccessPeer::PERM_MODULES]) {
-			$backend->addMessage('You do not have permission to delete inherited modules.', Curry_Backend::MSG_ERROR);
+			$backend->addMessage('You do not have permission to delete inherited modules.', AbstractBackend::MSG_ERROR);
 			return;
 		}
 		if (!$this->pagePermission[PageAccessPeer::PERM_CREATE_MODULE]) {
-			$backend->addMessage('You do not have permission to delete modules.', Curry_Backend::MSG_ERROR);
+			$backend->addMessage('You do not have permission to delete modules.', AbstractBackend::MSG_ERROR);
 			return;
 		}
 		$form = new Curry_Form(array(
@@ -330,9 +335,9 @@ class Curry_Backend_ContentList extends Curry_ModelView_List {
 			if (!$revisionModule)
 				throw new Exception('Unable to find RevisionModule to delete.');
 			$revisionModule->delete();
-			$backend->addMessage('The module has been deleted!', Curry_Backend::MSG_SUCCESS);
+			$backend->addMessage('The module has been deleted!', AbstractBackend::MSG_SUCCESS);
 			$backend->createModelUpdateEvent('PageModule', $pk, 'delete');
-			Curry_Admin::getInstance()->addBodyClass('live-edit-close');
+			$backend->addBodyClass('live-edit-close');
 		} else {
 			$msg = 'Do you really want to delete this module?';
 			$originPage = $wrapper->getOriginPage();
@@ -340,18 +345,18 @@ class Curry_Backend_ContentList extends Curry_ModelView_List {
 			if ($wrapper->isInherited()) {
 				$backend->addMessage('This module is inherited and will be removed from '.$originPage.
 					'. It will also be removed from the following subpages: '.
-					join(", ", $dependencies), Curry_Backend::MSG_WARNING);
+					join(", ", $dependencies), AbstractBackend::MSG_WARNING);
 			} else if(count($dependencies)) {
 				$backend->addMessage('This module is inherited to subpages and will '.
 					'also be removed from the following subpages: '.
-					join(", ", $dependencies), Curry_Backend::MSG_WARNING);
+					join(", ", $dependencies), AbstractBackend::MSG_WARNING);
 			}
 			$backend->addMessage($msg);
 			$backend->addMainContent($form);
 		}
 	}
 
-	public function showProperties(Curry_PageModuleWrapper $wrapper, $backend)
+	public function showProperties(PageModuleWrapper $wrapper, $backend)
 	{
 		$form = Curry_Backend_PageHelper::getModulePropertiesForm($wrapper);
 		if (isPost('pid_moduleproperties') && $form->isValid($_POST)) {
@@ -363,12 +368,12 @@ class Curry_Backend_ContentList extends Curry_ModelView_List {
 			if (isAjax())
 				return;
 			else
-				Curry_Admin::getInstance()->addBodyClass('live-edit-close');
+				$backend->addBodyClass('live-edit-close');
 		}
 		$backend->addMainContent($form);
 	}
 
-	public function showEdit(Curry_PageModuleWrapper $wrapper, $backend)
+	public function showEdit(PageModuleWrapper $wrapper, $backend)
 	{
 		$form = $this->getModuleForm($wrapper);
 		if(!$form) {
@@ -384,7 +389,7 @@ class Curry_Backend_ContentList extends Curry_ModelView_List {
 				if($module->saveBack($moduleForm) !== false)
 					$modified = $module->saveModule();
 				$backend->createModelUpdateEvent('PageModule', $wrapper->getPageModuleId(), 'update');
-				Curry_Admin::getInstance()->addBodyClass('live-edit-close');
+				$backend->addBodyClass('live-edit-close');
 			}
 
 			if($form->delete && $form->delete->isChecked()) {
@@ -423,10 +428,10 @@ class Curry_Backend_ContentList extends Curry_ModelView_List {
 	/**
 	 * Edit module form.
 	 *
-	 * @param Curry_PageModuleWrapper $wrapper
+	 * @param PageModuleWrapper $wrapper
 	 * @return Curry_Form|null
 	 */
-	protected function getModuleForm(Curry_PageModuleWrapper $wrapper)
+	protected function getModuleForm(PageModuleWrapper $wrapper)
 	{
 		$form = new Curry_Form(array(
 			'action' => url('', $_GET),

@@ -408,7 +408,6 @@ class ListView extends AbstractBackend {
 		}
 
 		$options['actions'] = array();
-		$this->initialize();
 		foreach($this->actions as $name => $action) {
 			if (isset($action['action']) && !isset($action['href'])) {
 				if (!$action['action'] instanceof \Curry\View)

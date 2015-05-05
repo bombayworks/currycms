@@ -2,6 +2,7 @@
 namespace Curry\Backend;
 
 use Curry\Form\ModelForm;
+use Curry\ModelView\ListView;
 use Curry\Module\AbstractModule;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -45,7 +46,7 @@ class Modules extends AbstractBackend {
 				),
 			)
 		));
-		$this->addView('modules', new \Curry_ModelView_List('Module', array(
+		$this->addView('modules', new ListView('Module', array(
 			'modelForm' => $form,
 		)));
 	}

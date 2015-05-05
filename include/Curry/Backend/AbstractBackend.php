@@ -304,8 +304,7 @@ abstract class AbstractBackend extends View {
 			'Accounts' => array(),
 			'System' => array(),
 		);
-		foreach($app->backend->views() as $viewName => $viewAndRoute) {
-			list($view, $route) = $viewAndRoute;
+		foreach($app->backend->getViews() as $viewName => $view) {
 			//if(!$user->hasAccess(get_class($view)))
 			//	continue;
 			$active = StringHelper::startsWith($app->request->getPathInfo(), '/'.$view->url());

@@ -50,7 +50,7 @@ class Curry_Backend_Users extends AbstractLegacyBackend
 		);
 	}
 
-	protected function getViews()
+	protected function getUserViews()
 	{
 		$all = array_combine(self::getPermissions(), array('Users','Roles','File permissions'));
 		$access = array();
@@ -63,14 +63,14 @@ class Curry_Backend_Users extends AbstractLegacyBackend
 
 	protected function addMenu()
 	{
-		foreach($this->getViews() as $view => $name)
+		foreach($this->getUserViews() as $view => $name)
 			$this->addMenuItem($name, url('', array('module','view'=>$view)));
 	}
 
 	/** {@inheritdoc} */
 	public function showMain()
 	{
-		$views = $this->getViews();
+		$views = $this->getUserViews();
 		if (!count($views))
 			throw new Exception('You don\'t have access to any user/role settings.');
 

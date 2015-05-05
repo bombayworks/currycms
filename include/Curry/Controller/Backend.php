@@ -93,8 +93,11 @@ class Backend extends AbstractBackend implements EventSubscriberInterface {
 
 	public function show(Request $request)
 	{
-		foreach($this->views() as $name => $viewAndRoute) {
-			list($view, $route) = $viewAndRoute;
+		if ($this->app['setup']) {
+			return self::redirect($this->setup->url());
+		}
+
+		foreach($this->getViews() as $name => $view) {
 			$this->addMainContent('<a href="'.$view->url().'">'.$name.'</a><br/>');
 		}
 		return $this->render();

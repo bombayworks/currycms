@@ -15,10 +15,10 @@
  * @license    http://currycms.com/license GPL
  * @link       http://currycms.com
  */
-use Curry\URL;
+namespace Curry\Backend;
+
 use Curry\Util\Console;
 use Curry\Util\PathHelper;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -26,25 +26,25 @@ use Symfony\Component\HttpFoundation\Request;
  *
  * @package Curry\Backend
  */
-class Curry_Backend_Setup extends \Curry\Backend\AbstractBackend {
+class Setup extends AbstractBackend {
 	
 	public function getGroup()
 	{
-		return 'Installation';
+		return null;
 	}
 
 	public function initialize()
 	{
 		$this->addViewFunction('permissions', array($this, 'showPermissions'));
 		$this->addViewFunction('database', array($this, 'showDatabase'));
-		$this->addViewFunction('create-database', array($this, 'showCreateDatabase'));
+		$this->addViewFunction('createDatabase', array($this, 'showCreateDatabase'), 'create-database');
 		$this->addViewFunction('configure', array($this, 'showConfigure'));
 		$this->addViewFunction('complete', array($this, 'showSetupComplete'));
 	}
 
 	public function show(Request $request)
 	{
-		return RedirectResponse::create($this->permissions->url());
+		return self::redirect($this->permissions->url());
 	}
 	
 	public function showPermissions()
@@ -65,9 +65,9 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractBackend {
 				$this->addMessage($path.' is not writable', self::MSG_WARNING);
 				$error = true;
 			} else if(is_dir($path)) {
-				$iterator = new RecursiveIteratorIterator(
-					new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS),
-					RecursiveIteratorIterator::SELF_FIRST);
+				$iterator = new \RecursiveIteratorIterator(
+					new \RecursiveDirectoryIterator($path, \RecursiveDirectoryIterator::SKIP_DOTS),
+					\RecursiveIteratorIterator::SELF_FIRST);
 				foreach ($iterator as $item) {
 					if(!$item->isWritable()) {
 						$this->addMessage($item->getPathname().' is not writable', self::MSG_WARNING);
@@ -80,26 +80,25 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractBackend {
 		if($error) {
 			$this->addMainContent('<p>Please fix the errors above and reload the page. If you\'re unable to fix the errors, you may attempt to <a href="'.$nextUrl.'">continue installation anyway</a>.</p>');
 		} else {
-			return RedirectResponse::create($nextUrl);
+			return self::redirect($nextUrl);
 		}
 		return parent::render();
 	}
 
-	public function showDatabase()
+	public function showDatabase(Request $request)
 	{
 		$nextUrl = $this->configure->url();
 
 		$this->addMainContent('<h2>Configure database</h2>');
 		$this->addBreadcrumb('Database', $this->database->url());
-		$url = url('', array('module', 'view'=>'CreateDatabase'));
-		$this->addCommand('Create database', $this['create-database']->url(), 'icon-plus-sign', array('class' => 'dialog'));
+		$this->addCommand('Create database', $this->createDatabase->url(), 'icon-plus-sign', array('class' => 'dialog'));
 
 		$cmsPath = $this->app['projectPath'];
 		$propelConfig = PathHelper::path($cmsPath, 'config', 'propel.xml');
 		if(!is_writable($propelConfig))
 			$this->addMessage("Configuration file $propelConfig doesn't seem to be writable.", self::MSG_ERROR);
 
-		$config = new SimpleXMLElement(file_get_contents($propelConfig));
+		$config = new \SimpleXMLElement(file_get_contents($propelConfig));
 		$defaultDataSource = (string)$config->propel->datasources['default'];
 		$params = array(
 			'host' => 'localhost',
@@ -127,7 +126,7 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractBackend {
 		}
 
 		$form = $this->getDatabaseForm($params);
-		if(isPost() && $form->isValid($_POST)) {
+		if($request->isMethod('POST') && $form->isValid($request->request->all())) {
 			if($form->test->isChecked()) {
 				$status = self::testConnection($form->getValues());
 				if ($status === true)
@@ -136,24 +135,24 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractBackend {
 					$this->addMessage('Connection failed: ' . $status, self::MSG_ERROR);
 			} else if($form->save->isChecked()) {
 				if($this->saveConnection($form->getValues(), $propelConfig))
-					return RedirectResponse::create($nextUrl);
+					return self::redirect($nextUrl);
 			}
 		}
 		$this->addMainContent($form);
 		return parent::render();
 	}
 
-	public function showCreateDatabase()
+	public function showCreateDatabase(Request $request)
 	{
 		$form = $this->getCreateDatabaseForm();
-		if(isPost() && $form->isValid($_POST)) {
+		if($request->isMethod('POST') && $form->isValid($request->request->all())) {
 			try {
 				$values = $form->getValues();
 				$dsn = "mysql:host={$values['host']}";
 				$username = strlen($values['admin_user']) ? $values['admin_user'] : null;
 				$password = strlen($values['admin_password']) ? $values['admin_password'] : null;
-				$pdo = new PDO($dsn, $username, $password);
-				$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+				$pdo = new \PDO($dsn, $username, $password);
+				$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 				if ($values['user']) {
 					$stmt = $pdo->prepare("CREATE USER :user@'localhost' IDENTIFIED BY :password");
 					$stmt->execute(array(':user' => $values['user'], ':password' => $values['password']));
@@ -175,7 +174,7 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractBackend {
 				$this->addMainContent('<script>'.$javascript.'</script>');
 				$this->addMessage('Success!', self::MSG_SUCCESS);
 			}
-			catch(Exception $e) {
+			catch(\Exception $e) {
 				$this->addMessage($e->getMessage(), self::MSG_ERROR);
 				$this->addMainContent($form);
 			}
@@ -185,15 +184,15 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractBackend {
 		return parent::render();
 	}
 
-	public function showConfigure()
+	public function showConfigure(Request $request)
 	{
-		$this->addBreadcrumb('Database', url('', array('module', 'view'=>'Database')));
-		$this->addBreadcrumb('Configure', url('', array('module', 'view'=>'Configure')));
+		$this->addBreadcrumb('Database', $this->database->url());
+		$this->addBreadcrumb('Configure', $this->configure->url());
 
 		$form = $this->getConfigureForm();
-		if(isPost() && $form->isValid($_POST)) {
+		if($request->isMethod('POST') && $form->isValid($request->request->all())) {
 			$this->saveConfiguration($form->getValues());
-			return RedirectResponse::create(url('', array('module','view'=>'SetupComplete')));
+			return self::redirect($this->complete->url());
 		} else {
 			$this->addMainContent('<h2>Basic configuration</h2>');
 
@@ -208,7 +207,7 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractBackend {
 		return parent::render();
 	}
 
-	public function showSetupComplete()
+	public function showSetupComplete(Request $request)
 	{
 		// Disable setup and enable backend authorization
 		$config = $this->app->openConfiguration();
@@ -216,8 +215,8 @@ class Curry_Backend_Setup extends \Curry\Backend\AbstractBackend {
 		$config->backend->noauth = false;
 		$this->app->writeConfiguration($config);
 
-		$backendUrl = url($this->app['backend.basePath']);
-		$frontendUrl = url('~/');
+		$backendUrl = $request->getBasePath().$this->app['backend.basePath'];
+		$frontendUrl = $request->getBasePath().'/';
 		$this->addMainContent(<<<HTML
 <div style="text-align:center">
   <h1>Installation complete!</h1>
@@ -231,9 +230,9 @@ HTML
 
 	protected function getCreateDatabaseForm()
 	{
-		$pdoDrivers = method_exists('PDO', 'getAvailableDrivers') ? PDO::getAvailableDrivers() : array();
+		$pdoDrivers = method_exists('PDO', 'getAvailableDrivers') ? \PDO::getAvailableDrivers() : array();
 		$adapters = count($pdoDrivers) ? array_combine($pdoDrivers, $pdoDrivers) : array();
-		$form = new Curry_Form(array(
+		$form = new \Curry_Form(array(
 			'action' => url('', $_GET),
 			'elements' => array(
 				'adapter' => array('select', array(
@@ -280,9 +279,9 @@ HTML
 
 	protected function getDatabaseForm($params)
 	{
-		$pdoDrivers = method_exists('PDO', 'getAvailableDrivers') ? PDO::getAvailableDrivers() : array();
+		$pdoDrivers = method_exists('PDO', 'getAvailableDrivers') ? \PDO::getAvailableDrivers() : array();
 		$adapters = count($pdoDrivers) ? array_combine($pdoDrivers, $pdoDrivers) : array();
-		$form = new Curry_Form(array(
+		$form = new \Curry_Form(array(
 			'csrfCheck' => false,
 			'elements' => array(
 				'adapter' => array('select', array(
@@ -332,11 +331,11 @@ HTML
 			$dsn = "mysql:host={$params['host']};dbname={$params['database']}";
 			$username = strlen($params['user']) ? $params['user'] : null;
 			$password = strlen($params['password']) ? $params['password'] : null;
-			$pdo = new PDO($dsn, $username, $password);
+			$pdo = new \PDO($dsn, $username, $password);
 			unset($pdo);
 			return true;
 		}
-		catch(Exception $e) {
+		catch(\Exception $e) {
 			return $e->getMessage();
 		}
 	}
@@ -361,7 +360,7 @@ HTML
 		}
 
 		// Update runtime configuration
-		$config = new SimpleXMLElement(file_get_contents($propelConfig));
+		$config = new \SimpleXMLElement(file_get_contents($propelConfig));
 		$defaultDataSource = (string)$config->propel->datasources['default'];
 		foreach($config->propel->datasources->datasource as $datasource) {
 			if((string)$datasource['id'] == $defaultDataSource) {
@@ -381,19 +380,19 @@ HTML
 		}
 
 		// Generate propel classes and configuration
-		$content = Curry_Backend_DatabaseHelper::propelGen('');
-		if(!Curry_Backend_DatabaseHelper::getPropelGenStatus($content)) {
+		$content = \Curry_Backend_DatabaseHelper::propelGen('');
+		if(!\Curry_Backend_DatabaseHelper::getPropelGenStatus($content)) {
 			$this->addMessage('It seems there was an error when building propel', self::MSG_ERROR);
 			$this->addMainContent('<pre class="console">'.Console::colorize($content).'</pre>');
 			return false;
 		}
 
 		// Initialize propel
-		Propel::init($this->app['propel.conf']);
+		\Propel::init($this->app['propel.conf']);
 
 		// Set database charset
 		if($params['set_charset']) {
-			$con = Propel::getConnection();
+			$con = \Propel::getConnection();
 			$result = $con->exec('ALTER DATABASE '.$params['database'].' CHARACTER SET utf8 COLLATE utf8_general_ci');
 			if(!$result) {
 				$this->addMessage('Unable to change database charset', self::MSG_WARNING);
@@ -403,8 +402,8 @@ HTML
 
 		// Create tables
 		if($params['create_tables']) {
-			$content = Curry_Backend_DatabaseHelper::propelGen('insert-sql');
-			if(!Curry_Backend_DatabaseHelper::getPropelGenStatus($content)) {
+			$content = \Curry_Backend_DatabaseHelper::propelGen('insert-sql');
+			if(!\Curry_Backend_DatabaseHelper::getPropelGenStatus($content)) {
 				$this->addMessage('It seems there was an error when creating database tables', self::MSG_ERROR);
 				$this->addMainContent('<pre class="console">'.Console::colorize($content).'</pre>');
 				return false;
@@ -416,24 +415,7 @@ HTML
 
 	protected function getConfigureForm()
 	{
-		$contentTemplates = array(
-			'empty' => 'Empty page',
-			//'curry' => 'Curry CMS example',
-			//'html5boilerplate' => 'HTML5 Boilerplate',
-			//'twitter-bootstrap' => 'Twitter Bootstrap',
-		);
-
-		if(file_exists('db.txt')) {
-			$contentTemplates = array('backup' => '[ Restore from backup ]') + $contentTemplates;
-		}
-
-		$scriptPath = URL::getScriptPath();
-		if (($pos = strrpos($scriptPath, '/')) !== false)
-			$scriptPath = substr($scriptPath, 0, $pos + 1);
-		else
-			$scriptPath = '';
-
-		$form = new Curry_Form(array(
+		$form = new \Curry_Form(array(
 			'csrfCheck' => false,
 			'elements' => array(
 				'name' => array('text', array(
@@ -446,12 +428,8 @@ HTML
 				)),
 				'base_url' => array('text', array(
 					'label' => 'Base URL',
-					'value' => $scriptPath == '/' ? '' : $scriptPath,
+					'value' => '',
 					'placeholder' => 'auto-detect',
-				)),
-				'template' => array('select', array(
-					'label' => 'Content template',
-					'multiOptions' => $contentTemplates,
 				)),
 				'development_mode' => array('checkbox', array(
 					'label' => 'Development mode',
@@ -463,7 +441,7 @@ HTML
 			),
 		));
 
-		$form->addSubForm(new Curry_Form_SubForm(array(
+		$form->addSubForm(new \Curry_Form_SubForm(array(
 			'legend' => 'Create administrator account',
 			'elements' => array(
 				'username' => array('text', array(
@@ -482,135 +460,142 @@ HTML
 					),
 				)),
 			)
-		)), 'admin', 5);
-
-		$form->addSubForm(new Curry_Form_SubForm(array(
-			'legend' => 'Create user account',
-			'elements' => array(
-				'username' => array('text', array(
-					'label' => 'Username',
-					'value' => 'user',
-				)),
-				'password' => array('password', array(
-					'label' => 'Password',
-					'renderPassword' => true,
-				)),
-				'password_confirm' => array('password', array(
-					'label' => 'Confirm password',
-					'renderPassword' => true,
-					'validators' => array(
-						array('identical', false, array('token' => 'password'))
-					),
-				)),
-			)
-		)), 'user', 6);
+		)), 'admin', 4);
 
 		return $form;
 	}
 
 	public function saveConfiguration($values)
 	{
-		// Restore database from backup?
-		if($values['template'] == 'backup') {
-			if(!Curry_Backend_DatabaseHelper::restoreFromFile('db.txt')) {
-				$this->addMessage('Unable to restore database content from db.txt', self::MSG_WARNING);
-			}
+		// Create admin role
+		$access = array('*', 'Curry_Backend_Content/*');
+		$adminRole = self::createRole('Administrator', $access);
+		if ($adminRole->isNew()) {
+			self::createFilebrowserAccess($adminRole, 'Root', '');
+		}
+
+		// Create editor role
+		$access = array(
+			'Curry_Backend_FileBrowser',
+			'Curry_Backend_Page',
+			'Curry_Backend_Profile',
+			'Curry_Backend_Translations',
+			'Curry_Backend_Content/*'
+		);
+		$editorRole = self::createRole('Editor', $access);
+		if ($editorRole->isNew()) {
+			self::createFilebrowserAccess($editorRole, 'Shared', 'content/shared/');
 		}
 
 		// Create admin user
 		if($values['admin']['username']) {
-			$access = array('*', 'Curry_Backend_Content/*');
-			$adminRole = self::createRole('Super', $access);
 			$adminUser = self::createUser($values['admin']['username'], $values['admin']['password'], $adminRole);
-			if($adminUser->isNew()) {
-				self::createFilebrowserAccess($adminRole, 'Root', '');
-			}
 			$adminUser->save();
 		}
 
-		// Create light user
-		if($values['user']['username']) {
-			$access = array(
-				'Curry_Backend_FileBrowser',
-				'Curry_Backend_Page',
-				'Curry_Backend_Profile',
-				'Curry_Backend_Translations',
-				'Curry_Backend_Content/*'
-			);
-			$userRole = self::createRole('User', $access);
-			$user = self::createUser($values['user']['username'], $values['user']['password'], $userRole);
-			if($user->isNew()) {
-				$user->save();
-				self::createFilebrowserAccess($user, 'Home', 'user-content/'.$user->getUserId().'/');
-				self::createFilebrowserAccess($userRole, 'Shared', 'content/');
-			}
-			$user->save();
+		// Create default meta-data items
+		$metadatas = array('Title' => 'text', 'Keywords' => 'textarea', 'Description' => 'textarea', 'Image' => 'previewImage');
+		foreach($metadatas as $name => $type) {
+			$metadata = new \Metadata();
+			$metadata->setName($name);
+			$metadata->setDisplayName($name);
+			$metadata->setType($type);
+			$metadata->save();
 		}
 
-		if($values['template'] != 'backup') {
-			// Create default meta-data items
-			$metadatas = array('Title' => 'text', 'Keywords' => 'textarea', 'Description' => 'textarea', 'Image' => 'previewImage');
-			foreach($metadatas as $name => $type) {
-				$metadata = new Metadata();
-				$metadata->setName($name);
-				$metadata->setDisplayName($name);
-				$metadata->setType($type);
-				$metadata->save();
-			}
+		// Create pages
+		$rootPage = new \Page();
+		$rootPage->setName("Root");
+		$rootPage->setURL("root/");
+		$rootPage->setVisible(true);
+		$rootPage->setEnabled(true);
+		$rootPage->makeRoot();
+		$rootPage->save();
+		$rootPage->createDefaultRevisions($rootPage);
+		$rootPage->save();
 
-			$page = new Page();
-			$page->setName("Home");
-			$page->setURL("/");
-			$page->setVisible(true);
-			$page->setEnabled(true);
-			$page->makeRoot();
-			$page->save();
+		$templatePage = new \Page();
+		$templatePage->setName('Templates');
+		$templatePage->setURL("templates/");
+		$templatePage->setIncludeInIndex(false);
+		$templatePage->insertAsLastChildOf($rootPage);
+		$templatePage->save();
+		$templatePage->createDefaultRevisions();
+		$pageRevision = $rootPage->getWorkingPageRevision();
+		$pageRevision->setTemplate('Root.html.twig');
+		$templatePage->save();
 
-			$page->createDefaultRevisions();
-			$page->save();
+		$homePage = new \Page();
+		$homePage->setName('Home');
+		$homePage->setURL("/");
+		$homePage->setVisible(true);
+		$homePage->setEnabled(true);
+		$homePage->insertAsLastChildOf($rootPage);
+		$homePage->save();
+		$homePage->createDefaultRevisions($templatePage);
+		$homePage->save();
 
-			$pageRev = $page->getWorkingPageRevision();
-			$pageRev->setTemplate('Root.html');
-			$pageRev->save();
+		// Create page access objects
+		$pa = new \PageAccess();
+		$pa->setUserRole($adminRole);
+		$pa->setPage($rootPage);
+		$pa->setPermSubpages(true);
+		$pa->setPermVisible(true);
+		$pa->setPermCreatePage(true);
+		$pa->setPermCreateModule(true);
+		$pa->setPermPublish(true);
+		$pa->setPermProperties(true);
+		$pa->setPermContent(true);
+		$pa->setPermMeta(true);
+		$pa->setPermModules(true);
+		$pa->setPermRevisions(true);
+		$pa->setPermPermissions(true);
+		$pa->save();
 
-			$pa = new PageAccess();
-			$pa->setPage($page);
-			$pa->setPermSubpages(true);
-			$pa->setPermVisible(true);
-			$pa->setPermCreatePage(true);
-			$pa->setPermCreateModule(true);
-			$pa->setPermPublish(true);
-			$pa->setPermProperties(true);
-			$pa->setPermContent(true);
-			$pa->setPermMeta(true);
-			$pa->setPermModules(true);
-			$pa->setPermRevisions(true);
-			$pa->setPermPermissions(true);
-			$pa->save();
-		}
+		$pa = new \PageAccess();
+		$pa->setUserRole($editorRole);
+		$pa->setPage($rootPage);
+		$pa->setPermSubpages(true);
+		$pa->setPermVisible(true);
+		$pa->setPermCreatePage(true);
+		$pa->setPermCreateModule(true);
+		$pa->setPermPublish(true);
+		$pa->setPermProperties(true);
+		$pa->setPermContent(true);
+		$pa->setPermMeta(true);
+		$pa->setPermModules(true);
+		$pa->setPermRevisions(true);
+		$pa->setPermPermissions(false);
+		$pa->save();
+
+		$pa = new \PageAccess();
+		$pa->setUserRole($editorRole);
+		$pa->setPage($templatePage);
+		$pa->setPermSubpages(true);
+		$pa->setPermVisible(false);
+		$pa->setPermCreatePage(false);
+		$pa->setPermCreateModule(false);
+		$pa->setPermPublish(false);
+		$pa->setPermProperties(false);
+		$pa->setPermContent(false);
+		$pa->setPermMeta(false);
+		$pa->setPermModules(false);
+		$pa->setPermRevisions(false);
+		$pa->setPermPermissions(false);
+		$pa->save();
 
 		// Create template root
 		$templateRoot = $this->app['template.root'];
 		if(!file_exists($templateRoot))
 			@mkdir($templateRoot, 0777, true);
 
-		switch($values['template']) {
-			case 'empty':
-			case 'curry':
-				$source = PathHelper::path($this->app['basePath'], 'shared', 'backend', 'common', 'templates', 'project-empty.html');
-				$templateFile = PathHelper::path($templateRoot, 'Root.html');
-				if(!file_exists($templateFile))
-					@copy($source, $templateFile);
-				break;
-
-			case 'twitter-bootstrap':
-			case 'html5boilerplate':
-		}
-
 		if (file_exists($this->app['configPath'])) {
 			$config = $this->app->openConfiguration();
 			$config->name = $values['name'];
 			$config->adminEmail = $values['email'];
+			if (!isset($config->backend))
+				$config->backend = array();
+			$config->backend->templatePage = $templatePage->getPageId();
 			if ($values['base_url'])
 				$config->baseUrl = $values['base_url'];
 			else
@@ -623,14 +608,19 @@ HTML
 		return true;
 	}
 
+	/**
+	 * @param $name
+	 * @param array $access
+	 * @return \UserRole
+	 */
 	protected static function createRole($name, array $access = array())
 	{
-		$role = UserRoleQuery::create()
+		$role = \UserRoleQuery::create()
 			->filterByName($name)
 			->findOneOrCreate();
 		if ($role->isNew()) {
 			foreach($access as $module) {
-				$roleAccess = new UserRoleAccess();
+				$roleAccess = new \UserRoleAccess();
 				$roleAccess->setUserRole($role);
 				$roleAccess->setModule($module);
 			}
@@ -638,9 +628,15 @@ HTML
 		return $role;
 	}
 
-	protected static function createUser($name, $password, UserRole $role)
+	/**
+	 * @param $name
+	 * @param $password
+	 * @param \UserRole $role
+	 * @return \User
+	 */
+	protected static function createUser($name, $password, \UserRole $role)
 	{
-		$user = UserQuery::create()
+		$user = \UserQuery::create()
 			->filterByName($name)
 			->findOneOrCreate();
 		$user->setPlainPassword($password);
@@ -648,13 +644,21 @@ HTML
 		return $user;
 	}
 
+	/**
+	 * @param \User|\UserRole $userOrRole
+	 * @param $name
+	 * @param $path
+	 * @param bool $write
+	 * @return \FilebrowserAccess
+	 * @throws \Exception
+	 */
 	protected static function createFilebrowserAccess($userOrRole, $name, $path, $write = true)
 	{
-		$fba = new FilebrowserAccess();
+		$fba = new \FilebrowserAccess();
 		$fba->setName($name);
-		if($userOrRole instanceof User)
+		if($userOrRole instanceof \User)
 			$fba->setUser($userOrRole);
-		else if($userOrRole instanceof UserRole)
+		else if($userOrRole instanceof \UserRole)
 			$fba->setUserRole($userOrRole);
 		$fba->setPath($path);
 		$fba->setWrite($write);

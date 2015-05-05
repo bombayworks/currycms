@@ -14,25 +14,22 @@ class CmsTest extends \PHPUnit_Framework_TestCase {
 
 		self::$fixturesDirectory = realpath(dirname(dirname(__DIR__)).'/fixtures');
 		$app = App::create(array (
-				'curry' =>
-				array (
-					'name' => 'Curry Unit Tests',
-					'adminEmail' => 'info@currycms.com',
-					'cache' => array('method' => 'none'),
-					'pageCache' => false,
-					'autoBackup' => false,
-					'projectPath' => self::$fixturesDirectory,
-					'migrationVersion' => App::MIGRATION_VERSION,
-					'template' => array(
-						'root' => self::$fixturesDirectory.'/templates',
-						'options' => array(
-							'cache' => false,
-						),
+				'name' => 'Curry Unit Tests',
+				'adminEmail' => 'info@currycms.com',
+				'cache' => array('method' => 'none'),
+				'pageCache' => false,
+				'autoBackup' => false,
+				'projectPath' => self::$fixturesDirectory,
+				'migrationVersion' => App::MIGRATION_VERSION,
+				'template' => array(
+					'root' => self::$fixturesDirectory.'/templates',
+					'options' => array(
+						'cache' => false,
 					),
-					'propel' => array(
-						'conf' => self::$fixturesDirectory.'/propel/build/conf/curry-conf.php',
-						'projectClassPath' => self::$fixturesDirectory.'/propel/build/classes',
-					),
+				),
+				'propel' => array(
+					'conf' => self::$fixturesDirectory.'/propel/build/conf/curry-conf.php',
+					'projectClassPath' => self::$fixturesDirectory.'/propel/build/classes',
 				),
 			));
 		$app->boot();
@@ -50,17 +47,12 @@ class CmsTest extends \PHPUnit_Framework_TestCase {
 			throw $e;
 		}
 
-		$setup = new \Curry_Backend_Setup($app);
+		$setup = new \Curry\Backend\Setup($app);
 		$setup->saveConfiguration(array(
-				'template' => 'empty',
 				'admin' => array(
 					'username' => 'admin',
 					'password' => 'admin',
 				),
-				'user' => array(
-					'username' => 'user',
-					'password' => 'user',
-				)
 			));
 		$app->cache->clean();
 	}

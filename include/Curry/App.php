@@ -224,7 +224,7 @@ namespace Curry {
 				$this->autoPublish();
 			}
 
-			if (isset($this['sharedController']) ? $this['sharedController'] : !file_exists($this['wwwPath'].'/shared')) {
+			if ($this['sharedController']) {
 				$this->logger->notice('Using php routing for curry shared folder');
 				$this->dispatcher->addSubscriber(new StaticContent('/shared/', $app['basePath'].'/shared'));
 			}
@@ -442,6 +442,7 @@ namespace Curry {
 					'enabled' => false,
 					'domains' => array(),
 				),
+				'sharedController' => !file_exists($config['wwwPath'].'/shared')
 			);
 			$config = ArrayHelper::extend($secondaryConfig, $config);
 			return $config;

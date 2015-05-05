@@ -432,27 +432,27 @@ class System extends AbstractBackend
 		self::setvar($config, 'name', $values['general']['name']);
 		self::setvar($config, 'baseUrl', $values['general']['baseUrl']);
 		self::setvar($config, 'adminEmail', $values['general']['adminEmail']);
-		$config->divertOutMailToAdmin = (bool)$values['general']['divertOutMailToAdmin'];
-		self::setvar($config, 'fallbackLanguage', $values['general']['fallbackLanguage'] ? $values['general']['fallbackLanguage'] : null);
-		$config->developmentMode = (bool)$values['general']['developmentMode'];
-		$config->forceDomain = (bool)$values['general']['forceDomain'];
+		self::setvar($config, 'divertOutMailToAdmin', (bool)$values['general']['divertOutMailToAdmin'], false);
+		self::setvar($config, 'fallbackLanguage', $values['general']['fallbackLanguage']);
+		self::setvar($config, 'developmentMode', (bool)$values['general']['developmentMode']);
+		self::setvar($config, 'forceDomain', (bool)$values['general']['forceDomain'], false);
 		
-		// backend
-		$config->revisioning = (bool)$values['backend']['revisioning'];
-		$config->autoPublish = (bool)$values['backend']['autoPublish'];
-		$config->backend->noauth = (bool)$values['backend']['noauth'];
+		// Backend
+		self::setvar($config, 'revisioning', (bool)$values['backend']['revisioning'], false);
+		self::setvar($config, 'autoPublish', (bool)$values['backend']['autoPublish'], false);
+		self::setvar($config, 'backend.noauth', (bool)$values['backend']['noauth']);
 		self::setvar($config, 'defaultEditor', $values['backend']['defaultEditor']);
 		self::setvar($config, 'backend.theme', $values['backend']['theme']);
-		self::setvar($config, 'backend.templatePage', $values['backend']['templatePage'] ? (int)$values['backend']['templatePage'] : null);
+		self::setvar($config, 'backend.templatePage', $values['backend']['templatePage'] ? (int)$values['backend']['templatePage'] : '');
 		self::setvar($config, 'backend.logotype', $values['backend']['logotype']);
-		self::setvar($config, 'autoBackup', $values['backend']['autoBackup']);
-		self::setvar($config, 'autoUpdateIndex', $values['backend']['autoUpdateIndex']);
+		self::setvar($config, 'autoBackup', $values['backend']['autoBackup'] ? (int)$values['backend']['autoBackup'] : '');
+		self::setvar($config, 'autoUpdateIndex', (bool)$values['backend']['autoUpdateIndex'], false);
 
 		// Live edit
 		$excludedPlaceholders = array_filter(array_map('trim', explode(PHP_EOL, $values['liveEdit']['placeholderExclude'])));
 		if (!count($excludedPlaceholders))
-			$excludedPlaceholders = null;
-		$config->liveEdit = (bool)$values['liveEdit']['liveEdit'];
+			$excludedPlaceholders = '';
+		self::setvar($config, 'liveEdit', (bool)$values['liveEdit']['liveEdit'], true);
 		self::setvar($config, 'backend.placeholderExclude', $excludedPlaceholders);
 
 		// Paths
@@ -460,7 +460,7 @@ class System extends AbstractBackend
 		self::setvar($config, 'projectPath', $values['paths']['projectPath']);
 		self::setvar($config, 'wwwPath', $values['paths']['wwwPath']);
 		self::setvar($config, 'vendorPath', $values['paths']['vendorPath']);
-			
+
 		// Mail
 		self::setvar($config, 'mail.from.email', $values['mail']['fromEmail']);
 		self::setvar($config, 'mail.from.name', $values['mail']['fromName']);
@@ -478,12 +478,12 @@ class System extends AbstractBackend
 		}
 
 		// Misc
-		$config->errorNotification = (bool)$values['misc']['error_notification'];
-		$config->propel->logging = (bool)$values['misc']['log_propel'];
-		$config->propel->debug = (bool)$values['misc']['debug_propel'];
+		self::setvar($config, 'errorNotification', (bool)$values['misc']['error_notification'], false);
+		self::setvar($config, 'propel.logging', (bool)$values['misc']['log_propel'], false);
+		self::setvar($config, 'propel.debug', (bool)$values['misc']['debug_propel'], false);
 		$loggers = $this->getDefaultLoggers($config);
 		foreach($loggers as $name => $logger) {
-			if (in_array($name, $values['misc']['log'])) {
+			if (in_array($name, (array)$values['misc']['log'])) {
 				if (!isset($config->log->$name)) {
 					$config->log->$name = $logger;
 				}
@@ -492,25 +492,21 @@ class System extends AbstractBackend
 				$config->log->$name->enabled = false;
 			}
 		}
-		$config->updateTranslationStrings = (bool)$values['misc']['update_translations'];
-			
+		self::setvar($config, 'updateTranslationStrings', (bool)$values['misc']['update_translations'], false);
+
 		// Error pages
-		$config->errorPage->notFound = $values['errorPage']['notFound'] ? (int)$values['errorPage']['notFound'] : null;
-		$config->errorPage->unauthorized = $values['errorPage']['unauthorized'] ? (int)$values['errorPage']['unauthorized'] : null;
-		$config->errorPage->error = $values['errorPage']['error'] ? (int)$values['errorPage']['error'] : null;
-		
+		self::setvar($config, 'errorPage.notFound', $values['errorPage']['notFound'] ? (int)$values['errorPage']['notFound'] : '');
+		self::setvar($config, 'errorPage.unauthorized', $values['errorPage']['unauthorized'] ? (int)$values['errorPage']['unauthorized'] : '');
+		self::setvar($config, 'errorPage.error', $values['errorPage']['error'] ? (int)$values['errorPage']['error'] : '');
+
 		// Maintenance
-		$config->maintenance->enabled = (bool)$values['maintenance']['enabled'];
-		$config->maintenance->page = $values['maintenance']['page'] ? (int)$values['maintenance']['page'] : null;
-		$config->maintenance->message = $values['maintenance']['message'];
+		self::setvar($config, 'maintenance.enabled', (bool)$values['maintenance']['enabled']);
+		self::setvar($config, 'maintenance.page', $values['maintenance']['page'] ? (int)$values['maintenance']['page'] : '');
+		self::setvar($config, 'maintenance.message', $values['maintenance']['message']);
 		
 		// Set migration version if missing
 		if (!isset($config->migrationVersion))
 			$config->migrationVersion = App::MIGRATION_VERSION;
-			
-		// Unset upgrade version if present
-		if (isset($config->upgradeVersion))
-			unset($config->upgradeVersion);
 		
 		try {
 			$this->app->writeConfiguration($config);
@@ -520,22 +516,23 @@ class System extends AbstractBackend
 			$this->addMessage($e->getMessage(), self::MSG_ERROR);
 		}
 	}
-	
+
 	/**
 	 * Set configuration variable. If value is an empty string, the variable will be unset.
 	 *
 	 * @param Config $config
 	 * @param string $name
 	 * @param string $value
+	 * @param string $default
 	 */
-	private static function setvar(Config $config, $name, $value)
+	private static function setvar(Config $config, $name, $value, $default = '')
 	{
 		if (strpos($name, '.') !== false) {
 			$parts = explode('.', $name);
 			do {
 				$name = array_shift($parts);
 				if (!isset($config->$name)) {
-					if ($value === '') {
+					if ($value === $default) {
 						return;
 					}
 					// this will actually be converted to a Config object, so we don't have to use references below.
@@ -545,10 +542,12 @@ class System extends AbstractBackend
 			} while (count($parts) > 1);
 			$name = array_shift($parts);
 		}
-		if($value != '')
+		if($value !== $default)
 			$config->$name = $value;
-		else
+		else {
+			$config->$name = true; // fixes issue with unsetting null values below
 			unset($config->$name);
+		}
 	}
 	
 	/**

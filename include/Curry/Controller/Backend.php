@@ -17,8 +17,8 @@
  */
 
 namespace Curry\Controller;
-use Curry\App;
 use Curry\Backend\AbstractBackend;
+use Curry\Backend\Setup;
 use Curry\Exception;
 use Curry\Util\ClassEnumerator;
 use Curry\Util\Helper;
@@ -37,25 +37,27 @@ use Symfony\Component\HttpKernel\KernelEvents;
 class Backend extends AbstractBackend implements EventSubscriberInterface {
 	public function initialize()
 	{
-		$app = App::getInstance();
-
-		$cacheName = sha1(__CLASS__.'_backendClasses');
-		$backendClasses = $app->cache->load($cacheName);
-		if ($backendClasses === false) {
-			$backendClasses = array();
-			$classes = ClassEnumerator::findClasses(__DIR__.'/../Backend');
-			foreach($classes as $className) {
-				if (class_exists($className) && $className !== __CLASS__) {
-					$r = new \ReflectionClass($className);
-					if ($r->isSubclassOf('Curry\\Backend\\AbstractBackend') && !$r->isAbstract())
-						$backendClasses[strtolower($r->getShortName())] = $className;
+		$app = $this->app;
+		if ($app['setup']) {
+			$this->addView('setup', new Setup($app));
+		} else {
+			$cacheName = sha1(__CLASS__.'_backendClasses');
+			$backendClasses = $app->cache->load($cacheName);
+			if ($backendClasses === false) {
+				$backendClasses = array();
+				$classes = ClassEnumerator::findClasses(__DIR__.'/../Backend');
+				foreach($classes as $className) {
+					if (class_exists($className) && $className !== __CLASS__ && $className !== 'Curry\Backend\Setup') {
+						$r = new \ReflectionClass($className);
+						if ($r->isSubclassOf('Curry\\Backend\\AbstractBackend') && !$r->isAbstract())
+							$backendClasses[strtolower($r->getShortName())] = $className;
+					}
 				}
+				$app->cache->save($backendClasses, $cacheName);
 			}
-			$app->cache->save($backendClasses, $cacheName);
-		}
-
-		foreach($backendClasses as $viewName => $className) {
-			$this->addView($viewName, new $className($this->app));
+			foreach($backendClasses as $viewName => $className) {
+				$this->addView($viewName, new $className($this->app));
+			}
 		}
 	}
 

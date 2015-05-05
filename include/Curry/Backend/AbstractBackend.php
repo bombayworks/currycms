@@ -279,7 +279,12 @@ abstract class AbstractBackend extends View {
 		$twig->addGlobal('Encoding', 'utf-8');
 		$twig->addGlobal('Version', App::VERSION);
 
-		$user = \User::getUser();
+		if ($app['setup']) {
+			$user = 1;
+		} else {
+			$user = \User::getUser();
+		}
+
 		if (!$user) {
 			$loginRedirect = '';
 			if(isset($_POST['login_redirect']))

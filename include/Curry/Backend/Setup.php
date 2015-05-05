@@ -521,7 +521,7 @@ HTML
 		$templatePage->insertAsLastChildOf($rootPage);
 		$templatePage->save();
 		$templatePage->createDefaultRevisions();
-		$pageRevision = $rootPage->getWorkingPageRevision();
+		$pageRevision = $templatePage->getWorkingPageRevision();
 		$pageRevision->setTemplate('Root.html.twig');
 		$templatePage->save();
 

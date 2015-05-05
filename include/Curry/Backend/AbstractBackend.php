@@ -8,6 +8,7 @@ use Curry\Util\HtmlHead;
 use Curry\Util\PathHelper;
 use Curry\Util\StringHelper;
 use Curry\View;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -109,6 +110,20 @@ abstract class AbstractBackend extends View {
 	{
 		$this->app = $app;
 		$this->htmlHead = new HtmlHead();
+	}
+
+	/**
+	 * Redirect helper to create RedirectResponse with absolute url.
+	 *
+	 * @param string|mixed $url
+	 * @return RedirectResponse
+	 */
+	public static function redirect($url)
+	{
+		$url = (string)$url;
+		if ($url[0] !== '/') // append base path
+			$url = App::getInstance()->request->getBasePath().'/'.$url;
+		return RedirectResponse::create($url);
 	}
 
 	/**
@@ -259,6 +274,7 @@ abstract class AbstractBackend extends View {
 		$htmlHead->addStylesheet('shared/libs/build/all.css');
 
 		// Globals
+		$twig->addGlobal('BaseUrl', $app->request->getBasePath().'/');
 		$twig->addGlobal('ProjectName', $this->app['name']);
 		$twig->addGlobal('Encoding', 'utf-8');
 		$twig->addGlobal('Version', App::VERSION);
@@ -292,7 +308,7 @@ abstract class AbstractBackend extends View {
 			list($view, $route) = $viewAndRoute;
 			//if(!$user->hasAccess(get_class($view)))
 			//	continue;
-			$active = StringHelper::startsWith($app->request->getPathInfo(), $view->url());
+			$active = StringHelper::startsWith($app->request->getPathInfo(), '/'.$view->url());
 			$group = $view->getGroup();
 			$moduleProperties = array(
 				'Module' => $viewName,

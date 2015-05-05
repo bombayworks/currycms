@@ -74,7 +74,7 @@ class Backend extends AbstractBackend implements EventSubscriberInterface {
 	public function onKernelRequest(GetResponseEvent $event)
 	{
 		$request = $event->getRequest();
-		if (preg_match('#^'.preg_quote($this->url(), '#').'(.*)$#', $request->getPathInfo(), $m)) {
+		if (preg_match('#^'.preg_quote('/'.$this->url(), '#').'(.*)$#', $request->getPathInfo(), $m)) {
 			$view = $this->findView($m[1]);
 			if ($view) {
 				$request->attributes->set('view', $view);

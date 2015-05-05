@@ -88,4 +88,11 @@ class CmsTest extends \PHPUnit_Framework_TestCase {
 		$this->assertNotEmpty($response->getContent());
 	}
 
+	public function test404()
+	{
+		$response = self::handleRequest(Request::create('/non-existing-page/'));
+		$this->assertEquals(404, $response->getStatusCode());
+		$this->assertNotEmpty($response->getContent());
+	}
+
 }

@@ -229,8 +229,10 @@ namespace Curry {
 				$this->dispatcher->addSubscriber(new StaticContent('/shared/', $app['basePath'].'/shared'));
 			}
 
-			$this->dispatcher->addSubscriber($app->backend);
-			$this->dispatcher->addSubscriber(new Frontend($this));
+			if ($app['backend.basePath'])
+				$this->dispatcher->addSubscriber($app->backend);
+			if (class_exists('Page'))
+				$this->dispatcher->addSubscriber(new Frontend($this));
 			$this->dispatcher->addSubscriber(new FileNotFound($this));
 
 			$this->dispatcher->addSubscriber(new Generator\ModuleProfiler($app->logger));

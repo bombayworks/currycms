@@ -433,6 +433,7 @@ class ModelForm extends Form
 			$v = method_exists($obj, "__toString") ? (string)$obj : $k;
 			$related[$k] = $v;
 		}
+		$options['type'] = 'choice';
 		$options['choices'] = $related;
 		return $this->createField($this->getColumnName($column), $options);
 	}

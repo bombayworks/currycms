@@ -22,6 +22,6 @@ namespace Curry\Module;
  * 
  * @package Curry\Module
  */
-class Template extends AbstractModule {
+class NullTemplate extends AbstractModule {
 
 }

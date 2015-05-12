@@ -63,22 +63,22 @@ function images() {
 
 // JS concat, strip debugging and minify
 gulp.task('scripts', function() {
-  gulp.src(scripts())
-    .pipe(uglify())
+  return gulp.src(scripts())
+    //.pipe(uglify())
     .pipe(concat('all.min.js'))
     .pipe(gulp.dest('build'));
 });
 
 // CSS concat, auto-prefix and minify
 gulp.task('styles', function() {
-  gulp.src(styles())
+  return gulp.src(styles())
     .pipe(concat('all.css'))
     .pipe(minifyCSS())
     .pipe(gulp.dest('build'));
 });
 
 gulp.task('images', function() {
-  gulp.src(images())
+  return gulp.src(images())
     .pipe(gulp.dest('build'));
 });
 

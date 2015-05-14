@@ -484,12 +484,15 @@ class System extends AbstractBackend
 		$loggers = $this->getDefaultLoggers($config);
 		foreach($loggers as $name => $logger) {
 			if (in_array($name, (array)$values['misc']['log'])) {
+				if (!isset($config->log)) {
+					$config->log = array();
+				}
 				if (!isset($config->log->$name)) {
 					$config->log->$name = $logger;
 				}
 				unset($config->log->$name->enabled);
 			} else if (isset($config->log->$name)) {
-				$config->log->$name->enabled = false;
+				self::setvar($config, "log.$name.enabled", false);
 			}
 		}
 		self::setvar($config, 'updateTranslationStrings', (bool)$values['misc']['update_translations'], false);

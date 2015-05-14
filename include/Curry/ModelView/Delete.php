@@ -41,26 +41,42 @@ class Delete extends AbstractBackend {
 	public function show(Request $request)
 	{
 		$modelClass = $this->modelClass;
-		/** @var \BaseObject $item */
-		$item = $this->getSelection();
-		if(!isset($item) || !($item instanceof $modelClass))
+
+		$items = array();
+		if ($this['id'] === ':id' && $request->query->has('item')) {
+			$pks = array_map(function($i) { return json_decode($i, true); }, $request->query->get('item', array()));
+			if ($pks && $this->parent instanceof AbstractBackend) {
+				$items = \PropelQuery::from($this->parent->getModelClass())->findPks($pks)->getArrayCopy();
+			}
+		} else {
+			$items = array($this->getSelection());
+		}
+		$items = array_filter($items, function($item) use($modelClass) {
+			return $item instanceof $modelClass;
+		});
+		if(!count($items))
 			throw new \Exception('No item to delete');
 
-		$name = method_exists($item, '__toString') ? '`'.htmlspecialchars((string)$item).'`' : 'this item';
+		$names = array_map(function($item) {
+			return method_exists($item, '__toString') ? '`'.htmlspecialchars((string)$item).'`' : 'this item';
+		}, $items);
+
 		if($request->isMethod('POST') && $request->request->get('do_delete')) {
-			$pk = $item->getPrimaryKey();
-			$item->delete();
+			foreach($items as $i => $item) {
+				$pk = $item->getPrimaryKey();
+				$item->delete();
 
-			// Trigger update event
-			//$this->createModelUpdateEvent($this->modelClass, $pk, 'update');
-			if ($item instanceof \Curry_ISearchable)
-				\Curry_Backend_Indexer::removeItem($item);
+				// Trigger update event
+				//$this->createModelUpdateEvent($this->modelClass, $pk, 'delete');
+				if ($item instanceof \Curry_ISearchable)
+					\Curry_Backend_Indexer::removeItem($item);
+			}
 
-			$this->addMainContent('<p>'.$name.' has been deleted.</p>');
+			$this->addMainContent('<p>'.$names[$i].' has been deleted.</p>');
 		} else {
 			$this->addMainContent('<form method="post">'.
 				'<input type="hidden" name="do_delete" value="1" />'.
-				'<p>Do you really want to delete '.$name.'?</p>'.
+				'<p>Do you really want to delete '.join(', ', $names).'?</p>'.
 				'<button type="submit" class="btn btn-danger">Delete</button>'.
 				'</form>');
 		}

@@ -45,6 +45,7 @@ class ListView extends AbstractBackend {
 		'maxPerPage' => 10,
 		'sortable' => false,
 		'defaultSortColumn' => null,
+		'defaultSortOrder' => 'asc',
 	);
 	protected static $defaultColumnOptions = array(
 		//'label' => 'Name',
@@ -54,6 +55,7 @@ class ListView extends AbstractBackend {
 		'hide' => false,
 		'sortable' => true,
 		'escape' => true,
+		'sortCallback' => null,
 	);
 	protected static $defaultActionOptions = array(
 		//'action' => Curry_ModelView_Abstract|callback,
@@ -271,7 +273,7 @@ class ListView extends AbstractBackend {
 				if ($column->isPrimaryKey())
 					continue;
 				$this->addColumn(strtolower($column->getName()), array(
-					'sort_func' => array($this, 'sortI18nColumn'),
+					'sortCallback' => array($this, 'sortI18nColumn'),
 					'phpName' => $column->getPhpName(),
 				));
 			}
@@ -421,7 +423,7 @@ class ListView extends AbstractBackend {
 
 		$options['columns'] = array();
 		foreach($this->columns as $name => $column) {
-			$allowed = array('label', 'sortable', 'escape', 'action', 'hide');
+			$allowed = array('label', 'sortable', 'escape', 'action', 'hide', 'align', 'width');
 			$options['columns'][$name] = array_intersect_key($column, array_flip($allowed));
 		}
 
@@ -472,21 +474,22 @@ class ListView extends AbstractBackend {
 		return $row;
 	}
 
-	protected function find($query, $params)
+	protected function find(\ModelCriteria $query, $params)
 	{
 		$page = isset($params['p']) ? $params['p'] : 1;
-		$pager = $query->paginate($page, $this->options['maxPerPage']);
+		$maxPerPage = isset($params['mpp']) ? $params['mpp'] : $this->options['maxPerPage'];
+		$pager = $query->paginate($page, $maxPerPage);
 		return $pager;
 	}
 
 	protected function filterByKeyword(\ModelCriteria $query, $params)
 	{
-		if (isset($params['q'])) {
+		if (!empty($params['q'])) {
 			$columns = array();
 			$peerClass = constant($this->query->getModelName() . '::PEER');
 			$phpNames = call_user_func(array($peerClass, 'getFieldNames'));
 			foreach ($this->columns as $name => $column) {
-				if ($column['phpName']) {
+				if (!empty($column['phpName'])) {
 					if (in_array($column['phpName'], $phpNames))
 						$columns[] = $this->query->getModelName() . '.' . $column['phpName'];
 				}
@@ -498,17 +501,11 @@ class ListView extends AbstractBackend {
 
 	protected function sort(\ModelCriteria $query, $params)
 	{
-		$sortColumn = null;
-		if (isset($this->options['defaultSortColumn'])) {
-			$sortColumn = $this->options['defaultSortColumn'];
-		}
-		if (isset($params['sort_column'])) {
+		$sortColumn = $this->options['defaultSortColumn'];
+		if (isset($params['sort_column']) && $params['sort_column'] !== '') {
 			$sortColumn = $params['sort_column'];
 		}
-		$sortOrder = 'asc';
-		if (isset($this->options['defaultSortOrder'])) {
-			$sortOrder = $this->options['defaultSortOrder'];
-		}
+		$sortOrder = $this->options['defaultSortOrder'];
 		if (isset($params['sort_order']) && in_array($params['sort_order'], array('asc', 'desc'))) {
 			$sortOrder = $params['sort_order'];
 		}
@@ -516,7 +513,7 @@ class ListView extends AbstractBackend {
 			if (!isset($this->columns[$sortColumn]))
 				throw new \Exception('Column not found: ' . $sortColumn);
 			$column = $this->columns[$sortColumn];
-			$func = $column['sort_func'];
+			$func = $column['sortCallback'];
 			if (is_callable($func))
 				call_user_func($func, $query, $sortColumn, $sortOrder);
 			else

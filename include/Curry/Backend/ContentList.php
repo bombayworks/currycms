@@ -284,7 +284,7 @@ class Curry_Backend_ContentList {
 		return json_encode($obj->getPageModuleId());
 	}
 
-	protected function find($query, $params)
+	protected function find(ModelCriteria $query, $params)
 	{
 		$all = $this->pageRevision->getPageModuleWrappers($this->langcode);
 		$user = User::getUser();

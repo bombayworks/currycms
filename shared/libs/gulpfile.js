@@ -30,8 +30,9 @@ var files = [
   'tinymce-3.5.8-jquery/themes/advanced/langs/en.js',
   'tinymce-currypopups/editor_plugin_src.js',
   'tinymce-3.5.8-jquery/jquery.tinymce.js',
+  // jquery-cookie (dependency of dynatree)
+  'bower_components/jquery-cookie/jquery.cookie.js',
   // dynatree
-  'bower_components/dynatree/jquery/jquery.cookie.js',
   'bower_components/dynatree/dist/jquery.dynatree.js',
   'bower_components/dynatree/dist/skin-vista/ui.dynatree.css',
   'bower_components/dynatree/dist/skin-vista/*.gif',
@@ -40,9 +41,9 @@ var files = [
   'bower_components/chosen/chosen.css',
   // URI.js
   'bower_components/uri.js/src/URI.js',
-  // modelview
-  '../backend/common/js/modelview.js',
-  '../backend/common/css/modelview.css',
+  // grid
+  'bower_components/curry-grid/grid.js',
+  'bower_components/curry-grid/grid.css',
   // Curry
   '../backend/common/js/core.js',
   '../backend/common/js/plugins.js',
@@ -64,7 +65,7 @@ function images() {
 // JS concat, strip debugging and minify
 gulp.task('scripts', function() {
   return gulp.src(scripts())
-    //.pipe(uglify())
+    .pipe(uglify())
     .pipe(concat('all.min.js'))
     .pipe(gulp.dest('build'));
 });

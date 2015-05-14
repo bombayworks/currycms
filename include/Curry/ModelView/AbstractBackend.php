@@ -24,6 +24,10 @@ namespace Curry\ModelView;
 abstract class AbstractBackend extends \Curry\Backend\AbstractBackend {
 	abstract public function getModelClass();
 
+	/**
+	 * @return \BaseObject|null
+	 * @throws \PropelException
+	 */
 	public function getSelection()
 	{
 		$pk = isset($this['id']) ? json_decode($this['id'], true) : null;

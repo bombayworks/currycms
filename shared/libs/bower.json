@@ -23,7 +23,7 @@
     "jquery-ui": "~1.11.0",
     "codemirror": "~4.3.0",
     "dynatree": "~1.2.5",
-    "chosen": "https://github.com/harvesthq/chosen/releases/download/v1.1.0/chosen_v1.1.0.zip",
+    "chosen": "~1.4.1",
     "uri.js": "~1.13.2",
     "curry-grid": "~1.0.0",
     "jquery-cookie": "~1.4.1"

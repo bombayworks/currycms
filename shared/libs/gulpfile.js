@@ -37,8 +37,9 @@ var files = [
   'bower_components/dynatree/dist/skin-vista/ui.dynatree.css',
   'bower_components/dynatree/dist/skin-vista/*.gif',
   // chosen
-  'bower_components/chosen/chosen.jquery.js',
-  'bower_components/chosen/chosen.css',
+  'bower_components/chosen/chosen.jquery.min.js',
+  'bower_components/chosen/chosen.min.css',
+  'bower_components/chosen/*.png',
   // URI.js
   'bower_components/uri.js/src/URI.js',
   // grid

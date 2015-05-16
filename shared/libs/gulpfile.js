@@ -22,14 +22,12 @@ var files = [
   'bower_components/codemirror/mode/javascript/javascript.js',
   'bower_components/codemirror/mode/css/css.js',
   // tinymce
-  'tinymce-3.5.8-jquery/tiny_mce_src.js',
-  'tinymce-3.5.8-jquery/langs/en.js',
-  'tinymce-3.5.8-jquery/plugins/{style,table,advimage,advlink,media,contextmenu,paste,fullscreen,nonbreaking,xhtmlxtras,advlist}/editor_plugin_src.js',
-  'tinymce-3.5.8-jquery/plugins/{style,table,advimage,advlink,media,contextmenu,paste,fullscreen,nonbreaking,xhtmlxtras,advlist}/langs/en.js',
-  'tinymce-3.5.8-jquery/themes/advanced/editor_template_src.js',
-  'tinymce-3.5.8-jquery/themes/advanced/langs/en.js',
-  'tinymce-currypopups/editor_plugin_src.js',
-  'tinymce-3.5.8-jquery/jquery.tinymce.js',
+  'bower_components/tinymce/tinymce.js',
+  'bower_components/tinymce/plugins/{table,image,autolink,link,media,contextmenu,paste,searchreplace,lists,advlist,hr,anchor,visualblocks,visualchars,code,fullscreen}/plugin.js',
+  'bower_components/tinymce/themes/modern/theme.js',
+  'bower_components/tinymce/skin/lightgray/content.min.css',
+  'bower_components/tinymce/skin/lightgray/skin.min.css',
+  'bower_components/tinymce/jquery.tinymce.min.js',
   // jquery-cookie (dependency of dynatree)
   'bower_components/jquery-cookie/jquery.cookie.js',
   // dynatree

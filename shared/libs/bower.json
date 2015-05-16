@@ -26,6 +26,7 @@
     "chosen": "~1.4.1",
     "uri.js": "~1.13.2",
     "curry-grid": "~1.0.0",
-    "jquery-cookie": "~1.4.1"
+    "jquery-cookie": "~1.4.1",
+    "tinymce": "~4.1.10"
   }
 }

@@ -167,10 +167,12 @@
 	border-radius: 0;
 }
 
-/* tinymce dialog with text content */
-.dialog-tinymce-content {
-	max-width: 400px;
-	padding: 10px;
+/* fixes z-index for tinymce modal dialogs */
+.mce-window {
+	z-index: 100 !important;
+}
+#mce-modal-block {
+	z-index: 99 !important;
 }
 
 .header-main {

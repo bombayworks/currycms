@@ -47,9 +47,7 @@ class Curry_Form_Decorator_Sortable extends Zend_Form_Decorator_Abstract
 		$javascript = <<<JS
 // <![CDATA[
 $(document).ready(function(){
-	$.require('jquery-ui', function() {
-		$("#$id").sortable({axis: 'y', items: '> li:not(.nosort)', containment: 'parent', cancel: ':input, button, select, option, img, .mceEditor', tolerance: 'pointer', delay: 200});
-	});
+	$("#$id").sortable({axis: 'y', items: '> li:not(.nosort)', containment: 'parent', cancel: ':input, button, select, option, img, .mceEditor', tolerance: 'pointer', delay: 200});
 });
 // ]]>
 JS;

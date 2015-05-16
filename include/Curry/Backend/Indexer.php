@@ -307,7 +307,6 @@ class Curry_Backend_Indexer extends \Curry\Backend\AbstractLegacyBackend {
 <a href="$rebuildLink" class="btn btn-link">Rebuild link</button>
 <script type="text/javascript">
 (function() {
-$.require('jquery-ui', function() {
 	function index() {
 		$.post("$url", {index: 'true'}, function(data) {
 			$('#progressbar').progressbar('value', data.progress);
@@ -322,7 +321,6 @@ $.require('jquery-ui', function() {
 		$('#status').html('Indexing...');
 		index();
 	});
-});
 })();
 </script>
 HTML;

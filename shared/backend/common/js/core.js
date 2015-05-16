@@ -1,16 +1,10 @@
 (function($) {
 	var components = [];
-
-	// Load a registered library
-	$.require = function(library, success, error) {
-		if($.isFunction(success))
-			success();
-	}
 	
 	// Register a new component
 	$.registerComponent = function(selector, component, requirements) {
 		components.push({selector: selector, component: component, requirements: requirements});
-	}
+	};
 	
 	// Initialize all components on new content
 	$(document).bind('curry-init', function(e) {

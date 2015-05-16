@@ -229,9 +229,7 @@ class Tree extends View {
 <script type="text/javascript">
 $(document).ready(function () {
 	$('#{$this->id}').html('');
-	$.require('dynatree', function() {
-		{$this->getJavaScript()}
-	});
+	{$this->getJavaScript()}
 });
 </script>
 JS;

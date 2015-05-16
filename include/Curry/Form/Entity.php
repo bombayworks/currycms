@@ -3,6 +3,7 @@
 namespace Curry\Form;
 
 use Curry\Configurable;
+use Curry\Form\Widget\AbstractWidget;
 
 abstract class Entity extends Configurable {
 	protected static $classMap = array(
@@ -25,7 +26,7 @@ abstract class Entity extends Configurable {
 		'number' => '\\Curry\\Form\\Field\\Number',
 	);
 
-	public static function createEntity($spec)
+	public static function create($spec)
 	{
 		if ($spec instanceof Entity) {
 			return $spec;
@@ -283,21 +284,7 @@ abstract class Entity extends Configurable {
 	 */
 	public function setWidget($widget)
 	{
-		/**
-		 * TODO: fix class names
-		 */
-		if (is_string($widget)) {
-			$type = '\\Curry\\Form\\Widget\\'.ucfirst($widget);
-			$widget = new $type;
-		} else if (is_array($widget)) {
-			$type = '\\Curry\\Form\\Widget\\'.ucfirst($widget['type']);
-			unset($widget['type']);
-			$widget = new $type($widget);
-		}
-		if (!($widget instanceof Widget\AbstractWidget)) {
-			throw new \Exception('Unknown widget type '.print_r($widget, true));
-		}
-		$this->widget = $widget;
+		$this->widget = AbstractWidget::create($widget);
 	}
 
 	/**

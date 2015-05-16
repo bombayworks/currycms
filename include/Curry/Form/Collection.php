@@ -13,7 +13,7 @@ class Collection extends Container {
 	{
 		$initial = $this->getInitial();
 		$rawValue = $this->getRawValue();
-		$this->entity = self::createEntity($entity);
+		$this->entity = self::create($entity);
 		$this->setInitial($initial);
 		$this->populate($rawValue);
 	}

@@ -143,7 +143,7 @@ class Container extends Entity implements \IteratorAggregate, \Countable {
 	public function addField($name, $field)
 	{
 		// TODO: do not allow the following characters [. ]
-		$field = self::createEntity($field);
+		$field = self::create($field);
 		if ($field->parent) {
 			$field->parent->removeField($field->getName());
 		}

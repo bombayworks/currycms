@@ -83,8 +83,17 @@
 			});
 			// Sort/pager
 			base.$el.on('click', '.modelview-param', function() {
-				if ($(this).closest('.modelview')[0] == base.el)
+				if ($(this).closest('.modelview')[0] == base.el) {
+					// sort functionality for column titles.
+					if ($(this).hasClass('sort-asc')) {
+						$(this).removeClass('sort-asc').addClass('sort-desc');
+						$(this).attr('href', URI($(this).attr('href')).removeSearch('sort_order').addSearch({sort_order:'desc'}).toString());
+					} else {
+						$(this).removeClass('sort-desc').addClass('sort-asc');
+						$(this).attr('href', URI($(this).attr('href')).removeSearch('sort_order').addSearch({sort_order:'asc'}).toString());
+					}
 					base.reload(URI($(this).attr('href')).search(true));
+				}
 				return false;
 			});
 			// Checkbox
@@ -186,7 +195,7 @@
 				var column = base.options.columns[i];
 				if (!column.hide) {
 					if (column.sortable) {
-						$content.append($('<th />').append($('<a />', {text: column.label, class: 'modelview-param', href: URI(window.location.href).addSearch({sort_column: i, sort_order: 'asc'})})));
+						$content.append($('<th />').append($('<a />', {text: column.label, class: 'modelview-param sortable', href: URI(window.location.href).addSearch({sort_column: i, sort_order: 'asc'})})));
 					} else {
 						$content.append($('<th />', {text: column.label}));
 					}

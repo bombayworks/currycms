@@ -87,18 +87,39 @@
 			// Sort/pager
 			base.$el.on('click', '.modelview-param', function() {
 				if ($(this).closest('.modelview')[0] == base.el) {
-					// sort functionality for column titles.
-					if ($(this).hasClass('sort-asc')) {
-						$(this).removeClass('sort-asc').addClass('sort-desc');
-						$(this).attr('href', URI($(this).attr('href')).removeSearch('sort_order').addSearch({sort_order:'desc'}).toString());
-					} else {
-						$(this).removeClass('sort-desc').addClass('sort-asc');
-						$(this).attr('href', URI($(this).attr('href')).removeSearch('sort_order').addSearch({sort_order:'asc'}).toString());
+					if ($(this).hasClass('sortable')) {
+						handleSortableColumnTitle($(this));
 					}
+					
 					base.reload(URI($(this).attr('href')).search(true));
 				}
 				return false;
 			});
+			
+			function handleSortableColumnTitle($el) {
+				// reset indicators to unsorted
+				$el.closest('tr').find(".sortable").not($el).each(function(){
+					$(this).removeClass('sort-asc sort-desc');
+					$(this).attr('href', URI($(this).attr('href')).removeSearch('sort_order').toString());
+				});
+				
+				// TODO: store this element's column title and sort-order in base.options
+				// TODO: we will need this info when we follow pager links.
+				
+				updateSortableColumnTitle($el);
+			}
+			
+			// update a sortable column's indicator and data.
+			function updateSortableColumnTitle($el) {
+				if ($el.hasClass('sort-asc')) {
+					$el.removeClass('sort-asc').addClass('sort-desc');
+					$el.attr('href', URI($el.attr('href')).removeSearch('sort_order').addSearch({sort_order:'desc'}).toString());
+				} else {
+					$el.removeClass('sort-desc').addClass('sort-asc');
+					$el.attr('href', URI($el.attr('href')).removeSearch('sort_order').addSearch({sort_order:'asc'}).toString());
+				}
+			}
+			
 			// Checkbox
 			base.$el.delegate('.modelview-col-select :checkbox', 'change', function() {
 				if ($(this).closest('.modelview')[0] == base.el) {

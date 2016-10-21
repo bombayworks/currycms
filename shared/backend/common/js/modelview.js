@@ -78,7 +78,10 @@
 			// Model update
 			$(document).on('model-update', function(e, model, id, method) {
 				if (base.options.model == model) {
-					base.reload();
+					// Reload the grid for the current page.
+					// we don't want the grid resetting to page 1 
+					// when an item on the nth page is edited.
+					base.reload({p: base.options.currentPage});
 				}
 			});
 			// Sort/pager

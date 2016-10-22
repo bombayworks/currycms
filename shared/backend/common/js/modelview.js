@@ -87,37 +87,42 @@
 			// Sort/pager
 			base.$el.on('click', '.modelview-param', function() {
 				if ($(this).closest('.modelview')[0] == base.el) {
+					var queryParams = {};
 					if ($(this).hasClass('sortable')) {
-						handleSortableColumnTitle($(this));
+						handleSortableColumnHeader($(this));
+						// keep current page when sorting on column header.
+						queryParams.p = base.options.currentPage;
+					} else if (null !== base.options.sort_column) {
+						// maintain current sorting state when following pager links.
+						queryParams.sort_column = base.options.sort_column;
+						queryParams.sort_order = base.options.sort_order;
 					}
-					
-					base.reload(URI($(this).attr('href')).search(true));
+					base.reload($.extend(URI($(this).attr('href')).search(true), queryParams));
 				}
 				return false;
 			});
 			
-			function handleSortableColumnTitle($el) {
-				// reset indicators to unsorted
+			function handleSortableColumnHeader($el) {
+				// reset all column header (except the one which is clicked) indicators to unsorted
 				$el.closest('tr').find(".sortable").not($el).each(function(){
 					$(this).removeClass('sort-asc sort-desc');
 					$(this).attr('href', URI($(this).attr('href')).removeSearch('sort_order').toString());
 				});
 				
-				// TODO: store this element's column title and sort-order in base.options
-				// TODO: we will need this info when we follow pager links.
-				
-				updateSortableColumnTitle($el);
-			}
-			
-			// update a sortable column's indicator and data.
-			function updateSortableColumnTitle($el) {
+				var uri = URI($el.attr('href')).removeSearch('sort_order');
 				if ($el.hasClass('sort-asc')) {
 					$el.removeClass('sort-asc').addClass('sort-desc');
-					$el.attr('href', URI($el.attr('href')).removeSearch('sort_order').addSearch({sort_order:'desc'}).toString());
+					uri.addSearch({sort_order:'desc'});
 				} else {
 					$el.removeClass('sort-desc').addClass('sort-asc');
-					$el.attr('href', URI($el.attr('href')).removeSearch('sort_order').addSearch({sort_order:'asc'}).toString());
+					uri.addSearch({sort_order:'asc'});
 				}
+				$el.attr('href', uri.toString());
+				// store current sortable column header and sort order.
+				// we need this information when following pager links.
+				var queryParams = uri.search(true);
+				base.options.sort_column = queryParams.sort_column;
+				base.options.sort_order = queryParams.sort_order;
 			}
 			
 			// Checkbox
@@ -402,7 +407,9 @@
 		numItems: 0,
 		maxPerPage: 0,
 		cancel: "input,textarea,button,select,option,a",
-		sortable: false
+		sortable: false,
+		sort_column: null,
+		sort_order: 'asc'
 	};
 
 	$.fn.modelview = function(options){

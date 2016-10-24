@@ -419,6 +419,11 @@ class Curry_ModelView_List extends Curry_ModelView_Abstract {
 		$allowed = array('title', 'url', 'model', 'paginate', 'maxPerPage', 'currentPage', 'numItems', 'sortable', 'quickSearch', 'actions', 'columns', 'idColumn');
 		$options = array_intersect_key($options, array_flip($allowed));
 
+		if (isset($this->options['defaultSortColumn'])) {
+		    $options['defaultSortColumn'] = $this->options['defaultSortColumn'];
+		    $options['defaultSortOrder'] = isset($this->options['defaultSortOrder']) ? $this->options['defaultSortOrder'] : 'asc';
+		}
+
 		$options = Zend_Json::encode($options, false, array('enableJsonExprFinder' => true));
 		return Curry_Html::createTag('div', array('class' => 'modelview', 'data-modelview' => $options));
 	}

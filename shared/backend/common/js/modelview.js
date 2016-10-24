@@ -78,8 +78,8 @@
 			// Model update
 			$(document).on('model-update', function(e, model, id, method) {
 				if (base.options.model == model) {
-					// Reload the grid for the current page.
-					// we don't want the grid resetting to page 1 
+					// Keep current page when reloading grid.
+					// we don't want the grid to reset to page 1 
 					// when an item on the nth page is edited.
 					base.reload({p: base.options.currentPage});
 				}
@@ -224,7 +224,7 @@
 				var column = base.options.columns[i];
 				if (!column.hide) {
 					if (column.sortable) {
-						$content.append($('<th />').append($('<a />', {text: column.label, class: 'modelview-param sortable', href: URI(window.location.href).addSearch({sort_column: i, sort_order: 'asc'})})));
+						$content.append($('<th />').append($('<a />', {text: column.label, class: 'modelview-param sortable'+('defaultSortColumn' in base.options && i == base.options.defaultSortColumn ? ' sort-'+base.options.defaultSortOrder : ''), href: URI(window.location.href).addSearch({sort_column: i, sort_order: 'asc'})})));
 					} else {
 						$content.append($('<th />', {text: column.label}));
 					}

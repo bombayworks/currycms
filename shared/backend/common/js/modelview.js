@@ -78,15 +78,53 @@
 			// Model update
 			$(document).on('model-update', function(e, model, id, method) {
 				if (base.options.model == model) {
-					base.reload();
+					// Keep current page when reloading grid.
+					// we don't want the grid to reset to page 1 
+					// when an item on the nth page is edited.
+					base.reload({p: base.options.currentPage});
 				}
 			});
 			// Sort/pager
 			base.$el.on('click', '.modelview-param', function() {
-				if ($(this).closest('.modelview')[0] == base.el)
-					base.reload(URI($(this).attr('href')).search(true));
+				if ($(this).closest('.modelview')[0] == base.el) {
+					var queryParams = {};
+					if ($(this).hasClass('sortable')) {
+						handleSortableColumnHeader($(this));
+						// keep current page when sorting on column header.
+						queryParams.p = base.options.currentPage;
+					} else if (null !== base.options.sort_column) {
+						// maintain current sorting state when following pager links.
+						queryParams.sort_column = base.options.sort_column;
+						queryParams.sort_order = base.options.sort_order;
+					}
+					base.reload($.extend(URI($(this).attr('href')).search(true), queryParams));
+				}
 				return false;
 			});
+			
+			function handleSortableColumnHeader($el) {
+				// reset all column header (except the one which is clicked) indicators to unsorted
+				$el.closest('tr').find(".sortable").not($el).each(function(){
+					$(this).removeClass('sort-asc sort-desc');
+					$(this).attr('href', URI($(this).attr('href')).removeSearch('sort_order').toString());
+				});
+				
+				var uri = URI($el.attr('href')).removeSearch('sort_order');
+				if ($el.hasClass('sort-asc')) {
+					$el.removeClass('sort-asc').addClass('sort-desc');
+					uri.addSearch({sort_order:'desc'});
+				} else {
+					$el.removeClass('sort-desc').addClass('sort-asc');
+					uri.addSearch({sort_order:'asc'});
+				}
+				$el.attr('href', uri.toString());
+				// store current sortable column header and sort order.
+				// we need this information when following pager links.
+				var queryParams = uri.search(true);
+				base.options.sort_column = queryParams.sort_column;
+				base.options.sort_order = queryParams.sort_order;
+			}
+			
 			// Checkbox
 			base.$el.delegate('.modelview-col-select :checkbox', 'change', function() {
 				if ($(this).closest('.modelview')[0] == base.el) {
@@ -186,7 +224,7 @@
 				var column = base.options.columns[i];
 				if (!column.hide) {
 					if (column.sortable) {
-						$content.append($('<th />').append($('<a />', {text: column.label, class: 'modelview-param', href: URI(window.location.href).addSearch({sort_column: i, sort_order: 'asc'})})));
+						$content.append($('<th />').append($('<a />', {text: column.label, class: 'modelview-param sortable'+(i == base.options.sort_column ? ' sort-'+base.options.sort_order : ''), href: URI(window.location.href).addSearch({sort_column: i, sort_order: (i == base.options.sort_column ? base.options.sort_order : 'asc')})})));
 					} else {
 						$content.append($('<th />', {text: column.label}));
 					}
@@ -369,7 +407,9 @@
 		numItems: 0,
 		maxPerPage: 0,
 		cancel: "input,textarea,button,select,option,a",
-		sortable: false
+		sortable: false,
+		sort_column: null,
+		sort_order: 'asc'
 	};
 
 	$.fn.modelview = function(options){

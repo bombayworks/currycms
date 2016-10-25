@@ -224,7 +224,7 @@
 				var column = base.options.columns[i];
 				if (!column.hide) {
 					if (column.sortable) {
-						$content.append($('<th />').append($('<a />', {text: column.label, class: 'modelview-param sortable'+('defaultSortColumn' in base.options && i == base.options.defaultSortColumn ? ' sort-'+base.options.defaultSortOrder : ''), href: URI(window.location.href).addSearch({sort_column: i, sort_order: 'asc'})})));
+						$content.append($('<th />').append($('<a />', {text: column.label, class: 'modelview-param sortable'+(i == base.options.sort_column ? ' sort-'+base.options.sort_order : ''), href: URI(window.location.href).addSearch({sort_column: i, sort_order: (i == base.options.sort_column ? base.options.sort_order : 'asc')})})));
 					} else {
 						$content.append($('<th />', {text: column.label}));
 					}

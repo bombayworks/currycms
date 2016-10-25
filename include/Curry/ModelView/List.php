@@ -420,8 +420,8 @@ class Curry_ModelView_List extends Curry_ModelView_Abstract {
 		$options = array_intersect_key($options, array_flip($allowed));
 
 		if (isset($this->options['defaultSortColumn'])) {
-		    $options['defaultSortColumn'] = $this->options['defaultSortColumn'];
-		    $options['defaultSortOrder'] = isset($this->options['defaultSortOrder']) ? $this->options['defaultSortOrder'] : 'asc';
+		    $options['sort_column'] = $this->options['defaultSortColumn'];
+		    $options['sort_order'] = isset($this->options['defaultSortOrder']) ? $this->options['defaultSortOrder'] : 'asc';
 		}
 
 		$options = Zend_Json::encode($options, false, array('enableJsonExprFinder' => true));
